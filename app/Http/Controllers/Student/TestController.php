@@ -1,0 +1,309 @@
+<?php
+
+namespace App\Http\Controllers\Student;
+
+use App\Http\Controllers\Controller;
+use App\Models\TestAnswer;
+use App\Models\TestAttempt;
+use App\Models\TestPackage;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
+class TestController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('auth:student');
+    }
+
+    public function start(TestPackage $package)
+    {
+        $student = Auth::guard('student')->user();
+
+        // Check if package is available
+        if (! $package->isAvailable()) {
+            return redirect()->route('student.dashboard')
+                ->with('error', 'Tes ini tidak tersedia atau sudah berakhir.');
+        }
+
+        // Check if student's class is assigned
+        $isAssigned = $package->classes()
+            ->where('class_id', $student->class_id)
+            ->exists();
+
+        if (! $isAssigned) {
+            return redirect()->route('student.dashboard')
+                ->with('error', 'Anda tidak terdaftar untuk tes ini.');
+        }
+
+        // Check if already attempted
+        $existingAttempt = TestAttempt::where('student_id', $student->id)
+            ->where('package_id', $package->id)
+            ->first();
+
+        if ($existingAttempt) {
+            if ($existingAttempt->status === 'completed') {
+                return redirect()->route('student.test.result', $existingAttempt)
+                    ->with('info', 'Anda sudah mengerjakan tes ini.');
+            } else {
+                // Continue existing attempt
+                return redirect()->route('student.test.work', $existingAttempt);
+            }
+        }
+
+        // Show confirmation page
+        $package->load('questions.category');
+
+        return view('student.test.start', compact('package'));
+    }
+
+    public function createAttempt(Request $request)
+    {
+        $request->validate([
+            'package_id' => ['required', 'exists:test_packages,id'],
+        ]);
+
+        $student = Auth::guard('student')->user();
+        $package = TestPackage::findOrFail($request->package_id);
+
+        // Check if package is available
+        if (! $package->isAvailable()) {
+            return response()->json(['error' => 'Tes tidak tersedia'], 400);
+        }
+
+        // Check if student's class is assigned
+        $isAssigned = $package->classes()
+            ->where('class_id', $student->class_id)
+            ->exists();
+
+        if (! $isAssigned) {
+            return response()->json(['error' => 'Anda tidak terdaftar untuk tes ini'], 403);
+        }
+
+        // Check if already attempted
+        $existingAttempt = TestAttempt::where('student_id', $student->id)
+            ->where('package_id', $package->id)
+            ->first();
+
+        if ($existingAttempt) {
+            return response()->json([
+                'attempt_id' => $existingAttempt->id,
+                'message' => 'Melanjutkan tes sebelumnya',
+            ]);
+        }
+
+        // Create new attempt
+        $attempt = TestAttempt::create([
+            'student_id' => $student->id,
+            'package_id' => $package->id,
+            'start_time' => now(),
+            'end_time' => now()->addMinutes($package->duration),
+            'status' => 'ongoing',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return response()->json([
+            'attempt_id' => $attempt->id,
+            'message' => 'Tes dimulai',
+        ]);
+    }
+
+    public function work(TestAttempt $attempt)
+    {
+        $student = Auth::guard('student')->user();
+
+        // Check ownership
+        if ($attempt->student_id !== $student->id) {
+            abort(403);
+        }
+
+        // Check if expired
+        if ($attempt->isExpired()) {
+            $this->autoSubmit($attempt);
+
+            return redirect()->route('student.test.result', $attempt)
+                ->with('info', 'Waktu tes telah habis. Tes Anda telah di-submit otomatis.');
+        }
+
+        // Check if already completed
+        if ($attempt->isCompleted()) {
+            return redirect()->route('student.test.result', $attempt);
+        }
+
+        $package = $attempt->package;
+        $package->load('questions.category');
+
+        // Get questions (shuffle if needed)
+        $questions = $package->questions;
+        if ($package->shuffle_questions) {
+            $questions = $questions->shuffle();
+        }
+
+        // Get existing answers
+        $existingAnswers = $attempt->answers()
+            ->pluck('answer', 'question_id')
+            ->toArray();
+
+        $doubtQuestions = $attempt->answers()
+            ->where('is_doubt', true)
+            ->pluck('question_id')
+            ->toArray();
+
+        return view('student.test.work', compact('attempt', 'package', 'questions', 'existingAnswers', 'doubtQuestions'));
+    }
+
+    public function continueAttempt(TestAttempt $attempt)
+    {
+        return $this->work($attempt);
+    }
+
+    public function saveAnswer(Request $request, TestAttempt $attempt)
+    {
+        $request->validate([
+            'question_id' => ['required', 'exists:questions,id'],
+            'answer' => ['nullable', 'string'],
+            'is_doubt' => ['boolean'],
+        ]);
+
+        $student = Auth::guard('student')->user();
+
+        // Check ownership
+        if ($attempt->student_id !== $student->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Check if still ongoing
+        if (! $attempt->isOngoing()) {
+            return response()->json(['error' => 'Test already completed'], 400);
+        }
+
+        // Check if expired
+        if ($attempt->isExpired()) {
+            $this->autoSubmit($attempt);
+
+            return response()->json(['error' => 'Time expired', 'expired' => true], 400);
+        }
+
+        $question = $attempt->package->questions()->find($request->question_id);
+
+        if (! $question) {
+            return response()->json(['error' => 'Question not found'], 404);
+        }
+
+        // Check answer correctness
+        $isCorrect = false;
+        if ($request->filled('answer')) {
+            $isCorrect = $question->checkAnswer($request->answer);
+        }
+
+        // Save or update answer
+        TestAnswer::updateOrCreate(
+            [
+                'attempt_id' => $attempt->id,
+                'question_id' => $request->question_id,
+            ],
+            [
+                'answer' => $request->answer,
+                'is_correct' => $isCorrect,
+                'is_doubt' => $request->is_doubt ?? false,
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Answer saved',
+        ]);
+    }
+
+    public function submit(Request $request, TestAttempt $attempt)
+    {
+        $student = Auth::guard('student')->user();
+
+        // Check ownership
+        if ($attempt->student_id !== $student->id) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+            abort(403);
+        }
+
+        // Check if already completed
+        if ($attempt->isCompleted()) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => true, 'redirect' => route('student.test.result', $attempt)]);
+            }
+
+            return redirect()->route('student.test.result', $attempt);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Calculate statistics
+            $attempt->calculateStatistics();
+
+            // Calculate score
+            $score = $attempt->calculateScore();
+
+            // Update attempt
+            $attempt->update([
+                'status' => 'completed',
+                'submitted_at' => now(),
+                'total_score' => $score,
+            ]);
+
+            // Increment package attempt count
+            $attempt->package->incrementAttemptCount();
+
+            DB::commit();
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Tes berhasil diselesaikan!',
+                    'redirect' => route('student.test.result', $attempt),
+                ]);
+            }
+
+            return redirect()->route('student.test.result', $attempt)
+                ->with('success', 'Tes berhasil diselesaikan!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Gagal submit tes: '.$e->getMessage()], 500);
+            }
+
+            return redirect()->back()->with('error', 'Gagal submit tes: '.$e->getMessage());
+        }
+    }
+
+    private function autoSubmit(TestAttempt $attempt)
+    {
+        if ($attempt->isCompleted()) {
+            return;
+        }
+
+        DB::beginTransaction();
+        try {
+            $attempt->calculateStatistics();
+            $score = $attempt->calculateScore();
+
+            $attempt->update([
+                'status' => 'completed',
+                'submitted_at' => now(),
+                'total_score' => $score,
+            ]);
+
+            $attempt->package->incrementAttemptCount();
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Auto submit failed: '.$e->getMessage());
+        }
+    }
+}
