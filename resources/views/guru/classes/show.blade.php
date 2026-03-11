@@ -1,5 +1,5 @@
 {{-- resources/views/guru/classes/show.blade.php --}}
-@extends('layouts.guru')
+@extends('layouts.dashboard')
 
 @section('title', 'Detail Kelas - ' . $class->name)
 

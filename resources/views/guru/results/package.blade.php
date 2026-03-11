@@ -1,5 +1,5 @@
 {{-- resources/views/guru/results/package.blade.php --}}
-@extends('layouts.guru')
+@extends('layouts.dashboard')
 
 @section('title', 'Hasil - ' . $package->title)
 

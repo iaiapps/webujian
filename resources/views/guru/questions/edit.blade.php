@@ -1,4 +1,4 @@
-@extends('layouts.guru')
+@extends('layouts.dashboard')
 
 @section('title', 'Edit Soal')
 

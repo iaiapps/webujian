@@ -1,5 +1,5 @@
 {{-- resources/views/guru/students/create.blade.php --}}
-@extends('layouts.guru')
+@extends('layouts.dashboard')
 
 @section('title', 'Tambah Siswa')
 

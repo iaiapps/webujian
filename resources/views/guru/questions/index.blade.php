@@ -1,5 +1,5 @@
 {{-- resources/views/guru/questions/index.blade.php --}}
-@extends('layouts.guru')
+@extends('layouts.dashboard')
 
 @section('title', 'Bank Soal')
 

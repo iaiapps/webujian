@@ -1,5 +1,5 @@
 {{-- resources/views/guru/subscription/pricing.blade.php --}}
-@extends('layouts.guru')
+@extends('layouts.dashboard')
 
 @section('title', 'Upgrade Plan')
 

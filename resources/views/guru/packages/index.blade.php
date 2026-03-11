@@ -1,5 +1,5 @@
 {{-- resources/views/guru/packages/index.blade.php --}}
-@extends('layouts.guru')
+@extends('layouts.dashboard')
 
 @section('title', 'Paket Tes')
 

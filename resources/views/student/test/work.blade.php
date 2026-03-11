@@ -1,35 +1,139 @@
 {{-- resources/views/student/test/work.blade.php --}}
-@extends('layouts.student')
+@extends('layouts.exam')
 
 @section('title', 'Mengerjakan - ' . $package->title)
 
-@section('content')
-    <div class="container-fluid py-3">
-        {{-- Header --}}
-        <div class="bg-white shadow-sm sticky-top">
-            <div class="container-fluid">
-                <div class="row align-items-center py-2">
-                    <div class="col-md-4">
-                        <h5 class="mb-0">{{ $package->title }}</h5>
-                        <small class="text-muted">{{ $questions->count() }} soal</small>
-                    </div>
-                    <div class="col-md-4 text-center">
-                        <div id="timer" class="fs-3 fw-bold text-danger"></div>
-                    </div>
-                    <div class="col-md-4 text-end">
-                        <button type="button" class="btn btn-warning" onclick="confirmSubmit()">
-                            <i class="bi bi-send"></i> Akhiri Tes
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+@push('styles')
+<style>
+    .exam-header {
+        background: var(--primary);
+        color: white;
+        padding: 12px 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
 
-        <div class="row mt-3">
-            {{-- Question Area --}}
-            <div class="col-lg-9">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body p-4">
+    .exam-timer {
+        font-size: 2rem;
+        font-weight: 800;
+        font-family: var(--font-heading);
+    }
+
+    .exam-timer.warning {
+        color: var(--accent);
+    }
+
+    .exam-timer.danger {
+        color: var(--danger);
+        animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+
+    .question-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow);
+    }
+
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .question-number {
+        font-family: var(--font-heading);
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .question-text {
+        font-size: 1.1rem;
+        line-height: 1.7;
+        margin-bottom: 24px;
+    }
+
+    .option-item {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 2px solid var(--border) !important;
+    }
+
+    .option-item:hover {
+        border-color: var(--primary) !important;
+        background: var(--primary-subtle);
+    }
+
+    .option-item.selected {
+        border-color: var(--primary) !important;
+        background: var(--primary-subtle);
+    }
+
+    .option-item input:checked + label {
+        font-weight: 600;
+    }
+
+    .nav-sidebar {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow);
+        position: sticky;
+        top: 80px;
+    }
+
+    .nav-btn {
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .nav-btn.answered {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+
+    .nav-btn.doubt {
+        border-color: var(--accent);
+        background: var(--accent-light);
+        color: var(--accent);
+    }
+
+    .nav-btn.current {
+        box-shadow: 0 0 0 3px var(--primary-subtle);
+    }
+
+    .btn-selesai {
+        background: var(--success);
+        border-color: var(--success);
+        color: white;
+    }
+
+    .btn-selesai:hover {
+        background: #059669;
+        color: white;
+    }
+</style>
+@endpush
+
+@section('header-actions')
+    <button type="button" class="btn btn-warning" onclick="confirmSubmit()" style="color: white;">
+        <i class="bi bi-send"></i> Akhiri Tes
+    </button>
+@endsection
+
+@section('content')
+    <div class="question-area">
+        <div class="question-card">
                         @foreach ($questions as $index => $question)
                             <div class="question-item {{ $index === 0 ? '' : 'd-none' }}"
                                 data-question-id="{{ $question->id }}" data-index="{{ $index }}">

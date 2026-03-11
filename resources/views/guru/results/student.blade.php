@@ -1,5 +1,5 @@
 {{-- resources/views/guru/results/student.blade.php --}}
-@extends('layouts.guru')
+@extends('layouts.dashboard')
 
 @section('title', 'Hasil Siswa - ' . $student->name)
 

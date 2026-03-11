@@ -1,5 +1,5 @@
 {{-- resources/views/guru/classes/edit.blade.php --}}
-@extends('layouts.guru')
+@extends('layouts.dashboard')
 
 @section('title', 'Edit Kelas')
 

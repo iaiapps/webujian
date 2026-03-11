@@ -1,5 +1,5 @@
 {{-- resources/views/guru/students/index.blade.php --}}
-@extends('layouts.guru')
+@extends('layouts.dashboard')
 
 @section('title', 'Kelola Siswa')
 

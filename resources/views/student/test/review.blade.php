@@ -1,5 +1,5 @@
 {{-- resources/views/student/test/review.blade.php --}}
-@extends('layouts.student')
+@extends('layouts.dashboard')
 
 @section('title', 'Review Pembahasan - ' . $package->title)
 

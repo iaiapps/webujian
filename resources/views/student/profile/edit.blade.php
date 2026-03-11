@@ -1,5 +1,5 @@
 {{-- resources/views/student/profile/edit.blade.php --}}
-@extends('layouts.student')
+@extends('layouts.dashboard')
 
 @section('title', 'Edit Profile')
 

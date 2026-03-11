@@ -1,5 +1,5 @@
 {{-- resources/views/admin/subscriptions/show.blade.php --}}
-@extends('layouts.admin')
+@extends('layouts.dashboard')
 
 @section('title', 'Detail Subscription #' . $subscription->id)
 

@@ -1,5 +1,5 @@
 {{-- resources/views/admin/subscriptions/index.blade.php --}}
-@extends('layouts.admin')
+@extends('layouts.dashboard')
 
 @section('title', 'Kelola Subscription')
 

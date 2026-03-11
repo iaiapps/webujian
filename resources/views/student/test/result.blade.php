@@ -1,5 +1,5 @@
 {{-- resources/views/student/test/result.blade.php --}}
-@extends('layouts.student')
+@extends('layouts.dashboard')
 
 @section('title', 'Hasil Tes')
 

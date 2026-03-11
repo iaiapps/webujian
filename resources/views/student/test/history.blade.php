@@ -1,5 +1,5 @@
 {{-- resources/views/student/test/history.blade.php --}}
-@extends('layouts.student')
+@extends('layouts.dashboard')
 
 @section('title', 'Histori Tes')
 
