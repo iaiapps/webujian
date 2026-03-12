@@ -28,15 +28,18 @@ class TestController extends Controller
                 ->with('error', 'Tes ini tidak tersedia atau sudah berakhir.');
         }
 
-        // Check if student's class is assigned
-        $isAssigned = $package->classes()
-            ->where('class_id', $student->class_id)
-            ->exists();
+        // ============================================================
+        // KELAS DINONAKTIFKAN - Semua siswa bisa akses tes tanpa perlu kelas
+        // ============================================================
+        // // Check if student's class is assigned
+        // $isAssigned = $package->classes()
+        //     ->where('class_id', $student->class_id)
+        //     ->exists();
 
-        if (! $isAssigned) {
-            return redirect()->route('student.dashboard')
-                ->with('error', 'Anda tidak terdaftar untuk tes ini.');
-        }
+        // if (! $isAssigned) {
+        //     return redirect()->route('student.dashboard')
+        //         ->with('error', 'Anda tidak terdaftar untuk tes ini.');
+        // }
 
         // Check if already attempted
         $existingAttempt = TestAttempt::where('student_id', $student->id)
@@ -73,14 +76,17 @@ class TestController extends Controller
             return response()->json(['error' => 'Tes tidak tersedia'], 400);
         }
 
-        // Check if student's class is assigned
-        $isAssigned = $package->classes()
-            ->where('class_id', $student->class_id)
-            ->exists();
+        // ============================================================
+        // KELAS DINONAKTIFKAN - Semua siswa bisa akses tes
+        // ============================================================
+        // // Check if student's class is assigned
+        // $isAssigned = $package->classes()
+        //     ->where('class_id', $student->class_id)
+        //     ->exists();
 
-        if (! $isAssigned) {
-            return response()->json(['error' => 'Anda tidak terdaftar untuk tes ini'], 403);
-        }
+        // if (! $isAssigned) {
+        //     return response()->json(['error' => 'Anda tidak terdaftar untuk tes ini'], 403);
+        // }
 
         // Check if already attempted
         $existingAttempt = TestAttempt::where('student_id', $student->id)

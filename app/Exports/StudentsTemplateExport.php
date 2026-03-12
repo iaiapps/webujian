@@ -1,6 +1,7 @@
 <?php
 
 // app/Exports/StudentsTemplateExport.php
+
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromArray;
@@ -13,9 +14,9 @@ class StudentsTemplateExport implements FromArray, WithHeadings, WithStyles
     public function array(): array
     {
         return [
-            ['Budi Santoso', '1234567890', 'budi@example.com', 'XII IPA 1'],
-            ['Ani Pratiwi', '0987654321', 'ani@example.com', 'XII IPA 1'],
-            ['', '', '', ''], // Empty row for user to fill
+            ['Budi Santoso', '1234567890', 'budi@example.com'],
+            ['Ani Pratiwi', '0987654321', 'ani@example.com'],
+            ['', '', ''], // Empty row for user to fill
         ];
     }
 
@@ -25,7 +26,7 @@ class StudentsTemplateExport implements FromArray, WithHeadings, WithStyles
             'Nama',
             'NISN',
             'Email',
-            'Kelas',
+            // 'Kelas', // DINONAKTIFKAN
         ];
     }
 

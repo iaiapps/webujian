@@ -168,7 +168,8 @@
 
                             <hr>
 
-                            <div class="mb-3">
+                            {{-- KELAS DINONAKTIFKAN --}}
+                            {{-- <div class="mb-3">
                                 <label class="form-label">Assign ke Kelas</label>
                                 @foreach ($classes as $class)
                                     <div class="form-check">
@@ -183,7 +184,7 @@
                                 @if ($classes->isEmpty())
                                     <p class="text-muted small mb-0">Belum ada kelas.</p>
                                 @endif
-                            </div>
+                            </div> --}}
 
                             <hr>
 

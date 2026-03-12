@@ -1,14 +1,15 @@
 <?php
 
 // app/Exports/TestResultsExport.php
+
 namespace App\Exports;
 
 use App\Models\TestPackage;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class TestResultsExport implements WithMultipleSheets
@@ -42,7 +43,7 @@ class RankingSheet implements FromCollection, WithHeadings, WithStyles, WithTitl
     public function collection()
     {
         $attempts = $this->package->completedAttempts()
-            ->with('student.classRoom')
+            // ->with('student.classRoom') // DINONAKTIFKAN
             ->orderBy('total_score', 'desc')
             ->get();
 
@@ -50,7 +51,7 @@ class RankingSheet implements FromCollection, WithHeadings, WithStyles, WithTitl
             return [
                 'rank' => $index + 1,
                 'name' => $attempt->student->name,
-                'class' => $attempt->student->classRoom ? $attempt->student->classRoom->name : '-',
+                // 'class' => $attempt->student->classRoom ? $attempt->student->classRoom->name : '-', // DINONAKTIFKAN
                 'score' => $attempt->total_score,
                 'correct' => $attempt->correct_answers,
                 'wrong' => $attempt->wrong_answers,
@@ -65,7 +66,7 @@ class RankingSheet implements FromCollection, WithHeadings, WithStyles, WithTitl
         return [
             'Rank',
             'Nama Siswa',
-            'Kelas',
+            // 'Kelas', // DINONAKTIFKAN
             'Skor',
             'Benar',
             'Salah',
@@ -99,17 +100,17 @@ class DetailSheet implements FromCollection, WithHeadings, WithStyles, WithTitle
     public function collection()
     {
         $attempts = $this->package->completedAttempts()
-            ->with('student.classRoom')
+            // ->with('student.classRoom') // DINONAKTIFKAN
             ->get();
 
         return $attempts->map(function ($attempt) {
             return [
                 'name' => $attempt->student->name,
                 'username' => $attempt->student->username,
-                'class' => $attempt->student->classRoom ? $attempt->student->classRoom->name : '-',
+                // 'class' => $attempt->student->classRoom ? $attempt->student->classRoom->name : '-', // DINONAKTIFKAN
                 'start_time' => $attempt->start_time->format('d-m-Y H:i'),
                 'submit_time' => $attempt->submitted_at->format('d-m-Y H:i'),
-                'duration' => $attempt->start_time->diffInMinutes($attempt->submitted_at) . ' menit',
+                'duration' => $attempt->start_time->diffInMinutes($attempt->submitted_at).' menit',
                 'score' => $attempt->total_score,
                 'correct' => $attempt->correct_answers,
                 'wrong' => $attempt->wrong_answers,
@@ -123,9 +124,9 @@ class DetailSheet implements FromCollection, WithHeadings, WithStyles, WithTitle
         return [
             'Nama',
             'Username',
-            'Kelas',
+            // 'Kelas', // DINONAKTIFKAN
             'Waktu Mulai',
-            'Waktu Submit',
+            'Waktu Selesai',
             'Durasi',
             'Skor',
             'Benar',
@@ -177,12 +178,12 @@ class QuestionAnalysisSheet implements FromCollection, WithHeadings, WithStyles,
             $data[] = [
                 'no' => $index + 1,
                 'category' => $question->category->name,
-                'question' => substr($question->question_text, 0, 100) . '...',
+                'question' => substr($question->question_text, 0, 100).'...',
                 'difficulty' => ucfirst($question->difficulty),
                 'total_answers' => $totalAnswers,
                 'correct' => $correctCount,
                 'wrong' => $totalAnswers - $correctCount,
-                'success_rate' => $successRate . '%',
+                'success_rate' => $successRate.'%',
             ];
         }
 

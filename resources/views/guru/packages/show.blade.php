@@ -82,7 +82,8 @@
 
                         <hr>
 
-                        <h6 class="mb-3">Kelas yang Mengikuti:</h6>
+                        {{-- KELAS DINONAKTIFKAN - Section kelas dihilangkan --}}
+                        {{-- <h6 class="mb-3">Kelas yang Mengikuti:</h6>
                         @if ($package->classes->count() > 0)
                             <div class="d-flex flex-wrap gap-2">
                                 @foreach ($package->classes as $class)
@@ -91,7 +92,7 @@
                             </div>
                         @else
                             <p class="text-muted">Belum ada kelas yang di-assign</p>
-                        @endif
+                        @endif --}}
                     </div>
                 </div>
 

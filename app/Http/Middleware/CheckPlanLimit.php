@@ -12,7 +12,7 @@ class CheckPlanLimit
     {
         $user = auth()->user();
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login');
         }
 
@@ -25,23 +25,23 @@ class CheckPlanLimit
             'student' => $user->canAddStudent(),
             'package' => $user->canAddPackage(),
             'question' => $user->canAddQuestion(),
-            'class' => $user->canAddClass(),
+            // 'class' => $user->canAddClass(), // DINONAKTIFKAN
             default => true,
         };
 
-        if (!$canProceed) {
+        if (! $canProceed) {
             $limitName = match ($limitType) {
                 'student' => 'siswa',
                 'package' => 'paket tes',
                 'question' => 'soal',
-                'class' => 'kelas',
+                // 'class' => 'kelas', // DINONAKTIFKAN
                 default => 'item',
             };
 
             return redirect()->back()->with('limit_reached', [
                 'type' => $limitType,
                 'limit' => $user->{"max_{$limitType}s"},
-                'current' => $user->{$limitType . 'sCount'}(),
+                'current' => $user->{$limitType.'sCount'}(),
                 'message' => "Anda sudah mencapai batas maksimal {$limitName} untuk plan {$user->plan}. Upgrade plan untuk menambah {$limitName}.",
             ]);
         }

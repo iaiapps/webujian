@@ -1,12 +1,12 @@
 <?php
 
 // app/Http/Controllers/Student/DashboardController.php
+
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
-use App\Models\TestPackage;
 use App\Models\TestAttempt;
-use Illuminate\Http\Request;
+use App\Models\TestPackage;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -20,14 +20,17 @@ class DashboardController extends Controller
     {
         $student = Auth::guard('student')->user();
 
-        // Get available tests for this student's class
+        // Get available tests (ALL tests, not filtered by class)
+        // ============================================================
+        // KELAS DINONAKTIFKAN - Semua siswa bisa akses semua tes
+        // ============================================================
         $availableTests = TestPackage::query()
             ->where('is_active', true)
             ->where('start_date', '<=', now())
             ->where('end_date', '>=', now())
-            ->whereHas('classes', function ($q) use ($student) {
-                $q->where('class_id', $student->class_id);
-            })
+            // ->whereHas('classes', function ($q) use ($student) {
+            //     $q->where('class_id', $student->class_id);
+            // })
             ->whereDoesntHave('testAttempts', function ($q) use ($student) {
                 $q->where('student_id', $student->id)
                     ->where('status', 'completed');

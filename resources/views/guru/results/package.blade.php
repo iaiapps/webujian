@@ -74,7 +74,8 @@
                                     <tr>
                                         <th>Rank</th>
                                         <th>Nama</th>
-                                        <th>Kelas</th>
+                                        {{-- KELAS DINONAKTIFKAN - Kolom kelas dihilangkan --}}
+                                        {{-- <th>Kelas</th> --}}
                                         <th>Skor</th>
                                         <th>Benar</th>
                                         <th>Salah</th>
@@ -96,14 +97,15 @@
                                                 @endif
                                             </td>
                                             <td><strong>{{ $attempt->student->name }}</strong></td>
-                                            <td>
+                                            {{-- KELAS DINONAKTIFKAN --}}
+                                            {{-- <td>
                                                 @if ($attempt->student->classRoom)
                                                     <span
                                                         class="badge bg-info">{{ $attempt->student->classRoom->name }}</span>
                                                 @else
                                                     -
                                                 @endif
-                                            </td>
+                                            </td> --}}
                                             <td><strong
                                                     class="text-primary">{{ number_format($attempt->total_score, 1) }}</strong>
                                             </td>

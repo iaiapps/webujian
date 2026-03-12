@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Guru\DashboardController as GuruDashboard;
 use App\Http\Controllers\Student\DashboardController as StudentDashboard;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 // Landing Page
 Route::get('/', function () {
@@ -76,14 +76,17 @@ Route::prefix('guru')->name('guru.')->middleware(['auth', 'role:guru', 'check.ap
     Route::get('/students/import/template', [App\Http\Controllers\Guru\StudentController::class, 'downloadTemplate'])->name('students.import.template');
     Route::post('/students/import', [App\Http\Controllers\Guru\StudentController::class, 'import'])->middleware('check.limit:student')->name('students.import');
 
+    // ============================================================
+    // KELAS DINONAKTIFKAN - Semua fitur kelas di-nonaktifkan
+    // ============================================================
     // Classes
-    Route::get('/classes', [App\Http\Controllers\Guru\ClassController::class, 'index'])->name('classes.index');
-    Route::get('/classes/create', [App\Http\Controllers\Guru\ClassController::class, 'create'])->middleware('check.limit:class')->name('classes.create');
-    Route::post('/classes', [App\Http\Controllers\Guru\ClassController::class, 'store'])->middleware('check.limit:class')->name('classes.store');
-    Route::get('/classes/{class}', [App\Http\Controllers\Guru\ClassController::class, 'show'])->name('classes.show');
-    Route::get('/classes/{class}/edit', [App\Http\Controllers\Guru\ClassController::class, 'edit'])->name('classes.edit');
-    Route::put('/classes/{class}', [App\Http\Controllers\Guru\ClassController::class, 'update'])->name('classes.update');
-    Route::delete('/classes/{class}', [App\Http\Controllers\Guru\ClassController::class, 'destroy'])->name('classes.destroy');
+    // Route::get('/classes', [App\Http\Controllers\Guru\ClassController::class, 'index'])->name('classes.index');
+    // Route::get('/classes/create', [App\Http\Controllers\Guru\ClassController::class, 'create'])->middleware('check.limit:class')->name('classes.create');
+    // Route::post('/classes', [App\Http\Controllers\Guru\ClassController::class, 'store'])->middleware('check.limit:class')->name('classes.store');
+    // Route::get('/classes/{class}', [App\Http\Controllers\Guru\ClassController::class, 'show'])->name('classes.show');
+    // Route::get('/classes/{class}/edit', [App\Http\Controllers\Guru\ClassController::class, 'edit'])->name('classes.edit');
+    // Route::put('/classes/{class}', [App\Http\Controllers\Guru\ClassController::class, 'update'])->name('classes.update');
+    // Route::delete('/classes/{class}', [App\Http\Controllers\Guru\ClassController::class, 'destroy'])->name('classes.destroy');
 
     // Questions
     Route::get('/questions', [App\Http\Controllers\Guru\QuestionController::class, 'index'])->name('questions.index');

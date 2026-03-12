@@ -9,8 +9,9 @@
             <div>
                 <h2>{{ $student->name }}</h2>
                 <p class="text-muted mb-0">
-                    Username: <code>{{ $student->username }}</code> |
-                    Kelas: {{ $student->classRoom ? $student->classRoom->name : '-' }}
+                    Username: <code>{{ $student->username }}</code>
+                    {{-- KELAS DINONAKTIFKAN - Kelas info dihilangkan --}}
+                    {{-- | Kelas: {{ $student->classRoom ? $student->classRoom->name : '-' }} --}}
                 </p>
             </div>
             <a href="javascript:history.back()" class="btn btn-outline-secondary">

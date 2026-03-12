@@ -68,7 +68,8 @@
                                 <td class="text-muted">Email</td>
                                 <td>{{ $student->email ?? '-' }}</td>
                             </tr>
-                            <tr>
+                            {{-- KELAS DINONAKTIFKAN --}}
+                            {{-- <tr>
                                 <td class="text-muted">Kelas</td>
                                 <td>
                                     @if ($student->classRoom)
@@ -77,7 +78,7 @@
                                         -
                                     @endif
                                 </td>
-                            </tr>
+                            </tr> --}}
                             <tr>
                                 <td class="text-muted">Status</td>
                                 <td>

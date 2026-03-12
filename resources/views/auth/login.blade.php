@@ -7,9 +7,6 @@
         <div class="auth-card">
             <!-- Logo/Brand -->
             <div class="text-center mb-4">
-                <div class="brand-icon mb-3 mx-auto">
-                    <i class="bi bi-book text-white" style="font-size: 32px;"></i>
-                </div>
                 <h1 class="h2 fw-bold mb-2">TKA Web App</h1>
                 <p class="text-muted">Masuk ke akun Anda</p>
             </div>
@@ -17,14 +14,14 @@
             <!-- Card -->
             <div class="card">
                 <div class="card-body p-4 p-md-5">
-                    @if(session('error'))
+                    @if (session('error'))
                         <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
                             <i class="bi bi-exclamation-circle-fill me-2"></i>
                             <div>{{ session('error') }}</div>
                         </div>
                     @endif
 
-                    @if(session('success'))
+                    @if (session('success'))
                         <div class="alert alert-success d-flex align-items-center mb-4" role="alert">
                             <i class="bi bi-check-circle-fill me-2"></i>
                             <div>{{ session('success') }}</div>
@@ -37,8 +34,8 @@
                         <!-- Email -->
                         <div class="mb-3">
                             <label for="email" class="form-label fw-semibold">Email</label>
-                            <input type="email" name="email" id="email" value="{{ old('email') }}" required autofocus
-                                class="form-control @error('email') is-invalid @enderror">
+                            <input type="email" name="email" id="email" value="{{ old('email') }}" required
+                                autofocus class="form-control @error('email') is-invalid @enderror">
                             @error('email')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror

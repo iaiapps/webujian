@@ -1,19 +1,19 @@
 <?php
 
 // app/Http/Controllers/Guru/StudentController.php
+
 namespace App\Http\Controllers\Guru;
 
+use App\Exports\StudentsTemplateExport;
 use App\Http\Controllers\Controller;
-use App\Models\Student;
+use App\Imports\StudentsImport;
 use App\Models\ClassRoom;
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Imports\StudentsImport;
-use App\Exports\StudentsTemplateExport;
-use App\Exports\StudentsCredentialsExport;
 
 class StudentController extends Controller
 {
@@ -38,10 +38,10 @@ class StudentController extends Controller
             });
         }
 
-        // Filter by class
-        if ($request->filled('class_id')) {
-            $query->where('class_id', $request->class_id);
-        }
+        // Filter by class (DINONAKTIFKAN)
+        // if ($request->filled('class_id')) {
+        //     $query->where('class_id', $request->class_id);
+        // }
 
         // Filter by status
         if ($request->filled('status')) {
@@ -59,7 +59,7 @@ class StudentController extends Controller
         $user = Auth::user();
 
         // Check if can add student
-        if (!$user->canAddStudent()) {
+        if (! $user->canAddStudent()) {
             return redirect()->route('guru.students.index')->with('limit_reached', [
                 'type' => 'student',
                 'limit' => $user->max_students,
@@ -76,9 +76,13 @@ class StudentController extends Controller
 
     public function store(Request $request)
     {
+        // ============================================================
+        // KELAS DINONAKTIFKAN - class_id tidak wajib
+        // ============================================================
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'class_id' => ['required', 'exists:classes,id'],
+            // 'class_id' => ['required', 'exists:classes,id'],
+            'class_id' => ['nullable'], // DINONAKTIFKAN
             'nisn' => ['nullable', 'string', 'max:20'],
             'email' => ['nullable', 'email', 'max:255'],
             'username' => ['nullable', 'string', 'max:255', 'unique:students,username'],
@@ -87,14 +91,14 @@ class StudentController extends Controller
 
         $user = Auth::user();
 
-        // Verify class ownership
-        $class = ClassRoom::where('id', $request->class_id)
-            ->where('user_id', $user->id)
-            ->firstOrFail();
+        // Verify class ownership (DINONAKTIFKAN)
+        // $class = ClassRoom::where('id', $request->class_id)
+        //     ->where('user_id', $user->id)
+        //     ->firstOrFail();
 
         // Auto-generate username if not provided
         $username = $request->username;
-        if (!$username) {
+        if (! $username) {
             $username = $request->nisn ?? $this->generateUsername($request->name);
         }
 
@@ -102,7 +106,7 @@ class StudentController extends Controller
         $password = $request->password ?? '123456';
 
         $student = $user->students()->create([
-            'class_id' => $class->id,
+            'class_id' => $request->class_id, // Bisa null
             'name' => $request->name,
             'nisn' => $request->nisn,
             'email' => $request->email,
@@ -111,8 +115,10 @@ class StudentController extends Controller
             'is_active' => true,
         ]);
 
-        // Update class student count
-        $class->updateStudentCount();
+        // Update class student count (DINONAKTIFKAN)
+        // if ($class) {
+        //     $class->updateStudentCount();
+        // }
 
         // Store plain password temporarily for display (in session)
         session()->flash('new_student_credentials', [
@@ -155,12 +161,16 @@ class StudentController extends Controller
             abort(403);
         }
 
+        // ============================================================
+        // KELAS DINONAKTIFKAN - class_id tidak wajib
+        // ============================================================
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'class_id' => ['required', 'exists:classes,id'],
+            // 'class_id' => ['required', 'exists:classes,id'],
+            'class_id' => ['nullable'], // DINONAKTIFKAN
             'nisn' => ['nullable', 'string', 'max:20'],
             'email' => ['nullable', 'email', 'max:255'],
-            'username' => ['required', 'string', 'max:255', 'unique:students,username,' . $student->id],
+            'username' => ['required', 'string', 'max:255', 'unique:students,username,'.$student->id],
             'password' => ['nullable', 'string', 'min:6'],
             'is_active' => ['required', 'boolean'],
         ]);
@@ -183,13 +193,13 @@ class StudentController extends Controller
             ]);
         }
 
-        // Update class student count if class changed
-        if ($oldClassId != $request->class_id) {
-            if ($oldClassId) {
-                ClassRoom::find($oldClassId)?->updateStudentCount();
-            }
-            ClassRoom::find($request->class_id)?->updateStudentCount();
-        }
+        // Update class student count if class changed (DINONAKTIFKAN)
+        // if ($oldClassId != $request->class_id) {
+        //     if ($oldClassId) {
+        //         ClassRoom::find($oldClassId)?->updateStudentCount();
+        //     }
+        //     ClassRoom::find($request->class_id)?->updateStudentCount();
+        // }
 
         return redirect()->route('guru.students.index')->with('success', 'Data siswa berhasil diupdate!');
     }
@@ -206,10 +216,10 @@ class StudentController extends Controller
 
         $student->delete();
 
-        // Update class student count
-        if ($classId) {
-            ClassRoom::find($classId)?->updateStudentCount();
-        }
+        // Update class student count (DINONAKTIFKAN)
+        // if ($classId) {
+        //     ClassRoom::find($classId)?->updateStudentCount();
+        // }
 
         return redirect()->route('guru.students.index')->with('success', "Siswa {$name} berhasil dihapus!");
     }
@@ -245,7 +255,7 @@ class StudentController extends Controller
 
             return redirect()->route('guru.students.index')->with('success', "Berhasil import {$imported} siswa!");
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Import gagal: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Import gagal: '.$e->getMessage());
         }
     }
 
@@ -257,7 +267,7 @@ class StudentController extends Controller
         $counter = 1;
 
         while (Student::where('username', $username)->exists()) {
-            $username = $base . $counter;
+            $username = $base.$counter;
             $counter++;
         }
 

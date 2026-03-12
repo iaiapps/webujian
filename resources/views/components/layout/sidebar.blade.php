@@ -34,9 +34,10 @@
                 <a class="sidebar-link {{ request()->routeIs('guru.dashboard') ? 'active' : '' }}" href="{{ route('guru.dashboard') }}">
                     <i class="bi bi-speedometer2"></i> Dashboard
                 </a>
-                <a class="sidebar-link {{ request()->routeIs('guru.classes.*') ? 'active' : '' }}" href="{{ route('guru.classes.index') }}">
+                {{-- KELAS DINONAKTIFKAN --}}
+                {{-- <a class="sidebar-link {{ request()->routeIs('guru.classes.*') ? 'active' : '' }}" href="{{ route('guru.classes.index') }}">
                     <i class="bi bi-door-open"></i> Kelas
-                </a>
+                </a> --}}
                 <a class="sidebar-link {{ request()->routeIs('guru.students.*') ? 'active' : '' }}" href="{{ route('guru.students.index') }}">
                     <i class="bi bi-people"></i> Siswa
                 </a>

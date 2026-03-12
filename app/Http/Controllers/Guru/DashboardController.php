@@ -1,17 +1,11 @@
 <?php
 
 // app/Http/Controllers/Guru/DashboardController.php
+
 namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Student;
-use App\Models\ClassRoom;
-use App\Models\Question;
-use App\Models\TestPackage;
 use App\Models\TestAttempt;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -30,12 +24,12 @@ class DashboardController extends Controller
             $user->refresh();
         }
 
-        // Statistics
+        // Statistics (KELAS DINONAKTIFKAN - tidak ditampilkan)
         $stats = [
             'total_students' => $user->studentsCount(),
             'max_students' => $user->max_students,
-            'total_classes' => $user->classesCount(),
-            'max_classes' => $user->max_classes,
+            // 'total_classes' => $user->classesCount(),
+            // 'max_classes' => $user->max_classes,
             'total_questions' => $user->questionsCount(),
             'max_questions' => $user->max_questions,
             'total_packages' => $user->packagesCount(),
@@ -45,7 +39,7 @@ class DashboardController extends Controller
         // Calculate usage percentage
         $usage = [
             'students' => $user->max_students > 0 ? round(($stats['total_students'] / $user->max_students) * 100) : 0,
-            'classes' => $user->max_classes > 0 ? round(($stats['total_classes'] / $user->max_classes) * 100) : 0,
+            // 'classes' => $user->max_classes > 0 ? round(($stats['total_classes'] / $user->max_classes) * 100) : 0,
             'questions' => $user->max_questions > 0 ? round(($stats['total_questions'] / $user->max_questions) * 100) : 0,
             'packages' => $user->max_packages > 0 ? round(($stats['total_packages'] / $user->max_packages) * 100) : 0,
         ];
@@ -98,9 +92,10 @@ class DashboardController extends Controller
             if ($stats['total_students'] > $stats['max_students']) {
                 $overLimit[] = "Siswa: {$stats['total_students']} dari maksimal {$stats['max_students']}";
             }
-            if ($stats['total_classes'] > $stats['max_classes']) {
-                $overLimit[] = "Kelas: {$stats['total_classes']} dari maksimal {$stats['max_classes']}";
-            }
+            // KELAS DINONAKTIFKAN - tidak perlu cek limit kelas
+            // if ($stats['total_classes'] > $stats['max_classes']) {
+            //     $overLimit[] = "Kelas: {$stats['total_classes']} dari maksimal {$stats['max_classes']}";
+            // }
             if ($stats['total_questions'] > $stats['max_questions']) {
                 $overLimit[] = "Soal: {$stats['total_questions']} dari maksimal {$stats['max_questions']}";
             }

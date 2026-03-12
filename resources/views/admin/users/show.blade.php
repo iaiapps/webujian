@@ -94,7 +94,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                {{-- KELAS DINONAKTIFKAN - Tidak ditampilkan --}}
+                {{-- <div class="col-md-3">
                     <div class="card border-0 shadow-sm text-center">
                         <div class="card-body">
                             <h3 class="text-success">{{ $stats['total_classes'] }}</h3>
@@ -102,7 +103,7 @@
                             <div class="small text-muted">Max: {{ $user->max_classes }}</div>
                         </div>
                     </div>
-                </div>
+                </div> --}}
                 <div class="col-md-3">
                     <div class="card border-0 shadow-sm text-center">
                         <div class="card-body">

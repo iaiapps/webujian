@@ -66,10 +66,11 @@
                                 <small class="text-muted">Siswa</small><br>
                                 <strong>{{ auth()->user()->studentsCount() }}/{{ auth()->user()->max_students }}</strong>
                             </div>
-                            <div class="col-md-3">
+                            {{-- KELAS DINONAKTIFKAN --}}
+                            {{-- <div class="col-md-3">
                                 <small class="text-muted">Kelas</small><br>
                                 <strong>{{ auth()->user()->classesCount() }}/{{ auth()->user()->max_classes }}</strong>
-                            </div>
+                            </div> --}}
                             <div class="col-md-3">
                                 <small class="text-muted">Soal</small><br>
                                 <strong>{{ auth()->user()->questionsCount() }}/{{ auth()->user()->max_questions }}</strong>

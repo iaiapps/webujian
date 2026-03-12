@@ -59,7 +59,8 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
+                        {{-- KELAS DINONAKTIFKAN --}}
+                        {{-- <div class="mb-3">
                             <label for="class_id" class="form-label">Kelas <span class="text-danger">*</span></label>
                             <select class="form-select @error('class_id') is-invalid @enderror" id="class_id" name="class_id" required>
                                 <option value="">Pilih Kelas</option>
@@ -72,7 +73,7 @@
                             @error('class_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                        </div>
+                        </div> --}}
 
                         <hr>
 

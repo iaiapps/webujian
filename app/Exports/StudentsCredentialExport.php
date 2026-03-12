@@ -1,6 +1,7 @@
 <?php
 
 // app/Exports/StudentsCredentialsExport.php
+
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromArray;
@@ -24,7 +25,7 @@ class StudentsCredentialsExport implements FromArray, WithHeadings, WithStyles
                 $cred['name'],
                 $cred['username'],
                 $cred['password'],
-                $cred['class'],
+                // $cred['class'], // DINONAKTIFKAN
             ];
         })->toArray();
     }
@@ -35,7 +36,7 @@ class StudentsCredentialsExport implements FromArray, WithHeadings, WithStyles
             'Nama',
             'Username',
             'Password',
-            'Kelas',
+            // 'Kelas', // DINONAKTIFKAN
         ];
     }
 

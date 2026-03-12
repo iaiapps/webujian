@@ -9,7 +9,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     protected $fillable = [
         'name',
@@ -117,7 +117,8 @@ class User extends Authenticatable
     protected function getLimitFromSettings($key, $fallback)
     {
         $limits = Setting::getByGroup('limits');
-        $settingKey = $this->plan . '_' . $key;
+        $settingKey = $this->plan.'_'.$key;
+
         return $limits[$settingKey] ?? $fallback;
     }
 
@@ -184,6 +185,7 @@ class User extends Authenticatable
         if ($this->isFree()) {
             return false;
         }
+
         return $this->plan_expired_at && $this->plan_expired_at->isPast();
     }
 
@@ -198,9 +200,20 @@ class User extends Authenticatable
         return $this->hasRole('guru');
     }
 
+    // ============================================================
+    // APPROVAL MANUAL DINONAKTIFKAN
+    // User yang baru daftar langsung approved
+    // ============================================================
+
+    // public function isApproved(): bool
+    // {
+    //     return $this->approved_at !== null;
+    // }
+
+    // Untuk backward compatibility, return true selalu
     public function isApproved(): bool
     {
-        return $this->approved_at !== null;
+        return true;
     }
 
     // Scope

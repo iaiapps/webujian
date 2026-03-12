@@ -14,9 +14,11 @@
     @if (isset($pendingSubscription) && $pendingSubscription)
         <div class="alert alert-warning mb-4">
             <i class="bi bi-hourglass-split me-2"></i>
-            <strong>Menunggu Verifikasi!</strong> Permintaan upgrade ke <strong>{{ strtoupper($pendingSubscription->plan) }}</strong> 
+            <strong>Menunggu Verifikasi!</strong> Permintaan upgrade ke
+            <strong>{{ strtoupper($pendingSubscription->plan) }}</strong>
             ({{ $pendingSubscription->billing_cycle == 'monthly' ? 'Bulanan' : 'Tahunan' }}) sedang diproses admin.
-            <br><small>Invoice: {{ $pendingSubscription->invoice_number }} | Diajukan: {{ $pendingSubscription->created_at->format('d M Y H:i') }}</small>
+            <br><small>Invoice: {{ $pendingSubscription->invoice_number }} | Diajukan:
+                {{ $pendingSubscription->created_at->format('d M Y H:i') }}</small>
         </div>
     @endif
 
@@ -26,7 +28,7 @@
             <div class="col-md-6">
                 <div class="d-flex align-items-center">
                     <div class="me-3">
-                        @if($planInfo['current_plan'] == 'free')
+                        @if ($planInfo['current_plan'] == 'free')
                             <span class="badge badge-primary" style="font-size: 0.9rem; padding: 8px 16px;">FREE</span>
                         @elseif($planInfo['current_plan'] == 'pro')
                             <span class="badge badge-orange" style="font-size: 0.9rem; padding: 8px 16px;">PRO</span>
@@ -36,11 +38,12 @@
                     </div>
                     <div>
                         <h6 class="mb-0" style="font-weight: 600;">Plan Aktif</h6>
-                        @if($planInfo['current_plan'] != 'free' && $planInfo['expired_at'])
+                        @if ($planInfo['current_plan'] != 'free' && $planInfo['expired_at'])
                             <small class="text-muted">
                                 Berlaku sampai: {{ $planInfo['expired_at']->format('d M Y') }}
-                                @if($planInfo['days_remaining'] > 0)
-                                    <span class="badge badge-{{ $planInfo['days_remaining'] < 7 ? 'warning' : 'info' }}" style="margin-left: 8px;">
+                                @if ($planInfo['days_remaining'] > 0)
+                                    <span class="badge badge-{{ $planInfo['days_remaining'] < 7 ? 'warning' : 'info' }}"
+                                        style="margin-left: 8px;">
                                         {{ $planInfo['days_remaining'] }} hari lagi
                                     </span>
                                 @endif
@@ -52,7 +55,7 @@
                 </div>
             </div>
             <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                @if($planInfo['current_plan'] == 'free')
+                @if ($planInfo['current_plan'] == 'free')
                     <a href="{{ route('guru.subscription.pricing') }}" class="btn btn-accent">
                         <i class="bi bi-arrow-up-circle"></i> Upgrade Plan
                     </a>
@@ -88,50 +91,41 @@
             <i class="bi bi-info-circle-fill me-2"></i>
             <strong>Perhatian!</strong> Beberapa data melebihi limit plan FREE Anda:
             <ul class="mb-0 mt-2">
-                @foreach($overLimit as $item)
+                @foreach ($overLimit as $item)
                     <li>{{ $item }}</li>
                 @endforeach
             </ul>
-            <small>Data lama tetap tersimpan, namun Anda tidak bisa menambah baru. <a href="{{ route('guru.subscription.pricing') }}" class="alert-link">Upgrade</a> untuk menambah kapasitas.</small>
+            <small>Data lama tetap tersimpan, namun Anda tidak bisa menambah baru. <a
+                    href="{{ route('guru.subscription.pricing') }}" class="alert-link">Upgrade</a> untuk menambah
+                kapasitas.</small>
         </div>
     @endif
 
     {{-- Usage Statistics Cards --}}
     <div class="row g-4 mb-4">
-        <div class="col-xl-3 col-md-6">
-            <x-ui.stat-card
-                icon="people"
-                icon-variant="{{ $usage['students'] >= 80 ? 'danger' : 'primary' }}"
-                value="{{ $stats['total_students'] }}/{{ $stats['max_students'] }}"
-                label="Siswa"
-            />
+        <div class="col-xl-4 col-md-6">
+            <x-ui.stat-card icon="people" icon-variant="{{ $usage['students'] >= 80 ? 'danger' : 'primary' }}"
+                value="{{ $stats['total_students'] }}/{{ $stats['max_students'] }}" label="Siswa" />
         </div>
 
-        <div class="col-xl-3 col-md-6">
+        {{-- KELAS DINONAKTIFKAN - Card kelas disembunyikan --}}
+        {{-- <div class="col-xl-4 col-md-6">
             <x-ui.stat-card
                 icon="door-open"
                 icon-variant="success"
                 value="{{ $stats['total_classes'] }}/{{ $stats['max_classes'] }}"
                 label="Kelas"
             />
+        </div> --}}
+
+        <div class="col-xl-4 col-md-6">
+            <x-ui.stat-card icon="question-circle" icon-variant="info"
+                value="{{ $stats['total_questions'] }}/{{ $stats['max_questions'] }}" label="Soal" />
         </div>
 
-        <div class="col-xl-3 col-md-6">
-            <x-ui.stat-card
-                icon="question-circle"
-                icon-variant="info"
-                value="{{ $stats['total_questions'] }}/{{ $stats['max_questions'] }}"
-                label="Soal"
-            />
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <x-ui.stat-card
-                icon="box"
-                icon-variant="warning"
-                value="{{ $stats['total_packages'] }}/{{ $stats['max_packages'] }}"
-                label="Paket Tes"
-            />
+        <div class="col-xl-4 col-md-6">
+            <x-ui.stat-card icon="box" icon-variant="warning"
+                value="{{ $stats['total_packages'] }}/{{ $stats['max_packages'] }}" label="Paket Tes" />
         </div>
     </div>
 
@@ -150,7 +144,8 @@
             </a>
         </div>
         <div class="col-md-3">
-            <a href="{{ route('guru.packages.create') }}" class="btn btn-info w-100 py-3" style="background: var(--info); border-color: var(--info); color: white;">
+            <a href="{{ route('guru.packages.create') }}" class="btn btn-info w-100 py-3"
+                style="background: var(--info); border-color: var(--info); color: white;">
                 <i class="bi bi-box-fill fs-4 d-block mb-2"></i>
                 Buat Paket Tes
             </a>
@@ -181,7 +176,8 @@
                             <span class="badge badge-success">{{ $test->test_attempts_count }} peserta</span>
                         </div>
                         <div class="mt-2">
-                            <a href="{{ route('guru.packages.show', $test->id) }}" class="btn btn-sm btn-outline-primary">Detail</a>
+                            <a href="{{ route('guru.packages.show', $test->id) }}"
+                                class="btn btn-sm btn-outline-primary">Detail</a>
                         </div>
                     </div>
                 @empty
@@ -195,13 +191,15 @@
             <x-ui.card class="mb-3">
                 <div class="text-center">
                     <h6 class="text-muted mb-2">Total Tes Dikerjakan</h6>
-                    <h2 class="mb-0" style="font-size: 2.5rem; font-weight: 800; color: var(--primary);">{{ number_format($totalAttempts) }}</h2>
+                    <h2 class="mb-0" style="font-size: 2.5rem; font-weight: 800; color: var(--primary);">
+                        {{ number_format($totalAttempts) }}</h2>
                 </div>
             </x-ui.card>
             <x-ui.card>
                 <div class="text-center">
                     <h6 class="text-muted mb-2">Rata-rata Skor</h6>
-                    <h2 class="mb-0" style="font-size: 2.5rem; font-weight: 800; color: var(--success);">{{ number_format($avgScore ?? 0, 1) }}</h2>
+                    <h2 class="mb-0" style="font-size: 2.5rem; font-weight: 800; color: var(--success);">
+                        {{ number_format($avgScore ?? 0, 1) }}</h2>
                 </div>
             </x-ui.card>
         </div>

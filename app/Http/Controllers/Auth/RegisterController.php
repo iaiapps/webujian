@@ -3,19 +3,23 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Setting;
+use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Http\Request;
-use Illuminate\Auth\Events\Registered;
 
 class RegisterController extends Controller
 {
     use RegistersUsers;
 
-    protected $redirectTo = '/auth/waiting-approval';
+    // ============================================================
+    // APPROVAL MANUAL DINONAKTIFKAN
+    // User langsung ke dashboard setelah register
+    // ============================================================
+    protected $redirectTo = '/guru/dashboard';
 
     public function __construct()
     {
@@ -56,6 +60,11 @@ class RegisterController extends Controller
             'max_questions' => Setting::get('free_max_questions', 100),
             'max_classes' => Setting::get('free_max_classes', 1),
             'is_active' => true,
+            // ============================================================
+            // APPROVAL MANUAL DINONAKTIFKAN
+            // User langsung di-approve saat registrasi
+            // ============================================================
+            'approved_at' => now(),
         ]);
 
         $user->assignRole('guru');
@@ -69,7 +78,13 @@ class RegisterController extends Controller
 
         event(new Registered($user = $this->create($request->all())));
 
-        return redirect()->route('auth.waiting-approval')
-            ->with('success', 'Registrasi berhasil! Silakan tunggu persetujuan admin.');
+        // ============================================================
+        // APPROVAL MANUAL DINONAKTIFKAN
+        // Langsung login dan redirect ke dashboard
+        // ============================================================
+        $this->guard()->login($user);
+
+        return redirect($this->redirectTo)
+            ->with('success', 'Registrasi berhasil! Selamat datang di TKA.');
     }
 }

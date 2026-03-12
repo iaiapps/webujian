@@ -5,8 +5,8 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header bg-warning text-dark">
-                    <i class="bi bi-hourglass-split"></i> Menunggu Persetujuan
+                <div class="card-header bg-success text-white">
+                    <i class="bi bi-check-circle"></i> Registrasi Berhasil
                 </div>
 
                 <div class="card-body text-center py-5">
@@ -17,26 +17,21 @@
                     @endif
 
                     <div class="mb-4">
-                        <i class="bi bi-clock-history text-warning" style="font-size: 5rem;"></i>
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
                     </div>
 
-                    <h4>Registrasi Berhasil!</h4>
+                    <h4>Selamat! Registrasi Anda Berhasil!</h4>
                     <p class="text-muted mb-4">
-                        Akun Anda sedang menunggu persetujuan dari administrator.<br>
-                        Kami akan mengirimkan notifikasi melalui email setelah akun Anda disetujui.
+                        Anda sekarang dapat mengakses semua fitur TKA.<br>
+                        Silakan lengkapi profil dan mulai membuat tes untuk siswa Anda.
                     </p>
 
-                    <div class="alert alert-info">
-                        <strong>Informasi:</strong><br>
-                        Proses persetujuan biasanya membutuhkan waktu 1x24 jam pada hari kerja.
-                    </div>
-
                     <div class="mt-4">
-                        <a href="{{ route('login') }}" class="btn btn-outline-primary">
-                            <i class="bi bi-arrow-left"></i> Kembali ke Login
+                        <a href="{{ route('guru.dashboard') }}" class="btn btn-primary">
+                            <i class="bi bi-speedometer2"></i> Ke Dashboard
                         </a>
-                        <a href="{{ route('home') }}" class="btn btn-outline-secondary">
-                            <i class="bi bi-house"></i> Ke Beranda
+                        <a href="{{ route('login') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
                         </a>
                     </div>
                 </div>

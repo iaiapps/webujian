@@ -188,7 +188,8 @@
 
                             <hr>
 
-                            <div class="mb-3">
+                            {{-- KELAS DINONAKTIFKAN --}}
+                            {{-- <div class="mb-3">
                                 <label class="form-label">Assign ke Kelas</label>
                                 @foreach ($classes as $class)
                                     <div class="form-check">
@@ -204,7 +205,7 @@
                                     <p class="text-muted small mb-0">Belum ada kelas. <a
                                             href="{{ route('guru.classes.create') }}">Buat kelas</a></p>
                                 @endif
-                            </div>
+                            </div> --}}
 
                             <hr>
 

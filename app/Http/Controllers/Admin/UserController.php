@@ -63,9 +63,10 @@ class UserController extends Controller
     {
         $user->load(['students', 'classes', 'questions', 'testPackages', 'subscriptions']);
 
+        // KELAS DINONAKTIFKAN - total_classes tidak perlu dikirim
         $stats = [
             'total_students' => $user->students()->count(),
-            'total_classes' => $user->classes()->count(),
+            // 'total_classes' => $user->classes()->count(),
             'total_questions' => $user->questions()->count(),
             'total_packages' => $user->testPackages()->count(),
         ];
@@ -75,31 +76,47 @@ class UserController extends Controller
 
     public function approve(User $user)
     {
-        $user->update([
-            'approved_at' => now(),
-            'is_active' => true,
-        ]);
+        // ============================================================
+        // APPROVAL MANUAL DINONAKTIFKAN
+        // Method ini dipertahankan untuk kebutuhan di masa depan
+        // jika ingin mengaktifkan kembali sistem approval manual
+        // ============================================================
 
-        // TODO: Send email notification to user
-        // Mail::to($user->email)->send(new UserApproved($user));
+        // $user->update([
+        //     'approved_at' => now(),
+        //     'is_active' => true,
+        // ]);
 
-        return redirect()->back()->with('success', "User {$user->name} telah disetujui.");
+        // // TODO: Send email notification to user
+        // // Mail::to($user->email)->send(new UserApproved($user));
+
+        // return redirect()->back()->with('success', "User {$user->name} telah disetujui.");
+
+        // Untuk saat ini, cukup info saja
+        return redirect()->back()->with('info', 'Fitur approval manual saat ini dinonaktifkan.');
     }
 
     public function reject(User $user)
     {
-        // TODO: Send email notification before delete
-        // Mail::to($user->email)->send(new UserRejected($user));
+        // ============================================================
+        // APPROVAL MANUAL DINONAKTIFKAN
+        // Method ini dipertahankan untuk kebutuhan di masa depan
+        // ============================================================
 
-        $user->delete();
+        // // TODO: Send email notification before delete
+        // // Mail::to($user->email)->send(new UserRejected($user));
 
-        return redirect()->route('admin.users.pending')->with('success', "User {$user->name} telah ditolak dan dihapus.");
+        // $user->delete();
+
+        // return redirect()->route('admin.users.pending')->with('success', "User {$user->name} telah ditolak dan dihapus.");
+
+        return redirect()->back()->with('info', 'Fitur reject manual saat ini dinonaktifkan.');
     }
 
     public function toggleStatus(User $user)
     {
         $user->update([
-            'is_active' => !$user->is_active,
+            'is_active' => ! $user->is_active,
         ]);
 
         $status = $user->is_active ? 'diaktifkan' : 'dinonaktifkan';

@@ -1,13 +1,13 @@
 <?php
 
 // app/Http/Controllers/Guru/PackageController.php
+
 namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
-use App\Models\TestPackage;
 use App\Models\Question;
 use App\Models\QuestionCategory;
-use App\Models\ClassRoom;
+use App\Models\TestPackage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -53,7 +53,7 @@ class PackageController extends Controller
         $user = Auth::user();
 
         // Check if can add package
-        if (!$user->canAddPackage()) {
+        if (! $user->canAddPackage()) {
             return redirect()->route('guru.packages.index')->with('limit_reached', [
                 'type' => 'package',
                 'limit' => $user->max_packages,
@@ -70,14 +70,17 @@ class PackageController extends Controller
 
     public function store(Request $request)
     {
+        // ============================================================
+        // KELAS DINONAKTIFKAN - class_ids tidak wajib
+        // ============================================================
         $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'duration' => ['required', 'integer', 'min:1'],
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after:start_date'],
-            'class_ids' => ['nullable', 'array'],
-            'class_ids.*' => ['exists:classes,id'],
+            // 'class_ids' => ['nullable', 'array'],
+            // 'class_ids.*' => ['exists:classes,id'],
             'question_ids' => ['required', 'array', 'min:1'],
             'question_ids.*' => ['exists:questions,id'],
         ]);
@@ -112,10 +115,10 @@ class PackageController extends Controller
                 Question::find($questionId)?->incrementUsage();
             }
 
-            // Attach classes
-            if ($request->filled('class_ids')) {
-                $package->classes()->attach($request->class_ids);
-            }
+            // Attach classes (DINONAKTIFKAN)
+            // if ($request->filled('class_ids')) {
+            //     $package->classes()->attach($request->class_ids);
+            // }
 
             DB::commit();
 
@@ -123,7 +126,8 @@ class PackageController extends Controller
                 ->with('success', 'Paket tes berhasil dibuat!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal membuat paket: ' . $e->getMessage())->withInput();
+
+            return redirect()->back()->with('error', 'Gagal membuat paket: '.$e->getMessage())->withInput();
         }
     }
 
@@ -153,9 +157,12 @@ class PackageController extends Controller
             abort(403);
         }
 
+        // ============================================================
+        // KELAS DINONAKTIFKAN
+        // ============================================================
         $classes = Auth::user()->classes;
         $categories = QuestionCategory::active()->get();
-        $selectedClasses = $package->classes->pluck('id')->toArray();
+        $selectedClasses = []; // $package->classes->pluck('id')->toArray(); // DINONAKTIFKAN
         $selectedQuestions = $package->questions->pluck('id')->toArray();
 
         return view('guru.packages.edit', compact('package', 'classes', 'categories', 'selectedClasses', 'selectedQuestions'));
@@ -168,14 +175,17 @@ class PackageController extends Controller
             abort(403);
         }
 
+        // ============================================================
+        // KELAS DINONAKTIFKAN - class_ids tidak wajib
+        // ============================================================
         $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'duration' => ['required', 'integer', 'min:1'],
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after:start_date'],
-            'class_ids' => ['nullable', 'array'],
-            'class_ids.*' => ['exists:classes,id'],
+            // 'class_ids' => ['nullable', 'array'],
+            // 'class_ids.*' => ['exists:classes,id'],
             'question_ids' => ['required', 'array', 'min:1'],
             'question_ids.*' => ['exists:questions,id'],
         ]);
@@ -207,8 +217,8 @@ class PackageController extends Controller
             }
             $package->questions()->sync($syncData);
 
-            // Sync classes
-            $package->classes()->sync($request->class_ids ?? []);
+            // Sync classes (DINONAKTIFKAN)
+            // $package->classes()->sync($request->class_ids ?? []);
 
             DB::commit();
 
@@ -216,7 +226,8 @@ class PackageController extends Controller
                 ->with('success', 'Paket tes berhasil diupdate!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal update paket: ' . $e->getMessage())->withInput();
+
+            return redirect()->back()->with('error', 'Gagal update paket: '.$e->getMessage())->withInput();
         }
     }
 

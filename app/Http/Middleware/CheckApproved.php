@@ -12,7 +12,7 @@ class CheckApproved
     {
         $user = auth()->user();
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login');
         }
 
@@ -21,15 +21,21 @@ class CheckApproved
             return $next($request);
         }
 
-        // Cek apakah user sudah di-approve
-        if (!$user->isApproved()) {
-            auth()->logout();
-            return redirect()->route('auth.waiting-approval')->with('warning', 'Akun Anda masih menunggu persetujuan admin.');
-        }
+        // ============================================================
+        // APPROVAL MANUAL DINONAKTIFKAN
+        // User yang baru daftar langsung bisa akses tanpa approval admin
+        // ============================================================
+
+        // // Cek apakah user sudah di-approve
+        // if (!$user->isApproved()) {
+        //     auth()->logout();
+        //     return redirect()->route('auth.waiting-approval')->with('warning', 'Akun Anda masih menunggu persetujuan admin.');
+        // }
 
         // Cek apakah akun aktif
-        if (!$user->is_active) {
+        if (! $user->is_active) {
             auth()->logout();
+
             return redirect()->route('login')->with('error', 'Akun Anda telah dinonaktifkan. Hubungi admin untuk informasi lebih lanjut.');
         }
 

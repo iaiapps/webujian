@@ -50,7 +50,8 @@
                         <input type="text" name="search" class="form-control" placeholder="Cari nama, username, NISN..."
                             value="{{ request('search') }}">
                     </div>
-                    <div class="col-md-3">
+                    {{-- KELAS DINONAKTIFKAN - Filter kelas dihilangkan --}}
+                    {{-- <div class="col-md-3">
                         <select name="class_id" class="form-select">
                             <option value="">Semua Kelas</option>
                             @foreach ($classes as $class)
@@ -60,8 +61,8 @@
                                 </option>
                             @endforeach
                         </select>
-                    </div>
-                    <div class="col-md-2">
+                    </div> --}}
+                    <div class="col-md-3">
                         <select name="status" class="form-select">
                             <option value="">Semua Status</option>
                             <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Aktif</option>
@@ -92,7 +93,8 @@
                                 <th>Nama</th>
                                 <th>Username</th>
                                 <th>NISN</th>
-                                <th>Kelas</th>
+                                {{-- KELAS DINONAKTIFKAN - Kolom kelas dihilangkan --}}
+                                {{-- <th>Kelas</th> --}}
                                 <th>Email</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
@@ -107,13 +109,14 @@
                                     </td>
                                     <td><code>{{ $student->username }}</code></td>
                                     <td>{{ $student->nisn ?? '-' }}</td>
-                                    <td>
+                                    {{-- KELAS DINONAKTIFKAN --}}
+                                    {{-- <td>
                                         @if ($student->classRoom)
                                             <span class="badge bg-info">{{ $student->classRoom->name }}</span>
                                         @else
                                             -
                                         @endif
-                                    </td>
+                                    </td> --}}
                                     <td>{{ $student->email ?? '-' }}</td>
                                     <td>
                                         <span class="badge bg-{{ $student->is_active ? 'success' : 'danger' }}">
@@ -142,7 +145,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="text-center text-muted py-4">
+                                    <td colspan="7" class="text-center text-muted py-4">
                                         Belum ada siswa. <a href="{{ route('guru.students.create') }}">Tambah siswa
                                             pertama</a>
                                     </td>
