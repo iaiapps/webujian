@@ -23,6 +23,7 @@ class User extends Authenticatable
         'max_packages',
         'max_questions',
         'max_classes',
+        'credits',
         'is_active',
         'approved_at',
         'email_verified_at',
@@ -93,33 +94,74 @@ class User extends Authenticatable
         return $this->hasMany(SubscriptionHistory::class);
     }
 
-    // Get limits from settings based on plan
+    // ============================================================
+    // SISTEM KREDIT - GANTI DARI SUBSCRIPTION
+    // Sekarang menggunakan setting global, bukan per-plan
+    // ============================================================
+
+    // Get limits from GLOBAL settings (tidak bergantung pada plan)
     public function getMaxStudentsAttribute($value)
     {
-        return $this->getLimitFromSettings('max_students', $value);
+        return Setting::get('global_max_students', $value ?? 50);
     }
 
     public function getMaxPackagesAttribute($value)
     {
-        return $this->getLimitFromSettings('max_packages', $value);
+        // max_packages sekarang tidak digunakan, diganti kredit
+        // Tapi tetap ada untuk backward compatibility
+        return 999999;
     }
 
     public function getMaxQuestionsAttribute($value)
     {
-        return $this->getLimitFromSettings('max_questions', $value);
+        return Setting::get('global_max_questions', $value ?? 100);
     }
 
     public function getMaxClassesAttribute($value)
     {
-        return $this->getLimitFromSettings('max_classes', $value);
+        // KELAS DINONAKTIFKAN - selalu return 999999
+        return 999999;
     }
 
     protected function getLimitFromSettings($key, $fallback)
     {
-        $limits = Setting::getByGroup('limits');
-        $settingKey = $this->plan.'_'.$key;
+        // ============================================================
+        // SISTEM KREDIT - Menggunakan setting global
+        // ============================================================
+        return Setting::get('global_'.$key, $fallback);
+    }
 
-        return $limits[$settingKey] ?? $fallback;
+    // ============================================================
+    // SISTEM KREDIT - Method untuk kredit
+    // ============================================================
+    public function hasCredits(): bool
+    {
+        return $this->credits > 0;
+    }
+
+    public function canCreatePackage(): bool
+    {
+        return $this->credits >= 1;
+    }
+
+    public function getCreditsAttribute($value)
+    {
+        return $value ?? 0;
+    }
+
+    public function addCredits(int $amount): void
+    {
+        $this->increment('credits', $amount);
+    }
+
+    public function deductCredits(int $amount = 1): bool
+    {
+        if ($this->credits < $amount) {
+            return false;
+        }
+        $this->decrement('credits', $amount);
+
+        return true;
     }
 
     // Helper Methods - Check Limits
@@ -128,9 +170,13 @@ class User extends Authenticatable
         return $this->students()->where('is_active', true)->count() < $this->max_students;
     }
 
+    // ============================================================
+    // SISTEM KREDIT - canAddPackage diganti dengan canCreatePackage
+    // Tidak ada batas paket, tapi butuh kredit untuk membuat
+    // ============================================================
     public function canAddPackage(): bool
     {
-        return $this->testPackages()->count() < $this->max_packages;
+        return $this->canCreatePackage();
     }
 
     public function canAddQuestion(): bool
@@ -140,7 +186,8 @@ class User extends Authenticatable
 
     public function canAddClass(): bool
     {
-        return $this->classes()->count() < $this->max_classes;
+        // KELAS DINONAKTIFKAN
+        return true;
     }
 
     // Get current counts
@@ -164,29 +211,49 @@ class User extends Authenticatable
         return $this->classes()->count();
     }
 
-    // Plan checks
+    // ============================================================
+    // SISTEM KREDIT - Plan methods tidak lagi digunakan
+    // Dihybrid untuk backward compatibility dengan admin
+    // ============================================================
+    // public function isFree(): bool
+    // {
+    //     return $this->plan === 'free';
+    // }
+
+    // public function isPro(): bool
+    // {
+    //     return $this->plan === 'pro';
+    // }
+
+    // public function isAdvanced(): bool
+    // {
+    //     return $this->plan === 'advanced';
+    // }
+
+    // public function isPlanExpired(): bool
+    // {
+    //     return false; // Tidak berlaku lagi
+    // }
+
+    // Untuk backward compatibility
     public function isFree(): bool
     {
-        return $this->plan === 'free';
+        return true;
     }
 
     public function isPro(): bool
     {
-        return $this->plan === 'pro';
+        return false;
     }
 
     public function isAdvanced(): bool
     {
-        return $this->plan === 'advanced';
+        return false;
     }
 
     public function isPlanExpired(): bool
     {
-        if ($this->isFree()) {
-            return false;
-        }
-
-        return $this->plan_expired_at && $this->plan_expired_at->isPast();
+        return false;
     }
 
     // Role checks

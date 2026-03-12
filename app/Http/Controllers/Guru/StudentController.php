@@ -64,7 +64,7 @@ class StudentController extends Controller
                 'type' => 'student',
                 'limit' => $user->max_students,
                 'current' => $user->studentsCount(),
-                'message' => "Anda sudah mencapai batas maksimal {$user->max_students} siswa untuk plan {$user->plan}. Upgrade plan untuk menambah siswa.",
+                'message' => "Anda sudah mencapai batas maksimal {$user->max_students} siswa. Hubungi admin untuk menambah limit.",
             ]);
         }
 

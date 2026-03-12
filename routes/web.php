@@ -40,11 +40,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::post('/users/{user}/reject', [App\Http\Controllers\Admin\UserController::class, 'reject'])->name('users.reject');
     Route::post('/users/{user}/toggle-status', [App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('users.toggle-status');
 
-    // Subscription Management
-    Route::get('/subscriptions', [App\Http\Controllers\Admin\SubscriptionController::class, 'index'])->name('subscriptions.index');
-    Route::get('/subscriptions/{subscription}', [App\Http\Controllers\Admin\SubscriptionController::class, 'show'])->name('subscriptions.show');
-    Route::post('/subscriptions/{subscription}/approve', [App\Http\Controllers\Admin\SubscriptionController::class, 'approve'])->name('subscriptions.approve');
-    Route::post('/subscriptions/{subscription}/reject', [App\Http\Controllers\Admin\SubscriptionController::class, 'reject'])->name('subscriptions.reject');
+    // ============================================================
+    // SISTEM KREDIT - Subscription management di-nonaktifkan
+    // ============================================================
+    // Route::get('/subscriptions', [App\Http\Controllers\Admin\SubscriptionController::class, 'index'])->name('subscriptions.index');
+    // Route::get('/subscriptions/{subscription}', [App\Http\Controllers\Admin\SubscriptionController::class, 'show'])->name('subscriptions.show');
+    // Route::post('/subscriptions/{subscription}/approve', [App\Http\Controllers\Admin\SubscriptionController::class, 'approve'])->name('subscriptions.approve');
+    // Route::post('/subscriptions/{subscription}/reject', [App\Http\Controllers\Admin\SubscriptionController::class, 'reject'])->name('subscriptions.reject');
 
     // Settings
     Route::get('/settings', [App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
@@ -118,12 +120,20 @@ Route::prefix('guru')->name('guru.')->middleware(['auth', 'role:guru', 'check.ap
     Route::get('/results/student/{student}', [App\Http\Controllers\Guru\ResultController::class, 'student'])->name('results.student');
     Route::get('/results/export/{package}', [App\Http\Controllers\Guru\ResultController::class, 'export'])->name('results.export');
 
-    // Subscription
-    Route::get('/subscription', [App\Http\Controllers\Guru\SubscriptionController::class, 'index'])->name('subscription.index');
-    Route::get('/subscription/pricing', [App\Http\Controllers\Guru\SubscriptionController::class, 'pricing'])->name('subscription.pricing');
-    Route::post('/subscription/upgrade', [App\Http\Controllers\Guru\SubscriptionController::class, 'upgrade'])->name('subscription.upgrade');
-    Route::post('/subscription/{subscription}/cancel', [App\Http\Controllers\Guru\SubscriptionController::class, 'cancel'])->name('subscription.cancel');
-    Route::get('/subscription/success', [App\Http\Controllers\Guru\SubscriptionController::class, 'success'])->name('subscription.success');
+    // ============================================================
+    // SISTEM KREDIT - Ganti Subscription menjadi Credits
+    // ============================================================
+    // Route::get('/subscription', [App\Http\Controllers\Guru\SubscriptionController::class, 'index'])->name('subscription.index');
+    // Route::get('/subscription/pricing', [App\Http\Controllers\Guru\SubscriptionController::class, 'pricing'])->name('subscription.pricing');
+    // Route::post('/subscription/upgrade', [App\Http\Controllers\Guru\SubscriptionController::class, 'upgrade'])->name('subscription.upgrade');
+    // Route::post('/subscription/{subscription}/cancel', [App\Http\Controllers\Guru\SubscriptionController::class, 'cancel'])->name('subscription.cancel');
+    // Route::get('/subscription/success', [App\Http\Controllers\Guru\SubscriptionController::class, 'success'])->name('subscription.success');
+
+    // Credits (Top-up)
+    Route::get('/credits', [App\Http\Controllers\Guru\CreditController::class, 'index'])->name('credits.index');
+    Route::get('/credits/topup', [App\Http\Controllers\Guru\CreditController::class, 'topup'])->name('credits.topup');
+    Route::post('/credits/purchase', [App\Http\Controllers\Guru\CreditController::class, 'purchase'])->name('credits.purchase');
+    Route::get('/credits/success', [App\Http\Controllers\Guru\CreditController::class, 'success'])->name('credits.success');
 
     // Profile
     Route::get('/profile', [App\Http\Controllers\Guru\ProfileController::class, 'edit'])->name('profile.edit');

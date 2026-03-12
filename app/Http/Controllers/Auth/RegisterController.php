@@ -55,10 +55,12 @@ class RegisterController extends Controller
             'institution_name' => $data['institution_name'],
             'phone' => $data['phone'],
             'plan' => 'free',
-            'max_students' => Setting::get('free_max_students', 30),
-            'max_packages' => Setting::get('free_max_packages', 3),
-            'max_questions' => Setting::get('free_max_questions', 100),
-            'max_classes' => Setting::get('free_max_classes', 1),
+            'max_students' => Setting::get('global_max_students', 50),
+            'max_questions' => Setting::get('global_max_questions', 100),
+            // ============================================================
+            // SISTEM KREDIT - Default 10 kredit untuk guru baru
+            // ============================================================
+            'credits' => Setting::get('credit_default', 10),
             'is_active' => true,
             // ============================================================
             // APPROVAL MANUAL DINONAKTIFKAN

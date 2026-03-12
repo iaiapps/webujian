@@ -175,8 +175,8 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="alert alert-info">
-                            <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Petunjuk:</h6>
+                        <div class="alert alert-info flex-column">
+                            <h6 class="alert-heading mb-0"> Petunjuk:</h6>
                             <ol class="mb-0 ps-3">
                                 <li>Download template Excel</li>
                                 <li>Isi data siswa sesuai format</li>
@@ -288,7 +288,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary"
                             onclick="this.closest('.modal').style.display='none'">Tutup</button>
-                        <a href="{{ route('guru.subscription.pricing') }}" class="btn btn-primary">Upgrade Plan</a>
+                        <a href="{{ route('guru.credits.topup') }}" class="btn btn-primary">Beli Kredit</a>
                     </div>
                 </div>
             </div>

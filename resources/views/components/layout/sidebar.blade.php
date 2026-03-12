@@ -17,9 +17,10 @@
                 <a class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
                     <i class="bi bi-people"></i> Kelola Guru
                 </a>
-                <a class="sidebar-link {{ request()->routeIs('admin.subscriptions.*') ? 'active' : '' }}" href="{{ route('admin.subscriptions.index') }}">
+                {{-- SUBSCRIPTION DINONAKTIFKAN - GANTI KE KREDIT --}}
+                {{-- <a class="sidebar-link {{ request()->routeIs('admin.subscriptions.*') ? 'active' : '' }}" href="{{ route('admin.subscriptions.index') }}">
                     <i class="bi bi-credit-card"></i> Subscription
-                </a>
+                </a> --}}
                 <a class="sidebar-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}" href="{{ route('admin.categories.index') }}">
                     <i class="bi bi-tags"></i> Kategori
                 </a>
@@ -49,6 +50,10 @@
                 </a>
                 <a class="sidebar-link {{ request()->routeIs('guru.results.*') ? 'active' : '' }}" href="{{ route('guru.results.index') }}">
                     <i class="bi bi-bar-chart"></i> Hasil
+                </a>
+                {{-- SISTEM KREDIT - Ganti dari Subscription --}}
+                <a class="sidebar-link {{ request()->routeIs('guru.credits.*') ? 'active' : '' }}" href="{{ route('guru.credits.index') }}">
+                    <i class="bi bi-coin"></i> Kredit
                 </a>
                 
             @elseif($role === 'student')

@@ -62,7 +62,7 @@ class QuestionController extends Controller
                 'type' => 'question',
                 'limit' => $user->max_questions,
                 'current' => $user->questionsCount(),
-                'message' => "Anda sudah mencapai batas maksimal {$user->max_questions} soal untuk plan {$user->plan}. Upgrade plan untuk menambah soal.",
+                'message' => "Anda sudah mencapai batas maksimal {$user->max_questions} soal. Hubungi admin untuk menambah limit.",
             ]);
         }
 
@@ -249,7 +249,7 @@ class QuestionController extends Controller
             $newCount = $user->questionsCount();
             if ($newCount > $maxQuestions) {
                 return redirect()->route('guru.questions.index')
-                    ->with('warning', "Import berhasil ({$imported} soal), tetapi Anda melebihi limit {$maxQuestions} soal. Upgrade plan untuk akses penuh.");
+                    ->with('warning', "Import berhasil ({$imported} soal), tetapi Anda melebihi limit {$maxQuestions} soal. Hubungi admin untuk menambah limit.");
             }
 
             return redirect()->route('guru.questions.index')

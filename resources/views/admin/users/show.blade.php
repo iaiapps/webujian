@@ -26,8 +26,9 @@
                     <h4>{{ $user->name }}</h4>
                     <p class="text-muted">{{ $user->institution_name }}</p>
                     
-                    <span class="badge bg-{{ $user->plan == 'free' ? 'secondary' : ($user->plan == 'pro' ? 'primary' : 'success') }} mb-3">
-                        {{ strtoupper($user->plan) }}
+                    {{-- SISTEM KREDIT - Tampilkan kredit bukan plan --}}
+                    <span class="badge bg-warning text-dark mb-3">
+                        <i class="bi bi-coin"></i> {{ $user->credits ?? 0 }} Kredit
                     </span>
 
                     @if(!$user->approved_at)
@@ -55,12 +56,6 @@
                         <span>Disetujui</span>
                         <span>{{ $user->approved_at ? $user->approved_at->format('d M Y') : '-' }}</span>
                     </li>
-                    @if($user->plan_expired_at)
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>Plan Expired</span>
-                        <span>{{ $user->plan_expired_at->format('d M Y') }}</span>
-                    </li>
-                    @endif
                 </ul>
                 <div class="card-footer">
                     @if(!$user->approved_at)
@@ -118,49 +113,30 @@
                         <div class="card-body">
                             <h3 class="text-warning">{{ $stats['total_packages'] }}</h3>
                             <small class="text-muted">Paket Tes</small>
-                            <div class="small text-muted">Max: {{ $user->max_packages }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm text-center">
+                        <div class="card-body">
+                            <h3 class="text-primary">{{ $user->credits ?? 0 }}</h3>
+                            <small class="text-muted">Kredit</small>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Subscription History --}}
+            {{-- Credit Info (was Subscription History) --}}
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0">Riwayat Subscription</h5>
+                    <h5 class="mb-0">Informasi Kredit</h5>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Invoice</th>
-                                    <th>Plan</th>
-                                    <th>Jumlah</th>
-                                    <th>Status</th>
-                                    <th>Tanggal</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($user->subscriptions as $sub)
-                                <tr>
-                                    <td>{{ $sub->invoice_number }}</td>
-                                    <td>{{ strtoupper($sub->plan) }}</td>
-                                    <td>Rp {{ number_format($sub->amount) }}</td>
-                                    <td>
-                                        <span class="badge bg-{{ $sub->status == 'active' ? 'success' : ($sub->status == 'waiting_confirmation' ? 'warning' : 'secondary') }}">
-                                            {{ ucfirst($sub->status) }}
-                                        </span>
-                                    </td>
-                                    <td>{{ $sub->created_at->format('d M Y') }}</td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted">Belum ada subscription</td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p class="mb-1"><strong>Kredit Tersedia:</strong> {{ $user->credits ?? 0 }}</p>
+                            <p class="mb-0"><small class="text-muted">1 Kredit = 1 Paket Tes</small></p>
+                        </div>
                     </div>
                 </div>
             </div>

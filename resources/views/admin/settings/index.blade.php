@@ -91,88 +91,60 @@
                 </div>
             </div>
 
-            {{-- Plan Limits --}}
+            {{-- ============================================================ --}}
+            {{-- SISTEM KREDIT - Global Limits (bukan per-plan) --}}
+            {{-- ============================================================ --}}
             <div class="col-12">
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white">
-                        <h5 class="mb-0"><i class="bi bi-sliders"></i> Limit Plan</h5>
+                        <h5 class="mb-0"><i class="bi bi-sliders"></i> Limit Global</h5>
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Plan</th>
-                                        <th>Max Siswa</th>
-                                        <th>Max Kelas</th>
-                                        <th>Max Soal</th>
-                                        <th>Max Paket</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><span class="badge bg-secondary">FREE</span></td>
-                                        <td><input type="number" name="free_max_students" class="form-control form-control-sm" value="{{ $settings['limits']['free_max_students'] ?? 30 }}"></td>
-                                        <td><input type="number" name="free_max_classes" class="form-control form-control-sm" value="{{ $settings['limits']['free_max_classes'] ?? 1 }}"></td>
-                                        <td><input type="number" name="free_max_questions" class="form-control form-control-sm" value="{{ $settings['limits']['free_max_questions'] ?? 100 }}"></td>
-                                        <td><input type="number" name="free_max_packages" class="form-control form-control-sm" value="{{ $settings['limits']['free_max_packages'] ?? 3 }}"></td>
-                                    </tr>
-                                    <tr>
-                                        <td><span class="badge bg-primary">PRO</span></td>
-                                        <td><input type="number" name="pro_max_students" class="form-control form-control-sm" value="{{ $settings['limits']['pro_max_students'] ?? 150 }}"></td>
-                                        <td><input type="number" name="pro_max_classes" class="form-control form-control-sm" value="{{ $settings['limits']['pro_max_classes'] ?? 5 }}"></td>
-                                        <td><input type="number" name="pro_max_questions" class="form-control form-control-sm" value="{{ $settings['limits']['pro_max_questions'] ?? 500 }}"></td>
-                                        <td><input type="number" name="pro_max_packages" class="form-control form-control-sm" value="{{ $settings['limits']['pro_max_packages'] ?? 999999 }}"></td>
-                                    </tr>
-                                    <tr>
-                                        <td><span class="badge bg-success">ADVANCED</span></td>
-                                        <td><input type="number" name="advanced_max_students" class="form-control form-control-sm" value="{{ $settings['limits']['advanced_max_students'] ?? 999999 }}"></td>
-                                        <td><input type="number" name="advanced_max_classes" class="form-control form-control-sm" value="{{ $settings['limits']['advanced_max_classes'] ?? 999999 }}"></td>
-                                        <td><input type="number" name="advanced_max_questions" class="form-control form-control-sm" value="{{ $settings['limits']['advanced_max_questions'] ?? 999999 }}"></td>
-                                        <td><input type="number" name="advanced_max_packages" class="form-control form-control-sm" value="{{ $settings['limits']['advanced_max_packages'] ?? 999999 }}"></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <p class="text-muted">Limit ini berlaku untuk semua guru, tidak terpengaruh oleh sistem kredit.</p>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Max Siswa</label>
+                                <input type="number" name="global_max_students" class="form-control" value="{{ $settings['limits']['global_max_students'] ?? 50 }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Max Soal</label>
+                                <input type="number" name="global_max_questions" class="form-control" value="{{ $settings['limits']['global_max_questions'] ?? 100 }}">
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Pricing --}}
+            {{-- Credit Settings --}}
             <div class="col-12">
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white">
-                        <h5 class="mb-0"><i class="bi bi-tags"></i> Harga Plan</h5>
+                        <h5 class="mb-0"><i class="bi bi-coin"></i> Pengaturan Kredit</h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">PRO Bulanan</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">Rp</span>
-                                    <input type="number" name="pro_price_monthly" class="form-control" value="{{ $settings['pricing']['pro_price_monthly'] ?? 149000 }}">
-                                </div>
+                                <label class="form-label">Kredit Default (Registrasi)</label>
+                                <input type="number" name="credit_default" class="form-control" value="{{ $settings['credits']['credit_default'] ?? 10 }}">
+                                <small class="text-muted">Kredit yang diberikan saat registrasi</small>
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">PRO Tahunan</label>
+                                <label class="form-label">Harga per Kredit</label>
                                 <div class="input-group">
                                     <span class="input-group-text">Rp</span>
-                                    <input type="number" name="pro_price_yearly" class="form-control" value="{{ $settings['pricing']['pro_price_yearly'] ?? 1490000 }}">
+                                    <input type="number" name="credit_price" class="form-control" value="{{ $settings['credits']['credit_price'] ?? 5000 }}">
                                 </div>
+                                <small class="text-muted">1 Kredit = Rp 5.000</small>
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">ADVANCED Bulanan</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">Rp</span>
-                                    <input type="number" name="advanced_price_monthly" class="form-control" value="{{ $settings['pricing']['advanced_price_monthly'] ?? 399000 }}">
-                                </div>
+                                <label class="form-label">Bonus Threshold</label>
+                                <input type="number" name="credit_bonus_threshold" class="form-control" value="{{ $settings['credits']['credit_bonus_threshold'] ?? 5 }}">
+                                <small class="text-muted">Beli setiap X kredit dapat bonus</small>
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">ADVANCED Tahunan</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">Rp</span>
-                                    <input type="number" name="advanced_price_yearly" class="form-control" value="{{ $settings['pricing']['advanced_price_yearly'] ?? 3990000 }}">
-                                </div>
+                                <label class="form-label">Jumlah Bonus</label>
+                                <input type="number" name="credit_bonus_amount" class="form-control" value="{{ $settings['credits']['credit_bonus_amount'] ?? 1 }}">
+                                <small class="text-muted">Bonus kredit per threshold</small>
                             </div>
                         </div>
                     </div>

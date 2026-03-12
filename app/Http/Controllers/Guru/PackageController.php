@@ -52,13 +52,15 @@ class PackageController extends Controller
     {
         $user = Auth::user();
 
-        // Check if can add package
-        if (! $user->canAddPackage()) {
+        // ============================================================
+        // SISTEM KREDIT - Cek kredit, bukan max_packages
+        // ============================================================
+        if (! $user->canCreatePackage()) {
             return redirect()->route('guru.packages.index')->with('limit_reached', [
                 'type' => 'package',
-                'limit' => $user->max_packages,
+                'limit' => $user->credits,
                 'current' => $user->packagesCount(),
-                'message' => "Anda sudah mencapai batas maksimal {$user->max_packages} paket tes untuk plan {$user->plan}. Upgrade plan untuk menambah paket.",
+                'message' => 'Kredit Anda tidak cukup untuk membuat paket tes. Silakan beli kredit terlebih dahulu.',
             ]);
         }
 
@@ -72,7 +74,14 @@ class PackageController extends Controller
     {
         // ============================================================
         // KELAS DINONAKTIFKAN - class_ids tidak wajib
+        // SISTEM KREDIT - Cek kredit cukup sebelum create
         // ============================================================
+        $user = Auth::user();
+
+        if (! $user->canCreatePackage()) {
+            return redirect()->back()->with('error', 'Kredit Anda tidak cukup untuk membuat paket tes.')->withInput();
+        }
+
         $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
@@ -84,8 +93,6 @@ class PackageController extends Controller
             'question_ids' => ['required', 'array', 'min:1'],
             'question_ids.*' => ['exists:questions,id'],
         ]);
-
-        $user = Auth::user();
 
         DB::beginTransaction();
         try {
@@ -120,10 +127,16 @@ class PackageController extends Controller
             //     $package->classes()->attach($request->class_ids);
             // }
 
+            // ============================================================
+            // SISTEM KREDIT - Kurangi 1 kredit saat buat package
+            // Tidak ada refund jika package dihapus
+            // ============================================================
+            $user->deductCredits(1);
+
             DB::commit();
 
             return redirect()->route('guru.packages.show', $package)
-                ->with('success', 'Paket tes berhasil dibuat!');
+                ->with('success', 'Paket tes berhasil dibuat! (1 kredit digunakan)');
         } catch (\Exception $e) {
             DB::rollBack();
 

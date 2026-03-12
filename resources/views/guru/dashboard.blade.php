@@ -10,8 +10,8 @@
         <p class="page-subtitle">{{ auth()->user()->institution_name }}</p>
     </div>
 
-    {{-- Pending Payment Alert --}}
-    @if (isset($pendingSubscription) && $pendingSubscription)
+    {{-- Pending Payment Alert - DINONAKTIFKAN --}}
+    {{-- @if (isset($pendingSubscription) && $pendingSubscription)
         <div class="alert alert-warning mb-4">
             <i class="bi bi-hourglass-split me-2"></i>
             <strong>Menunggu Verifikasi!</strong> Permintaan upgrade ke
@@ -20,84 +20,48 @@
             <br><small>Invoice: {{ $pendingSubscription->invoice_number }} | Diajukan:
                 {{ $pendingSubscription->created_at->format('d M Y H:i') }}</small>
         </div>
-    @endif
+    @endif --}}
 
-    {{-- Plan Info Card --}}
+    {{-- SISTEM KREDIT - Card Info Kredit --}}
     <x-ui.card class="mb-4">
         <div class="row align-items-center">
             <div class="col-md-6">
                 <div class="d-flex align-items-center">
                     <div class="me-3">
-                        @if ($planInfo['current_plan'] == 'free')
-                            <span class="badge badge-primary" style="font-size: 0.9rem; padding: 8px 16px;">FREE</span>
-                        @elseif($planInfo['current_plan'] == 'pro')
-                            <span class="badge badge-orange" style="font-size: 0.9rem; padding: 8px 16px;">PRO</span>
-                        @else
-                            <span class="badge badge-success" style="font-size: 0.9rem; padding: 8px 16px;">ADVANCED</span>
-                        @endif
+                        <span class="badge badge-orange" style="font-size: 1.2rem; padding: 12px 20px;">
+                            <i class="bi bi-coin me-1"></i>{{ $creditInfo['current_credits'] }}
+                        </span>
                     </div>
                     <div>
-                        <h6 class="mb-0" style="font-weight: 600;">Plan Aktif</h6>
-                        @if ($planInfo['current_plan'] != 'free' && $planInfo['expired_at'])
-                            <small class="text-muted">
-                                Berlaku sampai: {{ $planInfo['expired_at']->format('d M Y') }}
-                                @if ($planInfo['days_remaining'] > 0)
-                                    <span class="badge badge-{{ $planInfo['days_remaining'] < 7 ? 'warning' : 'info' }}"
-                                        style="margin-left: 8px;">
-                                        {{ $planInfo['days_remaining'] }} hari lagi
-                                    </span>
-                                @endif
-                            </small>
-                        @elseif($planInfo['current_plan'] == 'free')
-                            <small class="text-muted">Tidak ada batas waktu</small>
-                        @endif
+                        <h6 class="mb-0" style="font-weight: 600;">Kredit Tersedia</h6>
+                        <small class="text-muted">
+                            @if($creditInfo['can_create_package'])
+                                <span class="text-success"><i class="bi bi-check-circle"></i> Dapat membuat paket tes</span>
+                            @else
+                                <span class="text-danger"><i class="bi bi-x-circle"></i> Kredit tidak cukup</span>
+                            @endif
+                        </small>
                     </div>
                 </div>
             </div>
             <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                @if ($planInfo['current_plan'] == 'free')
-                    <a href="{{ route('guru.subscription.pricing') }}" class="btn btn-accent">
-                        <i class="bi bi-arrow-up-circle"></i> Upgrade Plan
-                    </a>
-                @else
-                    <a href="{{ route('guru.subscription.index') }}" class="btn btn-outline-primary">
-                        <i class="bi bi-receipt"></i> Lihat Subscription
-                    </a>
-                @endif
+                <a href="{{ route('guru.credits.topup') }}" class="btn btn-accent">
+                    <i class="bi bi-plus-circle"></i> Beli Kredit
+                </a>
             </div>
         </div>
     </x-ui.card>
-
-    {{-- Plan Expired Alert --}}
-    @if ($planInfo['is_expired'])
-        <div class="alert alert-danger mb-4">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            <strong>Plan Anda telah expired!</strong> Akun Anda telah dikembalikan ke FREE plan.
-            <a href="{{ route('guru.subscription.pricing') }}" class="alert-link">Upgrade sekarang</a> untuk mengakses
-            fitur premium.
-        </div>
-    @elseif($planInfo['days_remaining'] !== null && $planInfo['days_remaining'] <= 7 && $planInfo['days_remaining'] > 0)
-        <div class="alert alert-warning mb-4">
-            <i class="bi bi-clock-fill me-2"></i>
-            Plan {{ strtoupper($planInfo['current_plan']) }} Anda akan berakhir dalam
-            <strong>{{ $planInfo['days_remaining'] }} hari</strong>.
-            <a href="{{ route('guru.subscription.pricing') }}" class="alert-link">Perpanjang sekarang</a>
-        </div>
-    @endif
 
     {{-- Over Limit Warning --}}
     @if (isset($overLimit) && count($overLimit) > 0)
         <div class="alert alert-info mb-4">
             <i class="bi bi-info-circle-fill me-2"></i>
-            <strong>Perhatian!</strong> Beberapa data melebihi limit plan FREE Anda:
+            <strong>Perhatian!</strong> Beberapa data melebihi limit:
             <ul class="mb-0 mt-2">
                 @foreach ($overLimit as $item)
                     <li>{{ $item }}</li>
                 @endforeach
             </ul>
-            <small>Data lama tetap tersimpan, namun Anda tidak bisa menambah baru. <a
-                    href="{{ route('guru.subscription.pricing') }}" class="alert-link">Upgrade</a> untuk menambah
-                kapasitas.</small>
         </div>
     @endif
 
@@ -221,7 +185,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
-                        <a href="{{ route('guru.subscription.pricing') }}" class="btn btn-primary">Upgrade Plan</a>
+                        <a href="{{ route('guru.credits.topup') }}" class="btn btn-primary">Beli Kredit</a>
                     </div>
                 </div>
             </div>

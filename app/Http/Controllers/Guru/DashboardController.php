@@ -18,11 +18,9 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        // Auto-downgrade jika plan expired
-        if ($user->plan !== 'free' && $user->isPlanExpired()) {
-            $user->update(['plan' => 'free', 'plan_expired_at' => null]);
-            $user->refresh();
-        }
+        // ============================================================
+        // SISTEM KREDIT - Tidak ada auto-downgrade plan
+        // ============================================================
 
         // Statistics (KELAS DINONAKTIFKAN - tidak ditampilkan)
         $stats = [
@@ -33,7 +31,7 @@ class DashboardController extends Controller
             'total_questions' => $user->questionsCount(),
             'max_questions' => $user->max_questions,
             'total_packages' => $user->packagesCount(),
-            'max_packages' => $user->max_packages,
+            'max_packages' => 999999, // Tidak terbatas, pakai kredit
         ];
 
         // Calculate usage percentage
@@ -41,7 +39,7 @@ class DashboardController extends Controller
             'students' => $user->max_students > 0 ? round(($stats['total_students'] / $user->max_students) * 100) : 0,
             // 'classes' => $user->max_classes > 0 ? round(($stats['total_classes'] / $user->max_classes) * 100) : 0,
             'questions' => $user->max_questions > 0 ? round(($stats['total_questions'] / $user->max_questions) * 100) : 0,
-            'packages' => $user->max_packages > 0 ? round(($stats['total_packages'] / $user->max_packages) * 100) : 0,
+            'packages' => 0, // Package tidak lagi pakai limit percentage
         ];
 
         // Recent activities
@@ -72,37 +70,29 @@ class DashboardController extends Controller
             $q->where('user_id', $user->id);
         })->where('status', 'completed')->avg('total_score');
 
-        // Plan info
-        $planInfo = [
-            'current_plan' => $user->plan,
-            'expired_at' => $user->plan_expired_at,
-            'is_expired' => $user->isPlanExpired(),
-            'days_remaining' => $user->plan_expired_at ? now()->diffInDays($user->plan_expired_at, false) : null,
+        // ============================================================
+        // SISTEM KREDIT - Ganti planInfo dengan creditInfo
+        // ============================================================
+        $creditInfo = [
+            'current_credits' => $user->credits,
+            'can_create_package' => $user->canCreatePackage(),
         ];
 
-        // Pending subscription
-        $pendingSubscription = $user->subscriptions()
-            ->where('status', 'pending')
-            ->latest()
-            ->first();
+        // Pending subscription - tidak lagi digunakan
+        $pendingSubscription = null;
 
-        // Check over limit (hanya untuk plan free)
+        // Check over limit - tidak ada lagi karena pakai kredit
         $overLimit = [];
-        if ($user->plan === 'free') {
-            if ($stats['total_students'] > $stats['max_students']) {
-                $overLimit[] = "Siswa: {$stats['total_students']} dari maksimal {$stats['max_students']}";
-            }
-            // KELAS DINONAKTIFKAN - tidak perlu cek limit kelas
-            // if ($stats['total_classes'] > $stats['max_classes']) {
-            //     $overLimit[] = "Kelas: {$stats['total_classes']} dari maksimal {$stats['max_classes']}";
-            // }
-            if ($stats['total_questions'] > $stats['max_questions']) {
-                $overLimit[] = "Soal: {$stats['total_questions']} dari maksimal {$stats['max_questions']}";
-            }
-            if ($stats['total_packages'] > $stats['max_packages']) {
-                $overLimit[] = "Paket Tes: {$stats['total_packages']} dari maksimal {$stats['max_packages']}";
-            }
+        if ($stats['total_students'] > $stats['max_students']) {
+            $overLimit[] = "Siswa: {$stats['total_students']} dari maksimal {$stats['max_students']}";
         }
+        if ($stats['total_questions'] > $stats['max_questions']) {
+            $overLimit[] = "Soal: {$stats['total_questions']} dari maksimal {$stats['max_questions']}";
+        }
+        // Paket tidak ada limit, pakai kredit
+        // if ($stats['total_packages'] > $stats['max_packages']) {
+        //     $overLimit[] = "Paket Tes: {$stats['total_packages']} dari maksimal {$stats['max_packages']}";
+        // }
 
         return view('guru.dashboard', compact(
             'stats',
@@ -112,7 +102,7 @@ class DashboardController extends Controller
             'activeTests',
             'totalAttempts',
             'avgScore',
-            'planInfo',
+            'creditInfo',
             'pendingSubscription',
             'overLimit'
         ));

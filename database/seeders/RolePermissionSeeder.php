@@ -40,10 +40,10 @@ class RolePermissionSeeder extends Seeder
             'institution_name' => 'Bimbel Demo',
             'phone' => '081234567890',
             'plan' => 'free',
-            'max_students' => 30,
-            'max_packages' => 3,
+            // SISTEM KREDIT - Default credits
+            'credits' => 10,
+            'max_students' => 50,
             'max_questions' => 100,
-            'max_classes' => 1,
             'email_verified_at' => now(),
             'is_active' => true,
             'approved_at' => now(),

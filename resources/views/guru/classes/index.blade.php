@@ -126,7 +126,8 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                             onclick="this.closest('.modal').style.display='none'">Tutup</button>
-                        <a href="{{ route('guru.subscription.pricing') }}" class="btn btn-primary">Upgrade Plan</a>
+                        {{-- KELAS DINONAKTIFKAN - Link ini tidak akan pernah muncul --}}
+                        <span class="btn btn-secondary">Fitur Kelas Dinonaktifkan</span>
                     </div>
                 </div>
             </div>

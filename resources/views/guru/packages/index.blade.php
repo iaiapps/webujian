@@ -9,9 +9,11 @@
             <div>
                 <h2>Paket Tes</h2>
                 <p class="text-muted mb-0">
-                    <span
-                        class="badge bg-primary">{{ auth()->user()->packagesCount() }}/{{ auth()->user()->max_packages }}</span>
-                    paket digunakan
+                    {{-- SISTEM KREDIT - Tampilkan kredit bukan paket limit --}}
+                    <span class="badge bg-warning text-dark">
+                        <i class="bi bi-coin me-1"></i>{{ auth()->user()->credits }} Kredit
+                    </span>
+                    tersedia untuk membuat paket
                 </p>
             </div>
             <a href="{{ route('guru.packages.create') }}" class="btn btn-primary">
@@ -152,7 +154,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary"
                             onclick="this.closest('.modal').style.display='none'">Tutup</button>
-                        <a href="{{ route('guru.subscription.pricing') }}" class="btn btn-primary">Upgrade Plan</a>
+                        <a href="{{ route('guru.credits.topup') }}" class="btn btn-primary">Beli Kredit</a>
                     </div>
                 </div>
             </div>

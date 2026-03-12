@@ -1,6 +1,7 @@
 <?php
 
 // app/Http/Controllers/Guru/ClassController.php
+
 namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
@@ -36,12 +37,13 @@ class ClassController extends Controller
         $user = Auth::user();
 
         // Check if can add class
-        if (!$user->canAddClass()) {
+        if (! $user->canAddClass()) {
             return redirect()->route('guru.classes.index')->with('limit_reached', [
                 'type' => 'class',
                 'limit' => $user->max_classes,
                 'current' => $user->classesCount(),
-                'message' => "Anda sudah mencapai batas maksimal {$user->max_classes} kelas untuk plan {$user->plan}. Upgrade plan untuk menambah kelas.",
+                // KELAS DINONAKTIFKAN - pesan ini tidak akan pernah muncul
+                'message' => 'Fitur kelas telah dinonaktifkan.',
             ]);
         }
 

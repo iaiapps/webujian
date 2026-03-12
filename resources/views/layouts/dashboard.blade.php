@@ -48,7 +48,10 @@ if (auth()->guard('student')->check()) {
                 </div>
                 <div class="navbar-right">
                     @if($role === 'guru')
-                        <span class="navbar-plan-badge badge-orange me-3">{{ strtoupper(auth()->user()->plan ?? 'Free') }}</span>
+                        {{-- SISTEM KREDIT - Tampilkan kredit bukan plan --}}
+                        <span class="navbar-plan-badge badge-orange me-3">
+                            <i class="bi bi-coin me-1"></i>{{ auth()->user()->credits ?? 0 }} Kredit
+                        </span>
                     @endif
                     <button class="navbar-icon-btn">
                         <i class="bi bi-bell"></i>

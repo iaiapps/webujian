@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class SettingSeeder extends Seeder
 {
@@ -19,29 +18,19 @@ class SettingSeeder extends Seeder
             ['key' => 'app_logo', 'value' => null, 'type' => 'string', 'group' => 'general'],
             ['key' => 'app_timezone', 'value' => 'Asia/Jakarta', 'type' => 'string', 'group' => 'general'],
 
-            // Plan Limits - FREE
-            ['key' => 'free_max_students', 'value' => '30', 'type' => 'integer', 'group' => 'limits'],
-            ['key' => 'free_max_packages', 'value' => '2', 'type' => 'integer', 'group' => 'limits'],
-            ['key' => 'free_max_questions', 'value' => '50', 'type' => 'integer', 'group' => 'limits'],
-            ['key' => 'free_max_classes', 'value' => '1', 'type' => 'integer', 'group' => 'limits'],
+            // ============================================================
+            // SISTEM KREDIT - Global Limits (bukan per-plan)
+            // ============================================================
+            ['key' => 'global_max_students', 'value' => '50', 'type' => 'integer', 'group' => 'limits'],
+            ['key' => 'global_max_questions', 'value' => '100', 'type' => 'integer', 'group' => 'limits'],
 
-            // Plan Limits - PRO
-            ['key' => 'pro_max_students', 'value' => '60', 'type' => 'integer', 'group' => 'limits'],
-            ['key' => 'pro_max_packages', 'value' => '4', 'type' => 'integer', 'group' => 'limits'],
-            ['key' => 'pro_max_questions', 'value' => '100', 'type' => 'integer', 'group' => 'limits'],
-            ['key' => 'pro_max_classes', 'value' => '3', 'type' => 'integer', 'group' => 'limits'],
-
-            // Plan Limits - ADVANCED
-            ['key' => 'advanced_max_students', 'value' => '120', 'type' => 'integer', 'group' => 'limits'],
-            ['key' => 'advanced_max_packages', 'value' => '8', 'type' => 'integer', 'group' => 'limits'],
-            ['key' => 'advanced_max_questions', 'value' => '200', 'type' => 'integer', 'group' => 'limits'],
-            ['key' => 'advanced_max_classes', 'value' => '6', 'type' => 'integer', 'group' => 'limits'],
-
-            // Pricing
-            ['key' => 'pro_price_monthly', 'value' => '49000', 'type' => 'integer', 'group' => 'pricing'],
-            ['key' => 'pro_price_yearly', 'value' => '490000', 'type' => 'integer', 'group' => 'pricing'],
-            ['key' => 'advanced_price_monthly', 'value' => '99000', 'type' => 'integer', 'group' => 'pricing'],
-            ['key' => 'advanced_price_yearly', 'value' => '990000', 'type' => 'integer', 'group' => 'pricing'],
+            // ============================================================
+            // SISTEM KREDIT - Credit Settings
+            // ============================================================
+            ['key' => 'credit_default', 'value' => '10', 'type' => 'integer', 'group' => 'credits'],
+            ['key' => 'credit_price', 'value' => '5000', 'type' => 'integer', 'group' => 'credits'],
+            ['key' => 'credit_bonus_threshold', 'value' => '5', 'type' => 'integer', 'group' => 'credits'],
+            ['key' => 'credit_bonus_amount', 'value' => '1', 'type' => 'integer', 'group' => 'credits'],
 
             // Email Settings
             ['key' => 'email_from_address', 'value' => 'lontarnesia@gmail.com', 'type' => 'string', 'group' => 'email'],
@@ -60,7 +49,7 @@ class SettingSeeder extends Seeder
             // Payment Settings - General
             ['key' => 'payment_confirmation_email', 'value' => 'lontarnesia@gmail.com', 'type' => 'string', 'group' => 'payment'],
             ['key' => 'payment_whatsapp', 'value' => '6285232213939', 'type' => 'string', 'group' => 'payment'],
-            ['key' => 'payment_instructions', 'value' => 'Setelah melakukan pembayaran, silakan upload bukti transfer melalui halaman subscription.', 'type' => 'string', 'group' => 'payment'],
+            ['key' => 'payment_instructions', 'value' => 'Setelah melakukan pembayaran, silakan upload bukti transfer melalui halaman kredit.', 'type' => 'string', 'group' => 'payment'],
         ];
 
         foreach ($settings as $setting) {
