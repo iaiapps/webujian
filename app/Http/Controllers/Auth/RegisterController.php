@@ -54,18 +54,13 @@ class RegisterController extends Controller
             'password' => Hash::make($data['password']),
             'institution_name' => $data['institution_name'],
             'phone' => $data['phone'],
-            'plan' => 'free',
+            // SISTEM KREDIT - Plan dihapus
             'max_students' => Setting::get('global_max_students', 50),
             'max_questions' => Setting::get('global_max_questions', 100),
-            // ============================================================
             // SISTEM KREDIT - Default 10 kredit untuk guru baru
-            // ============================================================
             'credits' => Setting::get('credit_default', 10),
             'is_active' => true,
-            // ============================================================
-            // APPROVAL MANUAL DINONAKTIFKAN
-            // User langsung di-approve saat registrasi
-            // ============================================================
+            // APPROVAL MANUAL DINONAKTIFKAN - User langsung di-approve saat registrasi
             'approved_at' => now(),
         ]);
 

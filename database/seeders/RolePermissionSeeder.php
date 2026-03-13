@@ -39,7 +39,6 @@ class RolePermissionSeeder extends Seeder
             'password' => Hash::make('password'),
             'institution_name' => 'Bimbel Demo',
             'phone' => '081234567890',
-            'plan' => 'free',
             // SISTEM KREDIT - Default credits
             'credits' => 10,
             'max_students' => 50,

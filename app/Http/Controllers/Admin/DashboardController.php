@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Student;
 use App\Models\Question;
-use App\Models\TestPackage;
+use App\Models\Student;
 use App\Models\TestAttempt;
-use App\Models\Subscription;
-use Illuminate\Http\Request;
+use App\Models\TestPackage;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -32,22 +30,29 @@ class DashboardController extends Controller
             'total_attempts' => TestAttempt::where('status', 'completed')->count(),
         ];
 
-        // Revenue (from subscriptions)
+        // ============================================================
+        // SISTEM KREDIT - Revenue tracking dihapus (tidak ada tabel transaksi)
+        // ============================================================
         $revenue = [
-            'today' => Subscription::where('status', 'active')
-                ->whereDate('started_at', today())
-                ->sum('amount'),
-            'this_month' => Subscription::where('status', 'active')
-                ->whereMonth('started_at', now()->month)
-                ->whereYear('started_at', now()->year)
-                ->sum('amount'),
-            'total' => Subscription::where('status', 'active')->sum('amount'),
+            'today' => 0,
+            'this_month' => 0,
+            'total' => 0,
         ];
 
-        // Plan distribution
-        $planDistribution = User::role('guru')
-            ->select('plan', DB::raw('count(*) as total'))
-            ->groupBy('plan')
+        // ============================================================
+        // SISTEM KREDIT - Distribusi kredit (ganti dari plan)
+        // ============================================================
+        $creditDistribution = User::role('guru')
+            ->select(
+                DB::raw('CASE 
+                    WHEN credits = 0 THEN "Tidak ada kredit"
+                    WHEN credits BETWEEN 1 AND 10 THEN "1-10 Kredit"
+                    WHEN credits BETWEEN 11 AND 50 THEN "11-50 Kredit"
+                    ELSE "50+ Kredit"
+                END as credit_range'),
+                DB::raw('count(*) as total')
+            )
+            ->groupBy('credit_range')
             ->get();
 
         // Recent users (pending approval)
@@ -57,29 +62,20 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        // Recent subscriptions
-        $recentSubscriptions = Subscription::with('user')
-            ->latest()
-            ->take(10)
-            ->get();
+        // ============================================================
+        // SISTEM KREDIT - Tidak ada tabel transaksi kredit
+        // ============================================================
+        $recentTransactions = collect();
 
-        // Monthly revenue chart data
-        $monthlyRevenue = Subscription::where('status', 'active')
-            ->whereYear('started_at', now()->year)
-            ->select(
-                DB::raw('MONTH(started_at) as month'),
-                DB::raw('SUM(amount) as total')
-            )
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
+        // Monthly revenue chart data - dihapus
+        $monthlyRevenue = collect();
 
         return view('admin.dashboard', compact(
             'stats',
             'revenue',
-            'planDistribution',
+            'creditDistribution',
             'pendingUsers',
-            'recentSubscriptions',
+            'recentTransactions',
             'monthlyRevenue'
         ));
     }

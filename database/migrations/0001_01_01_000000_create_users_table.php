@@ -20,12 +20,11 @@ return new class extends Migration
             $table->rememberToken();
             $table->string('institution_name')->nullable();
             $table->string('phone', 20)->nullable();
-            $table->enum('plan', ['free', 'pro', 'advanced'])->default('free');
-            $table->timestamp('plan_expired_at')->nullable();
             $table->integer('max_students')->default(30);
             $table->integer('max_packages')->default(3);
             $table->integer('max_questions')->default(100);
             $table->integer('max_classes')->default(1);
+            $table->integer('credits')->default(10);
             $table->boolean('is_active')->default(true);
             $table->timestamp('approved_at')->nullable();
             $table->timestamps();

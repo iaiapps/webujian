@@ -29,7 +29,7 @@
     // Auto-detect role
     if (auth()->guard('student')->check()) {
         $role = 'student';
-    } elseif (auth()->user()->role === 'admin') {
+    } elseif (auth()->user()->hasRole('admin')) {
         $role = 'admin';
     } else {
         $role = 'guru';

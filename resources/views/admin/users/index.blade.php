@@ -15,18 +15,11 @@
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
             <form method="GET" class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-5">
                     <input type="text" name="search" class="form-control" placeholder="Cari nama, email, institusi..." value="{{ request('search') }}">
                 </div>
-                <div class="col-md-2">
-                    <select name="plan" class="form-select">
-                        <option value="">Semua Plan</option>
-                        <option value="free" {{ request('plan') == 'free' ? 'selected' : '' }}>Free</option>
-                        <option value="pro" {{ request('plan') == 'pro' ? 'selected' : '' }}>Pro</option>
-                        <option value="advanced" {{ request('plan') == 'advanced' ? 'selected' : '' }}>Advanced</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
+                {{-- SISTEM KREDIT - Filter plan dihapus --}}
+                <div class="col-md-3">
                     <select name="status" class="form-select">
                         <option value="">Semua Status</option>
                         <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Aktif</option>
@@ -56,7 +49,8 @@
                         <tr>
                             <th>Nama</th>
                             <th>Institusi</th>
-                            <th>Plan</th>
+                            {{-- SISTEM KREDIT - Ganti Plan dengan Kredit --}}
+                            <th>Kredit</th>
                             <th>Siswa</th>
                             <th>Status</th>
                             <th>Bergabung</th>
@@ -71,9 +65,10 @@
                                 <small class="text-muted">{{ $user->email }}</small>
                             </td>
                             <td>{{ $user->institution_name ?? '-' }}</td>
+                            {{-- SISTEM KREDIT - Tampilkan jumlah kredit --}}
                             <td>
-                                <span class="badge bg-{{ $user->plan == 'free' ? 'secondary' : ($user->plan == 'pro' ? 'primary' : 'success') }}">
-                                    {{ strtoupper($user->plan) }}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-coin me-1"></i>{{ $user->credits ?? 0 }}
                                 </span>
                             </td>
                             <td>{{ $user->students_count ?? $user->students()->count() }}</td>
@@ -101,7 +96,8 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-4">Tidak ada data guru</td>
+                            {{-- SISTEM KREDIT - Update colspan dari 7 jadi 6 --}}
+                            <td colspan="6" class="text-center text-muted py-4">Tidak ada data guru</td>
                         </tr>
                         @endforelse
                     </tbody>

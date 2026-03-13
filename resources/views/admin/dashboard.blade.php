@@ -54,11 +54,11 @@
     <div class="row g-4">
         {{-- Pending Approval --}}
         <div class="col-lg-6">
-            <x-ui.card title="Menunggu Persetujuan ({{ $stats['pending_approval'] }})">
+            <x-ui.card title="Menunggu Persetujuan ({{ $stats['pending_approval'] }})" icon="person-check">
                 @forelse($pendingUsers as $user)
                     <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
                         <div>
-                            <h6 class="mb-0" style="font-weight: 600;">{{ $user->name }}</h6>
+                            <h6 class="mb-0 fw-bold">{{ $user->name }}</h6>
                             <small class="text-muted">{{ $user->institution_name }}</small><br>
                             <small class="text-muted">{{ $user->email }}</small>
                         </div>
@@ -78,59 +78,33 @@
             </x-ui.card>
         </div>
 
-        {{-- Plan Distribution --}}
+        {{-- SISTEM KREDIT - Distribusi Kredit (ganti dari Distribusi Plan) --}}
         <div class="col-lg-6">
-            <x-ui.card title="Distribusi Plan">
-                @foreach ($planDistribution as $plan)
+            <x-ui.card title="Distribusi Kredit Guru" icon="coin">
+                @forelse ($creditDistribution as $credit)
                     <div class="mb-3">
                         <div class="d-flex justify-content-between mb-1">
-                            <span class="text-uppercase fw-semibold">{{ $plan->plan }}</span>
-                            <span class="fw-bold">{{ $plan->total }} guru</span>
+                            <span class="fw-semibold">{{ $credit->credit_range }}</span>
+                            <span class="fw-bold">{{ $credit->total }} guru</span>
                         </div>
-                        <div class="progress" style="height: 8px; border-radius: 4px;">
-                            <div class="progress-bar bg-{{ $plan->plan === 'free' ? 'secondary' : ($plan->plan === 'pro' ? 'primary' : 'success') }}"
-                                style="width: {{ $stats['total_users'] > 0 ? ($plan->total / $stats['total_users']) * 100 : 0 }}%">
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-primary"
+                                style="width: {{ $stats['total_users'] > 0 ? ($credit->total / $stats['total_users']) * 100 : 0 }}%">
                             </div>
                         </div>
                     </div>
-                @endforeach
+                @empty
+                    <p class="text-muted text-center py-3">Belum ada data kredit</p>
+                @endforelse
             </x-ui.card>
         </div>
 
-        {{-- Recent Subscriptions --}}
+        {{-- SISTEM KREDIT - Transaksi Kredit Terbaru --}}
         <div class="col-12">
-            <x-ui.card title="Transaksi Terbaru">
-                <div class="table-container" style="border: none; border-radius: 0;">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Tanggal</th>
-                                <th>Guru</th>
-                                <th>Plan</th>
-                                <th>Jumlah</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($recentSubscriptions as $sub)
-                                <tr>
-                                    <td>{{ $sub->created_at->format('d M Y H:i') }}</td>
-                                    <td>{{ $sub->user->name }}</td>
-                                    <td><span class="badge badge-primary">{{ strtoupper($sub->plan) }}</span></td>
-                                    <td>Rp {{ number_format($sub->amount) }}</td>
-                                    <td>
-                                        <span class="badge badge-{{ $sub->status === 'active' ? 'success' : ($sub->status === 'pending' ? 'warning' : 'danger') }}">
-                                            {{ ucfirst($sub->status) }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted">Belum ada transaksi</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+            <x-ui.card title="Aktivitas Terbaru" icon="activity">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Sistem kredit aktif. Guru membutuhkan 1 kredit untuk membuat paket tes.
                 </div>
             </x-ui.card>
         </div>

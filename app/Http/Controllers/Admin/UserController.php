@@ -16,7 +16,8 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        $query = User::role('guru')->with('activeSubscription');
+        // SISTEM KREDIT - Tidak perlu load subscription
+        $query = User::role('guru');
 
         // Search
         if ($request->filled('search')) {
@@ -28,10 +29,7 @@ class UserController extends Controller
             });
         }
 
-        // Filter by plan
-        if ($request->filled('plan')) {
-            $query->where('plan', $request->plan);
-        }
+        // SISTEM KREDIT - Filter plan dihapus
 
         // Filter by status
         if ($request->filled('status')) {
@@ -61,7 +59,8 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-        $user->load(['students', 'classes', 'questions', 'testPackages', 'subscriptions']);
+        // SISTEM KREDIT - Hapus subscription dari load
+        $user->load(['students', 'questions', 'testPackages']);
 
         // KELAS DINONAKTIFKAN - total_classes tidak perlu dikirim
         $stats = [

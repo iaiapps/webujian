@@ -17,8 +17,7 @@ class User extends Authenticatable
         'password',
         'institution_name',
         'phone',
-        'plan',
-        'plan_expired_at',
+        // SISTEM KREDIT - plan dan plan_expired_at dihapus
         'max_students',
         'max_packages',
         'max_questions',
@@ -39,7 +38,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'approved_at' => 'datetime',
-            'plan_expired_at' => 'datetime',
+            // SISTEM KREDIT - plan_expired_at dihapus
             'is_active' => 'boolean',
             'password' => 'hashed',
         ];
@@ -66,18 +65,20 @@ class User extends Authenticatable
         return $this->hasMany(TestPackage::class);
     }
 
-    public function subscriptions()
-    {
-        return $this->hasMany(Subscription::class);
-    }
+    // SISTEM KREDIT - subscriptions dinonaktifkan
+    // public function subscriptions()
+    // {
+    //     return $this->hasMany(Subscription::class);
+    // }
 
-    public function activeSubscription()
-    {
-        return $this->hasOne(Subscription::class)
-            ->where('status', 'active')
-            ->where('expired_at', '>=', now())
-            ->latest();
-    }
+    // SISTEM KREDIT - activeSubscription dinonaktifkan
+    // public function activeSubscription()
+    // {
+    //     return $this->hasOne(Subscription::class)
+    //         ->where('status', 'active')
+    //         ->where('expired_at', '>=', now())
+    //         ->latest();
+    // }
 
     public function usageLogs()
     {
@@ -89,10 +90,11 @@ class User extends Authenticatable
         return $this->hasMany(Activity::class);
     }
 
-    public function subscriptionHistories()
-    {
-        return $this->hasMany(SubscriptionHistory::class);
-    }
+    // SISTEM KREDIT - subscriptionHistories dinonaktifkan
+    // public function subscriptionHistories()
+    // {
+    //     return $this->hasMany(SubscriptionHistory::class);
+    // }
 
     // ============================================================
     // SISTEM KREDIT - GANTI DARI SUBSCRIPTION

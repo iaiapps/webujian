@@ -48,44 +48,33 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-2">
-            <div class="card border-0 shadow-sm text-center">
-                <div class="card-body">
-                    <h4 class="text-danger mb-0">Rp {{ number_format($stats['total_revenue'] / 1000000, 1) }}jt</h4>
-                    <small class="text-muted">Revenue</small>
-                </div>
-            </div>
-        </div>
+        {{-- SISTEM KREDIT - Revenue card dihapus --}}
     </div>
 
     <div class="row g-4">
-        {{-- Plan Distribution --}}
+        {{-- SISTEM KREDIT - Distribusi Kredit (ganti dari Distribusi Plan) --}}
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0">Distribusi Plan</h5>
+                    <h5 class="mb-0">Distribusi Kredit Guru</h5>
                 </div>
                 <div class="card-body">
-                    @foreach($planDistribution as $plan)
+                    @forelse($creditDistribution as $credit)
                     <div class="mb-3">
                         <div class="d-flex justify-content-between mb-1">
-                            <span class="text-uppercase fw-bold">{{ $plan->plan }}</span>
-                            <span>{{ $plan->count }} guru</span>
+                            <span class="fw-bold">{{ $credit->credit_range }}</span>
+                            <span>{{ $credit->count }} guru</span>
                         </div>
                         <div class="progress" style="height: 10px;">
                             @php
-                                $percentage = $stats['total_users'] > 0 ? ($plan->count / $stats['total_users']) * 100 : 0;
-                                $color = match($plan->plan) {
-                                    'free' => 'secondary',
-                                    'pro' => 'primary',
-                                    'advanced' => 'success',
-                                    default => 'secondary'
-                                };
+                                $percentage = $stats['total_users'] > 0 ? ($credit->count / $stats['total_users']) * 100 : 0;
                             @endphp
-                            <div class="progress-bar bg-{{ $color }}" style="width: {{ $percentage }}%"></div>
+                            <div class="progress-bar bg-primary" style="width: {{ $percentage }}%"></div>
                         </div>
                     </div>
-                    @endforeach
+                    @empty
+                        <p class="text-muted text-center">Belum ada data kredit</p>
+                    @endforelse
                 </div>
             </div>
         </div>
@@ -119,30 +108,21 @@
             </div>
         </div>
 
-        {{-- Revenue by Month --}}
+        {{-- SISTEM KREDIT - Revenue by Month dihapus --}}
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0">Revenue per Bulan ({{ now()->year }})</h5>
+                    <h5 class="mb-0">Informasi Sistem</h5>
                 </div>
                 <div class="card-body">
-                    @php
-                        $months = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
-                        $maxRevenue = $revenueByMonth->max('total') ?: 1;
-                    @endphp
-                    @foreach($revenueByMonth as $rev)
-                    <div class="d-flex align-items-center mb-2">
-                        <span class="me-2" style="width: 30px;">{{ $months[$rev->month] }}</span>
-                        <div class="progress flex-fill" style="height: 20px;">
-                            <div class="progress-bar bg-success" style="width: {{ ($rev->total / $maxRevenue) * 100 }}%">
-                                Rp {{ number_format($rev->total / 1000) }}k
-                            </div>
-                        </div>
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-info-circle me-2"></i>Sistem Kredit Aktif</h6>
+                        <p class="mb-0 small">Guru membutuhkan 1 kredit untuk setiap paket tes yang dibuat. Kredit dapat dibeli melalui menu Kredit di dashboard guru.</p>
                     </div>
-                    @endforeach
-                    @if($revenueByMonth->isEmpty())
-                        <p class="text-muted text-center">Belum ada data revenue</p>
-                    @endif
+                    <div class="alert alert-success">
+                        <h6><i class="bi bi-check-circle me-2"></i>Sistem Approval</h6>
+                        <p class="mb-0 small">Pendaftaran guru langsung aktif tanpa persetujuan manual.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -161,7 +141,8 @@
                                     <th>#</th>
                                     <th>Nama</th>
                                     <th>Institusi</th>
-                                    <th>Plan</th>
+                                    {{-- SISTEM KREDIT - Ganti Plan dengan Kredit --}}
+                                    <th>Kredit</th>
                                     <th>Siswa</th>
                                 </tr>
                             </thead>
@@ -171,7 +152,8 @@
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $teacher->name }}</td>
                                     <td>{{ Str::limit($teacher->institution_name, 20) }}</td>
-                                    <td><span class="badge bg-{{ $teacher->plan == 'free' ? 'secondary' : ($teacher->plan == 'pro' ? 'primary' : 'success') }}">{{ strtoupper($teacher->plan) }}</span></td>
+                                    {{-- SISTEM KREDIT - Tampilkan kredit --}}
+                                    <td><span class="badge bg-warning text-dark"><i class="bi bi-coin me-1"></i>{{ $teacher->credits ?? 0 }}</span></td>
                                     <td><strong>{{ $teacher->students_count }}</strong></td>
                                 </tr>
                                 @endforeach
@@ -182,39 +164,28 @@
             </div>
         </div>
 
-        {{-- Recent Subscriptions --}}
+        {{-- SISTEM KREDIT - Recent Subscriptions dihapus, ganti dengan info --}}
         <div class="col-lg-6">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0">Subscription Terbaru</h5>
+                    <h5 class="mb-0">Penggunaan Sistem</h5>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Tanggal</th>
-                                    <th>Guru</th>
-                                    <th>Plan</th>
-                                    <th>Jumlah</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($recentSubscriptions as $sub)
-                                <tr>
-                                    <td>{{ $sub->confirmed_at->format('d M Y') }}</td>
-                                    <td>{{ $sub->user->name }}</td>
-                                    <td><span class="badge bg-primary">{{ strtoupper($sub->plan) }}</span></td>
-                                    <td>Rp {{ number_format($sub->amount) }}</td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted">Belum ada data</td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <h3 class="text-primary">{{ number_format($stats['total_packages']) }}</h3>
+                            <small class="text-muted">Total Paket Tes</small>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <h3 class="text-success">{{ number_format($stats['total_attempts']) }}</h3>
+                            <small class="text-muted">Tes Selesai</small>
+                        </div>
                     </div>
+                    <hr>
+                    <p class="text-muted text-center mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Sistem menggunakan model kredit untuk membuat paket tes
+                    </p>
                 </div>
             </div>
         </div>

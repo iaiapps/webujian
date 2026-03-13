@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Student;
 use App\Models\Question;
-use App\Models\TestPackage;
+use App\Models\Student;
 use App\Models\TestAttempt;
-use App\Models\Subscription;
+use App\Models\TestPackage;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -30,7 +29,7 @@ class AnalyticsController extends Controller
             'total_questions' => Question::count(),
             'total_packages' => TestPackage::count(),
             'total_attempts' => TestAttempt::where('status', 'completed')->count(),
-            'total_revenue' => Subscription::where('status', 'active')->sum('amount'),
+            'total_revenue' => 0, // SISTEM KREDIT - Tidak ada revenue tracking
         ];
 
         // User growth
@@ -41,21 +40,21 @@ class AnalyticsController extends Controller
             ->orderBy('date')
             ->get();
 
-        // Revenue by month
-        $revenueByMonth = Subscription::where('status', 'active')
-            ->whereYear('confirmed_at', now()->year)
-            ->select(
-                DB::raw('MONTH(confirmed_at) as month'),
-                DB::raw('SUM(amount) as total')
-            )
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
+        // SISTEM KREDIT - Revenue tracking dihapus
+        $revenueByMonth = collect();
 
-        // Plan distribution
-        $planDistribution = User::role('guru')
-            ->select('plan', DB::raw('COUNT(*) as count'))
-            ->groupBy('plan')
+        // SISTEM KREDIT - Distribusi kredit (ganti dari plan distribution)
+        $creditDistribution = User::role('guru')
+            ->select(
+                DB::raw('CASE 
+                    WHEN credits = 0 THEN "Tidak ada kredit"
+                    WHEN credits BETWEEN 1 AND 10 THEN "1-10 Kredit"
+                    WHEN credits BETWEEN 11 AND 50 THEN "11-50 Kredit"
+                    ELSE "50+ Kredit"
+                END as credit_range'),
+                DB::raw('COUNT(*) as count')
+            )
+            ->groupBy('credit_range')
             ->get();
 
         // Top teachers by students
@@ -73,18 +72,14 @@ class AnalyticsController extends Controller
             'total_wrong' => TestAttempt::where('status', 'completed')->sum('wrong_answers'),
         ];
 
-        // Recent activities
-        $recentSubscriptions = Subscription::with('user')
-            ->where('status', 'active')
-            ->latest('confirmed_at')
-            ->take(5)
-            ->get();
+        // SISTEM KREDIT - Recent subscriptions dihapus
+        $recentSubscriptions = collect();
 
         return view('admin.analytics.index', compact(
             'stats',
             'userGrowth',
             'revenueByMonth',
-            'planDistribution',
+            'creditDistribution',
             'topTeachers',
             'testStats',
             'recentSubscriptions'
