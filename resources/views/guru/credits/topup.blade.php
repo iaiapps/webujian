@@ -4,10 +4,11 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <h2 class="mb-4">Beli Kredit</h2>
-        </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Beli Kredit</h2>
+        <a href="{{ route('guru.credits.history') }}" class="btn btn-outline-primary">
+            <i class="bi bi-clock-history"></i> Riwayat Kredit
+        </a>
     </div>
 
     <div class="row">
@@ -15,67 +16,100 @@
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0">Paket Kredit</h5>
+                    <h5 class="mb-0">Pilih Paket Kredit</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row g-3">
-                        @foreach($creditPackages as $package)
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card border">
-                                <div class="card-body text-center">
-                                    <h4 class="text-primary mb-0">{{ $package['credits'] }}</h4>
-                                    <small class="text-muted">Kredit</small>
-                                    @if($package['bonus'] > 0)
-                                    <div class="mt-2">
-                                        <span class="badge bg-success">Bonus {{ $package['bonus'] }} Kredit</span>
+                    @if($creditPackages->count() > 0)
+                        <div class="row g-3">
+                            @foreach($creditPackages as $package)
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card h-100 border {{ session('selected_package_id') == $package->id ? 'border-primary' : '' }}" 
+                                     id="package-{{ $package->id }}"
+                                     onclick="selectPackage({{ $package->id }}, {{ $package->credit_amount }}, {{ $package->bonus_credits }}, {{ $package->price }}, '{{ $package->name }}')"
+                                     style="cursor: pointer;">
+                                    <div class="card-body text-center">
+                                        <h4 class="text-primary mb-1">{{ $package->credit_amount }}</h4>
+                                        <small class="text-muted">Kredit Dasar</small>
+                                        
+                                        @if($package->bonus_credits > 0)
+                                        <div class="mt-2">
+                                            <span class="badge bg-success">+{{ $package->bonus_credits }} Bonus</span>
+                                        </div>
+                                        <div class="mt-1">
+                                            <small class="text-success">Total: {{ $package->getTotalCredits() }} Kredit</small>
+                                        </div>
+                                        @endif
+                                        
+                                        @if($package->description)
+                                        <div class="mt-2">
+                                            <small class="text-muted">{{ $package->description }}</small>
+                                        </div>
+                                        @endif
+                                        
+                                        <div class="mt-3">
+                                            <h5 class="mb-0 text-primary">{{ $package->getFormattedPrice() }}</h5>
+                                            @if($package->bonus_credits > 0)
+                                            <small class="text-muted">
+                                                {{ number_format($package->getPricePerCredit(), 0, ',', '.') }}/kredit
+                                            </small>
+                                            @endif
+                                        </div>
                                     </div>
-                                    @endif
-                                    <div class="mt-3">
-                                        <strong class="fs-5">Rp {{ number_format($package['price'], 0, ',', '.') }}</strong>
+                                    <div class="card-footer bg-white text-center">
+                                        <button type="button" class="btn btn-outline-primary btn-sm select-btn" data-package-id="{{ $package->id }}">
+                                            Pilih Paket
+                                        </button>
                                     </div>
-                                    <button type="button" class="btn btn-outline-primary mt-3 w-100"
-                                        onclick="selectCreditPackage({{ $package['credits'] }}, {{ $package['price'] }}, {{ $package['total'] }})">
-                                        Pilih
-                                    </button>
                                 </div>
                             </div>
+                            @endforeach
                         </div>
-                        @endforeach
-                    </div>
+                    @else
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Belum ada paket kredit tersedia. Silakan hubungi admin.
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
 
         {{-- Payment Form --}}
         <div class="col-lg-4">
-            <div class="card border-0 shadow-sm">
+            <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0">Pembelian Kredit</h5>
+                    <h5 class="mb-0">Detail Pembelian</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('guru.credits.purchase') }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('guru.credits.purchase') }}" enctype="multipart/form-data" id="purchase-form">
                         @csrf
                         
-                        <div id="selected-package-info" class="alert alert-info d-none">
-                            <strong>Paket Terpilih:</strong> <span id="selected-credits">0</span> Kredit<br>
-                            <strong>Total:</strong> Rp <span id="selected-price">0</span>
+                        <input type="hidden" name="package_id" id="package_id" value="">
+
+                        <div id="package-detail" class="alert alert-light border d-none">
+                            <h6 class="mb-2" id="detail-name">-</h6>
+                            <div class="d-flex justify-content-between mb-1">
+                                <small>Kredit Dasar:</small>
+                                <strong id="detail-credits">0</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <small>Bonus:</small>
+                                <strong class="text-success" id="detail-bonus">0</strong>
+                            </div>
+                            <hr class="my-2">
+                            <div class="d-flex justify-content-between">
+                                <strong>Total Kredit:</strong>
+                                <strong class="text-primary" id="detail-total">0</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mt-1">
+                                <strong>Harga:</strong>
+                                <strong class="text-primary" id="detail-price">Rp 0</strong>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Jumlah Kredit yang Ingin Dibeli</label>
-                            <select name="credit_amount" id="credit_amount" class="form-select" required>
-                                <option value="">Pilih Paket</option>
-                                @foreach($creditPackages as $package)
-                                <option value="{{ $package['credits'] }}" data-price="{{ $package['price'] }}" data-total="{{ $package['total'] }}">
-                                    {{ $package['credits'] }} Kredit (+{{ $package['bonus'] }} bonus) = Rp {{ number_format($package['price'], 0, ',', '.') }}
-                                </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Total Pembayaran</label>
-                            <div class="fs-4 fw-bold text-primary">Rp <span id="total-price">0</span></div>
+                        <div id="no-package-selected" class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Silakan pilih paket kredit di sebelah kiri
                         </div>
 
                         <hr>
@@ -90,9 +124,10 @@
                                     Bank Transfer
                                 </label>
                             </div>
-                            <div class="ms-4 mt-2">
+                            <div class="ms-4 mt-2 p-2 bg-light rounded">
                                 <small class="text-muted">
-                                    {{ $payment['bank_name'] }} - {{ $payment['bank_account_number'] }}<br>
+                                    <strong>{{ $payment['bank_name'] }}</strong><br>
+                                    {{ $payment['bank_account_number'] }}<br>
                                     A/n {{ $payment['bank_account_name'] }}
                                 </small>
                             </div>
@@ -107,7 +142,7 @@
 
                         @if(!empty($payment['payment_instructions']))
                         <div class="alert alert-info mb-3">
-                            <h6 class="alert-heading">Instruksi Pembayaran:</h6>
+                            <h6 class="alert-heading"><i class="bi bi-info-circle me-1"></i>Instruksi:</h6>
                             <small>{{ $payment['payment_instructions'] }}</small>
                         </div>
                         @endif
@@ -124,37 +159,45 @@
 
 @push('scripts')
 <script>
-    const creditAmountSelect = document.getElementById('credit_amount');
-    const totalPriceSpan = document.getElementById('total-price');
-    const selectedCreditsSpan = document.getElementById('selected-credits');
-    const selectedPriceSpan = document.getElementById('selected-price');
-    const selectedPackageInfo = document.getElementById('selected-package-info');
-    const submitBtn = document.getElementById('submit-btn');
+    let selectedPackageId = null;
 
-    creditAmountSelect.addEventListener('change', function() {
-        const option = this.options[this.selectedIndex];
-        if (option && option.value) {
-            const price = option.dataset.price;
-            const total = option.dataset.total;
-            
-            totalPriceSpan.textContent = parseInt(price).toLocaleString('id-ID');
-            selectedCreditsSpan.textContent = total;
-            selectedPriceSpan.textContent = parseInt(price).toLocaleString('id-ID');
-            selectedPackageInfo.classList.remove('d-none');
-            submitBtn.disabled = false;
-        } else {
-            totalPriceSpan.textContent = '0';
-            selectedPackageInfo.classList.add('d-none');
-            submitBtn.disabled = true;
-        }
-    });
-
-    function selectCreditPackage(credits, price, total) {
-        creditAmountSelect.value = credits;
-        creditAmountSelect.dispatchEvent(new Event('change'));
+    function selectPackage(id, credits, bonus, price, name) {
+        // Remove selection from all cards
+        document.querySelectorAll('.card').forEach(card => {
+            card.classList.remove('border-primary');
+        });
         
-        document.getElementById('credit_amount').scrollIntoView({ behavior: 'smooth' });
+        // Add selection to clicked card
+        document.getElementById('package-' + id).classList.add('border-primary');
+        
+        // Update form
+        document.getElementById('package_id').value = id;
+        
+        // Update detail display
+        document.getElementById('detail-name').textContent = name;
+        document.getElementById('detail-credits').textContent = credits;
+        document.getElementById('detail-bonus').textContent = bonus;
+        document.getElementById('detail-total').textContent = credits + bonus;
+        document.getElementById('detail-price').textContent = 'Rp ' + parseInt(price).toLocaleString('id-ID');
+        
+        // Show detail, hide warning
+        document.getElementById('package-detail').classList.remove('d-none');
+        document.getElementById('no-package-selected').classList.add('d-none');
+        
+        // Enable submit button
+        document.getElementById('submit-btn').disabled = false;
+        
+        selectedPackageId = id;
     }
+
+    // Handle card click
+    document.querySelectorAll('.select-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const packageId = this.dataset.packageId;
+            document.getElementById('package-' + packageId).click();
+        });
+    });
 </script>
 @endpush
 @endsection

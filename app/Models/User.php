@@ -90,6 +90,12 @@ class User extends Authenticatable
         return $this->hasMany(Activity::class);
     }
 
+    // SISTEM KREDIT - History transaksi kredit
+    public function creditTransactions()
+    {
+        return $this->hasMany(CreditTransaction::class)->latest();
+    }
+
     // SISTEM KREDIT - subscriptionHistories dinonaktifkan
     // public function subscriptionHistories()
     // {
@@ -151,19 +157,48 @@ class User extends Authenticatable
         return $value ?? 0;
     }
 
-    public function addCredits(int $amount): void
+    // SISTEM KREDIT - Add credits dengan history
+    public function addCredits(int $amount, string $type = 'manual_add', string $description = '', ?string $referenceId = null, ?string $referenceType = null, ?int $performedBy = null, ?string $notes = null): CreditTransaction
     {
+        $balanceBefore = $this->credits;
         $this->increment('credits', $amount);
+        $this->refresh();
+
+        return $this->creditTransactions()->create([
+            'type' => $type,
+            'amount' => $amount,
+            'balance_before' => $balanceBefore,
+            'balance_after' => $this->credits,
+            'description' => $description ?: "Penambahan {$amount} kredit",
+            'reference_id' => $referenceId,
+            'reference_type' => $referenceType,
+            'performed_by' => $performedBy,
+            'notes' => $notes,
+        ]);
     }
 
-    public function deductCredits(int $amount = 1): bool
+    // SISTEM KREDIT - Deduct credits dengan history
+    public function deductCredits(int $amount = 1, string $type = 'usage', string $description = '', ?string $referenceId = null, ?string $referenceType = null): ?CreditTransaction
     {
         if ($this->credits < $amount) {
-            return false;
+            return null;
         }
-        $this->decrement('credits', $amount);
 
-        return true;
+        $balanceBefore = $this->credits;
+        $this->decrement('credits', $amount);
+        $this->refresh();
+
+        return $this->creditTransactions()->create([
+            'type' => $type,
+            'amount' => -$amount,
+            'balance_before' => $balanceBefore,
+            'balance_after' => $this->credits,
+            'description' => $description ?: "Penggunaan {$amount} kredit",
+            'reference_id' => $referenceId,
+            'reference_type' => $referenceType,
+            'performed_by' => null,
+            'notes' => null,
+        ]);
     }
 
     // Helper Methods - Check Limits

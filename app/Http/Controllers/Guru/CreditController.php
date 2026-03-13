@@ -8,6 +8,7 @@
 namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
+use App\Models\CreditPackage;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,16 +30,33 @@ class CreditController extends Controller
             'can_create_package' => $user->canCreatePackage(),
         ];
 
+        // Ambil 5 transaksi terakhir
+        $recentTransactions = $user->creditTransactions()->take(5)->get();
+
         $payment = Setting::getByGroup('payment');
 
-        return view('guru.credits.index', compact('creditInfo', 'payment'));
+        return view('guru.credits.index', compact('creditInfo', 'recentTransactions', 'payment'));
+    }
+
+    public function history()
+    {
+        $user = Auth::user();
+        $transactions = $user->creditTransactions()->paginate(20);
+
+        $stats = [
+            'total_in' => $user->creditTransactions()->in()->sum('amount'),
+            'total_out' => abs($user->creditTransactions()->out()->sum('amount')),
+        ];
+
+        return view('guru.credits.history', compact('transactions', 'stats'));
     }
 
     public function topup()
     {
         $user = Auth::user();
 
-        $creditPackages = $this->getCreditPackages();
+        // Ambil paket kredit aktif dari database
+        $creditPackages = CreditPackage::active()->ordered()->get();
 
         $payment = Setting::getByGroup('payment');
 
@@ -48,21 +66,18 @@ class CreditController extends Controller
     public function purchase(Request $request)
     {
         $request->validate([
-            'credit_amount' => ['required', 'integer', 'min:5'],
+            'package_id' => ['required', 'exists:credit_packages,id'],
             'payment_proof' => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
         ]);
 
         $user = Auth::user();
+        $package = CreditPackage::findOrFail($request->package_id);
 
-        $creditPrice = Setting::get('credit_price', 5000);
-        $bonusThreshold = Setting::get('credit_bonus_threshold', 5);
-        $bonusAmount = Setting::get('credit_bonus_amount', 1);
-
-        $creditAmount = $request->credit_amount;
-        $totalPrice = $creditAmount * $creditPrice;
-
-        $bonusCredits = floor($creditAmount / $bonusThreshold) * $bonusAmount;
-        $totalCredits = $creditAmount + $bonusCredits;
+        // Hitung total
+        $creditAmount = $package->credit_amount;
+        $bonusCredits = $package->bonus_credits;
+        $totalCredits = $package->getTotalCredits();
+        $totalPrice = $package->price;
 
         $proofPath = $this->uploadPaymentProof($request->file('payment_proof'));
 
@@ -71,6 +86,7 @@ class CreditController extends Controller
         session([
             'credit_purchase' => [
                 'invoice_number' => $invoiceNumber,
+                'package_name' => $package->name,
                 'credit_amount' => $creditAmount,
                 'bonus_credits' => $bonusCredits,
                 'total_credits' => $totalCredits,
@@ -92,10 +108,30 @@ class CreditController extends Controller
 
         $user = Auth::user();
 
-        $user->addCredits($purchase['total_credits']);
+        // Catat transaksi utama (purchase)
+        $user->addCredits(
+            $purchase['credit_amount'],
+            'purchase',
+            "Pembelian paket {$purchase['package_name']}",
+            $purchase['invoice_number'],
+            'purchase'
+        );
+
+        // Catat transaksi bonus jika ada
+        if ($purchase['bonus_credits'] > 0) {
+            $user->addCredits(
+                $purchase['bonus_credits'],
+                'bonus',
+                "Bonus {$purchase['bonus_credits']} kredit ({$purchase['package_name']})",
+                $purchase['invoice_number'],
+                'purchase'
+            );
+        }
 
         $result = $purchase;
         $user->refresh();
+
+        session()->forget('credit_purchase');
 
         return view('guru.credits.success', compact('result'))->with('success', 'Pembelian kredit berhasil! Kredit telah ditambahkan ke akun Anda.');
     }
@@ -105,26 +141,6 @@ class CreditController extends Controller
         session()->forget('credit_purchase');
 
         return redirect()->route('guru.credits.index');
-    }
-
-    private function getCreditPackages()
-    {
-        $creditPrice = Setting::get('credit_price', 5000);
-        $bonusThreshold = Setting::get('credit_bonus_threshold', 5);
-        $bonusAmount = Setting::get('credit_bonus_amount', 1);
-
-        $packages = [];
-        for ($i = 5; $i <= 50; $i += 5) {
-            $bonus = floor($i / $bonusThreshold) * $bonusAmount;
-            $packages[] = [
-                'credits' => $i,
-                'bonus' => $bonus,
-                'total' => $i + $bonus,
-                'price' => $i * $creditPrice,
-            ];
-        }
-
-        return $packages;
     }
 
     private function uploadPaymentProof($file)

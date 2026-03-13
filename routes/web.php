@@ -49,6 +49,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 
     // Analytics
     Route::get('/analytics', [App\Http\Controllers\Admin\AnalyticsController::class, 'index'])->name('analytics.index');
+
+    // Credit Management
+    Route::get('/credits', [App\Http\Controllers\Admin\CreditController::class, 'index'])->name('credits.index');
+    Route::get('/credits/transactions', [App\Http\Controllers\Admin\CreditController::class, 'transactions'])->name('credits.transactions');
+    Route::get('/credits/{user}', [App\Http\Controllers\Admin\CreditController::class, 'show'])->name('credits.show');
+    Route::post('/credits/{user}/add', [App\Http\Controllers\Admin\CreditController::class, 'add'])->name('credits.add');
+    Route::post('/credits/{user}/deduct', [App\Http\Controllers\Admin\CreditController::class, 'deduct'])->name('credits.deduct');
+
+    // Credit Packages
+    Route::resource('credit-packages', App\Http\Controllers\Admin\CreditPackageController::class);
+    Route::post('/credit-packages/{credit_package}/toggle-status', [App\Http\Controllers\Admin\CreditPackageController::class, 'toggleStatus'])->name('credit-packages.toggle-status');
 });
 
 // ============================================
@@ -119,6 +130,7 @@ Route::prefix('guru')->name('guru.')->middleware(['auth', 'role:guru', 'check.ap
     Route::get('/credits/topup', [App\Http\Controllers\Guru\CreditController::class, 'topup'])->name('credits.topup');
     Route::post('/credits/purchase', [App\Http\Controllers\Guru\CreditController::class, 'purchase'])->name('credits.purchase');
     Route::get('/credits/success', [App\Http\Controllers\Guru\CreditController::class, 'success'])->name('credits.success');
+    Route::get('/credits/history', [App\Http\Controllers\Guru\CreditController::class, 'history'])->name('credits.history');
 
     // Profile
     Route::get('/profile', [App\Http\Controllers\Guru\ProfileController::class, 'edit'])->name('profile.edit');

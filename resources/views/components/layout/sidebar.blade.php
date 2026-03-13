@@ -17,10 +17,12 @@
                 <a class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
                     <i class="bi bi-people"></i> Kelola Guru
                 </a>
-                {{-- SUBSCRIPTION DINONAKTIFKAN - GANTI KE KREDIT --}}
-                {{-- <a class="sidebar-link {{ request()->routeIs('admin.subscriptions.*') ? 'active' : '' }}" href="{{ route('admin.subscriptions.index') }}">
-                    <i class="bi bi-credit-card"></i> Subscription
-                </a> --}}
+                <a class="sidebar-link {{ request()->routeIs('admin.credits.*') ? 'active' : '' }}" href="{{ route('admin.credits.index') }}">
+                    <i class="bi bi-coin"></i> Manajemen Kredit
+                </a>
+                <a class="sidebar-link {{ request()->routeIs('admin.credit-packages.*') ? 'active' : '' }}" href="{{ route('admin.credit-packages.index') }}">
+                    <i class="bi bi-box-seam"></i> Paket Kredit
+                </a>
                 <a class="sidebar-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}" href="{{ route('admin.categories.index') }}">
                     <i class="bi bi-tags"></i> Kategori
                 </a>

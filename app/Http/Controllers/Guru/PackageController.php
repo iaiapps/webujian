@@ -128,10 +128,16 @@ class PackageController extends Controller
             // }
 
             // ============================================================
-            // SISTEM KREDIT - Kurangi 1 kredit saat buat package
+            // SISTEM KREDIT - Kurangi 1 kredit saat buat package dengan history
             // Tidak ada refund jika package dihapus
             // ============================================================
-            $user->deductCredits(1);
+            $user->deductCredits(
+                1,
+                'usage',
+                "Pembuatan paket tes: {$package->title}",
+                $package->id,
+                'test_package'
+            );
 
             DB::commit();
 

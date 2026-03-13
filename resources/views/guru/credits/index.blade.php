@@ -4,9 +4,15 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <h2 class="mb-4">Kredit Saya</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Kredit Saya</h2>
+        <div>
+            <a href="{{ route('guru.credits.history') }}" class="btn btn-outline-primary me-2">
+                <i class="bi bi-clock-history"></i> Riwayat Lengkap
+            </a>
+            <a href="{{ route('guru.credits.topup') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Beli Kredit
+            </a>
         </div>
     </div>
 
@@ -38,13 +44,62 @@
                         <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i> Setiap pembuatan paket mengurangi 1 kredit</li>
                         <li class="mb-0"><i class="bi bi-info-circle text-info me-2"></i> Kredit tidak hangus jika paket dihapus</li>
                     </ul>
-                    <a href="{{ route('guru.credits.topup') }}" class="btn btn-accent mt-3">
-                        <i class="bi bi-plus-circle"></i> Beli Kredit
-                    </a>
                 </div>
             </div>
         </div>
     </div>
+
+    {{-- Recent Transactions --}}
+    @if(isset($recentTransactions) && $recentTransactions->count() > 0)
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Riwayat Terakhir</h5>
+                    <a href="{{ route('guru.credits.history') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Tipe</th>
+                                    <th>Jumlah</th>
+                                    <th>Balance</th>
+                                    <th>Deskripsi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($recentTransactions as $transaction)
+                                <tr>
+                                    <td>{{ $transaction->created_at->format('d M Y H:i') }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ $transaction->getTypeBadgeClass() }}">
+                                            {{ $transaction->getTypeLabel() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if($transaction->amount > 0)
+                                            <span class="text-success fw-bold">+{{ $transaction->amount }}</span>
+                                        @else
+                                            <span class="text-danger fw-bold">{{ $transaction->amount }}</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <small>{{ $transaction->balance_before }} → <strong>{{ $transaction->balance_after }}</strong></small>
+                                    </td>
+                                    <td>{{ Str::limit($transaction->description, 40) }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 
     {{-- Payment Info --}}
     <div class="row">
