@@ -159,6 +159,9 @@ Route::prefix('student')->name('student.')->middleware('auth:student')->group(fu
     Route::get('/result/{attempt}/review', [App\Http\Controllers\Student\ResultController::class, 'review'])->name('test.review');
     Route::get('/history', [App\Http\Controllers\Student\ResultController::class, 'history'])->name('test.history');
 
+    // Leaderboard API (for polling)
+    Route::get('/leaderboard/{package}', [App\Http\Controllers\Student\ResultController::class, 'leaderboard'])->name('test.leaderboard');
+
     // Profile
     Route::get('/profile', [App\Http\Controllers\Student\ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [App\Http\Controllers\Student\ProfileController::class, 'update'])->name('profile.update');

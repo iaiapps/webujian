@@ -80,6 +80,7 @@
                                         <th>Benar</th>
                                         <th>Salah</th>
                                         <th>Kosong</th>
+                                        <th>Durasi</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -112,6 +113,14 @@
                                             <td><span class="badge bg-success">{{ $attempt->correct_answers }}</span></td>
                                             <td><span class="badge bg-danger">{{ $attempt->wrong_answers }}</span></td>
                                             <td><span class="badge bg-secondary">{{ $attempt->unanswered }}</span></td>
+                                            <td>
+                                                @php
+                                                    $duration = $attempt->start_time && $attempt->submitted_at 
+                                                        ? $attempt->submitted_at->diffInMinutes($attempt->start_time) 
+                                                        : null;
+                                                @endphp
+                                                {{ $duration !== null ? $duration . ' menit' : '-' }}
+                                            </td>
                                             <td>
                                                 <a href="{{ route('guru.results.student', $attempt->student) }}"
                                                     class="btn btn-sm btn-info">

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\TestAttempt;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ResultController extends Controller
@@ -24,7 +23,7 @@ class ResultController extends Controller
         }
 
         // Check if completed
-        if (!$attempt->isCompleted()) {
+        if (! $attempt->isCompleted()) {
             return redirect()->route('student.test.work', $attempt)
                 ->with('info', 'Selesaikan tes terlebih dahulu.');
         }
@@ -32,13 +31,14 @@ class ResultController extends Controller
         $package = $attempt->package;
 
         // Check if show result is enabled
-        if (!$package->show_result) {
+        if (! $package->show_result) {
             return redirect()->route('student.dashboard')
                 ->with('info', 'Hasil tes tidak dapat ditampilkan.');
         }
 
         // Get ranking if enabled
         $ranking = null;
+        $leaderboard = null;
         if ($package->show_ranking) {
             $ranking = TestAttempt::where('package_id', $package->id)
                 ->where('status', 'completed')
@@ -47,6 +47,26 @@ class ResultController extends Controller
                 ->search($student->id);
 
             $ranking = $ranking !== false ? $ranking + 1 : null;
+
+            // Get leaderboard top 10
+            $leaderboard = TestAttempt::where('package_id', $package->id)
+                ->where('status', 'completed')
+                ->with('student:id,name')
+                ->orderBy('total_score', 'desc')
+                ->orderBy('submitted_at', 'asc')
+                ->limit(10)
+                ->get()
+                ->map(function ($attempt, $index) {
+                    return [
+                        'rank' => $index + 1,
+                        'name' => $attempt->student->name,
+                        'score' => $attempt->total_score,
+                        'submitted_at' => $attempt->submitted_at,
+                        'duration' => $attempt->start_time && $attempt->submitted_at
+                            ? $attempt->submitted_at->diffInMinutes($attempt->start_time)
+                            : null,
+                    ];
+                });
         }
 
         $totalAttempts = TestAttempt::where('package_id', $package->id)
@@ -56,7 +76,7 @@ class ResultController extends Controller
         // Get answers with questions
         $attempt->load(['answers.question.category']);
 
-        return view('student.test.result', compact('attempt', 'package', 'ranking', 'totalAttempts'));
+        return view('student.test.result', compact('attempt', 'package', 'ranking', 'totalAttempts', 'leaderboard'));
     }
 
     public function history()
@@ -82,14 +102,14 @@ class ResultController extends Controller
         }
 
         // Check if completed
-        if (!$attempt->isCompleted()) {
+        if (! $attempt->isCompleted()) {
             return redirect()->route('student.test.work', $attempt);
         }
 
         $package = $attempt->package;
 
         // Check if show explanation is enabled
-        if (!$package->show_explanation) {
+        if (! $package->show_explanation) {
             return redirect()->route('student.test.result', $attempt)
                 ->with('info', 'Pembahasan tidak tersedia untuk tes ini.');
         }
@@ -104,5 +124,41 @@ class ResultController extends Controller
         $answersMap = $attempt->answers->keyBy('question_id');
 
         return view('student.test.review', compact('attempt', 'package', 'questions', 'answersMap'));
+    }
+
+    public function leaderboard(TestPackage $package)
+    {
+        $student = Auth::guard('student')->user();
+
+        $leaderboard = TestAttempt::where('package_id', $package->id)
+            ->where('status', 'completed')
+            ->with('student:id,name')
+            ->orderBy('total_score', 'desc')
+            ->orderBy('submitted_at', 'asc')
+            ->limit(10)
+            ->get()
+            ->map(function ($attempt, $index) {
+                return [
+                    'rank' => $index + 1,
+                    'name' => $attempt->student->name,
+                    'score' => number_format($attempt->total_score, 1),
+                    'duration' => $attempt->start_time && $attempt->submitted_at
+                        ? $attempt->submitted_at->diffInMinutes($attempt->start_time)
+                        : null,
+                ];
+            });
+
+        $userRank = TestAttempt::where('package_id', $package->id)
+            ->where('status', 'completed')
+            ->orderBy('total_score', 'desc')
+            ->pluck('student_id')
+            ->search($student->id);
+
+        $userRank = $userRank !== false ? $userRank + 1 : null;
+
+        return response()->json([
+            'leaderboard' => $leaderboard,
+            'userRank' => $userRank,
+        ]);
     }
 }

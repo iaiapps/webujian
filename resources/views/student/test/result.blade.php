@@ -4,6 +4,70 @@
 @section('title', 'Hasil Tes')
 
 @section('content')
+    <script>
+        let leaderboardPolling = null;
+        
+        function loadLeaderboard() {
+            fetch('{{ route("student.test.leaderboard", $package->id) }}')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.leaderboard) {
+                        updateLeaderboardTable(data.leaderboard, data.userRank);
+                    }
+                })
+                .catch(error => console.error('Error loading leaderboard:', error));
+        }
+        
+        function updateLeaderboardTable(leaderboard, userRank) {
+            const tbody = document.getElementById('leaderboard-body');
+            if (!tbody) return;
+            
+            tbody.innerHTML = leaderboard.map((entry, index) => {
+                const isCurrentUser = entry.rank == userRank;
+                const durationText = entry.duration !== null ? entry.duration + ' menit' : '-';
+                let rankBadge = '';
+                if (entry.rank == 1) rankBadge = '<span class="badge bg-warning text-dark fs-6">🥇</span>';
+                else if (entry.rank == 2) rankBadge = '<span class="badge bg-secondary fs-6">🥈</span>';
+                else if (entry.rank == 3) rankBadge = '<span class="badge bg-danger fs-6">🥉</span>';
+                else rankBadge = '<span class="text-muted fw-bold">' + entry.rank + '</span>';
+                
+                return `
+                    <tr class="${isCurrentUser ? 'table-warning' : ''}">
+                        <td class="text-center">${rankBadge}</td>
+                        <td class="fw-medium">
+                            ${entry.name}
+                            ${isCurrentUser ? '<span class="badge bg-primary ms-1">Kamu</span>' : ''}
+                        </td>
+                        <td class="text-center"><span class="fw-bold">${entry.score}</span></td>
+                        <td class="text-center text-muted">${durationText}</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // Update rank info
+            const rankInfo = document.getElementById('rank-info');
+            if (rankInfo && userRank) {
+                rankInfo.textContent = `Peringkat ${userRank} dari ${leaderboard.length} peserta`;
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Start polling every 15 seconds
+            leaderboardPolling = setInterval(loadLeaderboard, 15000);
+        });
+        
+        // Stop polling when leaving page
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && leaderboardPolling) {
+                clearInterval(leaderboardPolling);
+                leaderboardPolling = null;
+            } else if (!document.hidden && !leaderboardPolling) {
+                leaderboardPolling = setInterval(loadLeaderboard, 15000);
+                loadLeaderboard();
+            }
+        });
+    </script>
+    
     <div class="container py-4">
         <div class="row justify-content-center">
             <div class="col-lg-10">
@@ -20,12 +84,79 @@
                         <h1 class="display-1 fw-bold text-primary mb-0">{{ number_format($attempt->total_score, 1) }}</h1>
 
                         @if ($ranking)
-                            <p class="text-muted mt-3">
+                            <p class="text-muted mt-3" id="rank-info">
                                 <i class="bi bi-trophy"></i> Peringkat {{ $ranking }} dari {{ $totalAttempts }} peserta
                             </p>
                         @endif
                     </div>
                 </div>
+
+                {{-- Leaderboard --}}
+                @if ($leaderboard && $leaderboard->count() > 0)
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white border-0 py-3">
+                            <h5 class="mb-0">
+                                <i class="bi bi-trophy text-warning"></i> Leaderboard - Top 10
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="text-center" style="width: 60px;">Peringkat</th>
+                                            <th>Nama</th>
+                                            <th class="text-center">Skor</th>
+                                            <th class="text-center">Durasi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="leaderboard-body">
+                                        @foreach ($leaderboard as $index => $entry)
+                                            @php
+                                                $isCurrentUser = $entry['rank'] == $ranking;
+                                                $duration = $entry['duration'];
+                                                $durationText = $duration !== null 
+                                                    ? $duration . ' menit' 
+                                                    : '-';
+                                            @endphp
+                                            <tr class="{{ $isCurrentUser ? 'table-warning' : '' }}">
+                                                <td class="text-center">
+                                                    @if ($entry['rank'] == 1)
+                                                        <span class="badge bg-warning text-dark fs-6">
+                                                            🥇
+                                                        </span>
+                                                    @elseif ($entry['rank'] == 2)
+                                                        <span class="badge bg-secondary fs-6">
+                                                            🥈
+                                                        </span>
+                                                    @elseif ($entry['rank'] == 3)
+                                                        <span class="badge bg-danger fs-6">
+                                                            🥉
+                                                        </span>
+                                                    @else
+                                                        <span class="text-muted fw-bold">{{ $entry['rank'] }}</span>
+                                                    @endif
+                                                </td>
+                                                <td class="fw-medium">
+                                                    {{ $entry['name'] }}
+                                                    @if ($isCurrentUser)
+                                                        <span class="badge bg-primary ms-1">Kamu</span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="fw-bold">{{ number_format($entry['score'], 1) }}</span>
+                                                </td>
+                                                <td class="text-center text-muted">
+                                                    {{ $durationText }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                @endif
 
                 {{-- Statistics --}}
                 <div class="row g-3 mb-4">
