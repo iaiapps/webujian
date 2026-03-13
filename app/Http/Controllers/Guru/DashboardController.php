@@ -31,7 +31,7 @@ class DashboardController extends Controller
             'total_questions' => $user->questionsCount(),
             'max_questions' => $user->max_questions,
             'total_packages' => $user->packagesCount(),
-            'max_packages' => 999999, // Tidak terbatas, pakai kredit
+            'credits' => $user->credits,
         ];
 
         // Calculate usage percentage
@@ -39,7 +39,6 @@ class DashboardController extends Controller
             'students' => $user->max_students > 0 ? round(($stats['total_students'] / $user->max_students) * 100) : 0,
             // 'classes' => $user->max_classes > 0 ? round(($stats['total_classes'] / $user->max_classes) * 100) : 0,
             'questions' => $user->max_questions > 0 ? round(($stats['total_questions'] / $user->max_questions) * 100) : 0,
-            'packages' => 0, // Package tidak lagi pakai limit percentage
         ];
 
         // Recent activities

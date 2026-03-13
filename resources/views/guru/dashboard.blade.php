@@ -89,7 +89,12 @@
 
         <div class="col-xl-4 col-md-6">
             <x-ui.stat-card icon="box" icon-variant="warning"
-                value="{{ $stats['total_packages'] }}/{{ $stats['max_packages'] }}" label="Paket Tes" />
+                value="{{ $stats['total_packages'] }}" label="Paket Tes" />
+        </div>
+        
+        <div class="col-xl-4 col-md-6">
+            <x-ui.stat-card icon="coin" icon-variant="success"
+                value="{{ $stats['credits'] }}" label="Kredit Tersedia" />
         </div>
     </div>
 

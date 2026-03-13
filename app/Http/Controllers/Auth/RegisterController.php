@@ -48,6 +48,8 @@ class RegisterController extends Controller
 
     protected function create(array $data)
     {
+        $defaultCredits = Setting::get('credit_default', 10);
+
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -57,14 +59,27 @@ class RegisterController extends Controller
             // SISTEM KREDIT - Plan dihapus
             'max_students' => Setting::get('global_max_students', 50),
             'max_questions' => Setting::get('global_max_questions', 100),
-            // SISTEM KREDIT - Default 10 kredit untuk guru baru
-            'credits' => Setting::get('credit_default', 10),
+            // SISTEM KREDIT - Default 0 kredit untuk guru baru, nanti ditambah via transaction
+            'credits' => 0,
             'is_active' => true,
             // APPROVAL MANUAL DINONAKTIFKAN - User langsung di-approve saat registrasi
             'approved_at' => now(),
         ]);
 
         $user->assignRole('guru');
+
+        // SISTEM KREDIT - Catat transaksi initial kredit
+        if ($defaultCredits > 0) {
+            $user->addCredits(
+                $defaultCredits,
+                'bonus',
+                'Kredit awal registrasi',
+                null,
+                'registration',
+                null,
+                "Selamat datang! Anda mendapatkan {$defaultCredits} kredit gratis."
+            );
+        }
 
         return $user;
     }

@@ -21,7 +21,6 @@ return new class extends Migration
             $table->string('institution_name')->nullable();
             $table->string('phone', 20)->nullable();
             $table->integer('max_students')->default(30);
-            $table->integer('max_packages')->default(3);
             $table->integer('max_questions')->default(100);
             $table->integer('max_classes')->default(1);
             $table->integer('credits')->default(10);

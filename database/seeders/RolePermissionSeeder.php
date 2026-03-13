@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\CreditTransaction;
+use App\Models\Student;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -39,8 +41,8 @@ class RolePermissionSeeder extends Seeder
             'password' => Hash::make('password'),
             'institution_name' => 'Bimbel Demo',
             'phone' => '081234567890',
-            // SISTEM KREDIT - Default credits
-            'credits' => 10,
+            // SISTEM KREDIT - Mulai dari 0, nanti ditambah via transaction
+            'credits' => 0,
             'max_students' => 50,
             'max_questions' => 100,
             'email_verified_at' => now(),
@@ -49,8 +51,50 @@ class RolePermissionSeeder extends Seeder
         ]);
         $guru->assignRole('guru');
 
+        // SISTEM KREDIT - Buat transaksi initial kredit untuk guru demo
+        CreditTransaction::create([
+            'user_id' => $guru->id,
+            'type' => 'bonus',
+            'amount' => 10,
+            'balance_before' => 0,
+            'balance_after' => 10,
+            'description' => 'Kredit awal registrasi - Guru Demo',
+            'reference_id' => null,
+            'reference_type' => 'registration',
+            'performed_by' => null,
+            'notes' => 'Selamat datang! Anda mendapatkan 10 kredit gratis.',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Update credits guru
+        $guru->update(['credits' => 10]);
+
+        // Create Demo Student
+        $studentUser = User::create([
+            'name' => 'Siswa Demo',
+            'email' => 'siswa@demo.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+            'is_active' => true,
+            'approved_at' => now(),
+        ]);
+        $studentUser->assignRole('siswa');
+
+        // Create Student record untuk siswa demo
+        Student::create([
+            'user_id' => $guru->id, // Siswa ini milik guru demo
+            'username' => 'siswa_demo',
+            'password' => Hash::make('password'),
+            'name' => 'Siswa Demo',
+            'email' => 'siswa@demo.com',
+            'nisn' => '1234567890',
+            'is_active' => true,
+        ]);
+
         $this->command->info('Roles created successfully!');
         $this->command->info('Admin: admin@demo.com / password');
         $this->command->info('Guru: guru@demo.com / password');
+        $this->command->info('Siswa: siswa@demo.com / password');
     }
 }

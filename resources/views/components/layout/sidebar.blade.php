@@ -32,6 +32,9 @@
                 <a class="sidebar-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}" href="{{ route('admin.settings.index') }}">
                     <i class="bi bi-gear"></i> Settings
                 </a>
+                <a class="sidebar-link {{ request()->routeIs('admin.settings.credits*') ? 'active' : '' }}" href="{{ route('admin.settings.credits') }}">
+                    <i class="bi bi-coin"></i> Pengaturan Kredit
+                </a>
                 
             @elseif($role === 'guru')
                 <a class="sidebar-link {{ request()->routeIs('guru.dashboard') ? 'active' : '' }}" href="{{ route('guru.dashboard') }}">

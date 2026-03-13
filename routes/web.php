@@ -60,6 +60,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     // Credit Packages
     Route::resource('credit-packages', App\Http\Controllers\Admin\CreditPackageController::class);
     Route::post('/credit-packages/{credit_package}/toggle-status', [App\Http\Controllers\Admin\CreditPackageController::class, 'toggleStatus'])->name('credit-packages.toggle-status');
+
+    // Credit Settings
+    Route::get('/settings/credits', [App\Http\Controllers\Admin\CreditSettingController::class, 'index'])->name('settings.credits');
+    Route::put('/settings/credits', [App\Http\Controllers\Admin\CreditSettingController::class, 'update'])->name('settings.credits.update');
 });
 
 // ============================================

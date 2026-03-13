@@ -17,9 +17,7 @@ class User extends Authenticatable
         'password',
         'institution_name',
         'phone',
-        // SISTEM KREDIT - plan dan plan_expired_at dihapus
         'max_students',
-        'max_packages',
         'max_questions',
         'max_classes',
         'credits',
@@ -111,13 +109,6 @@ class User extends Authenticatable
     public function getMaxStudentsAttribute($value)
     {
         return Setting::get('global_max_students', $value ?? 50);
-    }
-
-    public function getMaxPackagesAttribute($value)
-    {
-        // max_packages sekarang tidak digunakan, diganti kredit
-        // Tapi tetap ada untuk backward compatibility
-        return 999999;
     }
 
     public function getMaxQuestionsAttribute($value)
