@@ -142,6 +142,17 @@ h1, h2, h3, h4, h5, h6 {
     gap: 12px;
 }
 
+.exam-violations {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 15px;
+}
+
+.exam-violations i {
+    font-size: 1.2rem;
+}
+
 /* Exam Main Content */
 .exam-main {
     display: flex;
@@ -639,6 +650,44 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--accent-hover);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+/* ==================== Violations Badge ==================== */
+
+#violation-badge {
+    font-size: 0.85rem;
+    padding: 4px 10px;
+}
+
+#violation-badge.bg-danger {
+    animation: pulse 1s infinite;
+}
+
+/* Sticky navigation */
+.sticky-top-100 {
+    position: sticky;
+    top: 100px;
+}
+
+/* Legend boxes */
+.legend-box {
+    width: 30px;
+    height: 24px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.legend-box-answered {
+    background: var(--primary);
+}
+
+.legend-box-unanswered {
+    border: 1px solid var(--border);
+    background: white;
+}
+
+.legend-box-doubt {
+    background: var(--accent);
 }
 
 /* ==================== Responsive ==================== */

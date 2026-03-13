@@ -126,6 +126,12 @@ class TestController extends Controller
             abort(403);
         }
 
+        // Check if flagged (kicked out due to violations)
+        if ($attempt->is_flagged) {
+            return redirect()->route('student.test.result', $attempt)
+                ->with('error', 'Anda telah dikeluarikan dari ujian ini. Hubungi guru untuk mendapatkan token reset.');
+        }
+
         // Check if expired
         if ($attempt->isExpired()) {
             $this->autoSubmit($attempt);
@@ -158,7 +164,10 @@ class TestController extends Controller
             ->pluck('question_id')
             ->toArray();
 
-        return view('student.test.work', compact('attempt', 'package', 'questions', 'existingAnswers', 'doubtQuestions'));
+        // Get current violation count for JS initialization
+        $violationCount = $attempt->violations_count;
+
+        return view('student.test.work', compact('attempt', 'package', 'questions', 'existingAnswers', 'doubtQuestions', 'violationCount'));
     }
 
     public function continueAttempt(TestAttempt $attempt)

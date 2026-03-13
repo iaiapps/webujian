@@ -11,30 +11,33 @@
     <!-- Fonts -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
+
     <!-- Custom CSS -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    
+
     @stack('styles')
 </head>
 
 @php
-// Auto-detect role
-if (auth()->guard('student')->check()) {
-    $role = 'student';
-} elseif (auth()->user()->role === 'admin') {
-    $role = 'admin';
-} else {
-    $role = 'guru';
-}
+    // Auto-detect role
+    if (auth()->guard('student')->check()) {
+        $role = 'student';
+    } elseif (auth()->user()->role === 'admin') {
+        $role = 'admin';
+    } else {
+        $role = 'guru';
+    }
 @endphp
 
 <body class="{{ $role === 'student' ? 'student-layout' : '' }} {{ $bodyClass ?? '' }}">
+
     <div class="app-wrapper">
         @include('components.layout.sidebar', ['role' => $role])
 
@@ -47,7 +50,7 @@ if (auth()->guard('student')->check()) {
                     <h1 class="navbar-title">@yield('page-title', 'Dashboard')</h1>
                 </div>
                 <div class="navbar-right">
-                    @if($role === 'guru')
+                    @if ($role === 'guru')
                         {{-- SISTEM KREDIT - Tampilkan kredit bukan plan --}}
                         <span class="navbar-plan-badge badge-orange me-3">
                             <i class="bi bi-coin me-1"></i>{{ auth()->user()->credits ?? 0 }} Kredit

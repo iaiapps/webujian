@@ -25,11 +25,22 @@ return new class extends Migration
             $table->enum('status', ['ongoing', 'completed', 'expired'])->default('ongoing');
             $table->ipAddress('ip_address')->nullable();
             $table->text('user_agent')->nullable();
+
+            // ANTI PELANGGARAN / PROCTORING
+            $table->integer('violations_count')->default(0);
+            $table->json('violations_log')->nullable(); // Detail setiap pelanggaran
+            $table->boolean('is_flagged')->default(false);
+            $table->timestamp('flagged_at')->nullable();
+            $table->string('reset_token')->nullable();
+            $table->timestamp('reset_token_expires_at')->nullable();
+
             $table->timestamps();
 
             $table->index('student_id');
             $table->index('package_id');
             $table->index('status');
+            $table->index('is_flagged');
+            $table->index('reset_token');
             $table->unique(['student_id', 'package_id']); // prevent multiple attempts
         });
     }

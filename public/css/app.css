@@ -1261,6 +1261,20 @@ body.student-layout .sidebar {
     --sidebar-width: 220px;
 }
 
-body.student-layout .top-navbar {
-    --navbar-height: 60px;
+/* ==================== Result Page ==================== */
+
+.icon-success {
+    font-size: 4rem;
+}
+
+.leaderboard-th-rank {
+    width: 60px;
+}
+
+.progress-sm {
+    height: 20px;
+}
+
+.progress-sm .progress-bar {
+    font-size: 0.75rem;
 }

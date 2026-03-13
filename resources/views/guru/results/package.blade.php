@@ -81,6 +81,7 @@
                                         <th>Salah</th>
                                         <th>Kosong</th>
                                         <th>Durasi</th>
+                                        <th>Pelanggaran</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -122,10 +123,79 @@
                                                 {{ $duration !== null ? $duration . ' menit' : '-' }}
                                             </td>
                                             <td>
-                                                <a href="{{ route('guru.results.student', $attempt->student) }}"
-                                                    class="btn btn-sm btn-info">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
+                                                @if ($attempt->violations_count > 0)
+                                                    @php
+                                                        $violationsLog = $attempt->violations_log ? json_decode($attempt->violations_log, true) : [];
+                                                        $logHtml = '';
+                                                        foreach ($violationsLog as $log) {
+                                                            $typeLabel = match($log['type']) {
+                                                                'tab_switch' => 'Pindah Tab',
+                                                                'window_blur' => 'Klik Luar',
+                                                                'right_click' => 'Klik Kanan',
+                                                                'copy' => 'Copy',
+                                                                'cut' => 'Cut',
+                                                                'paste' => 'Paste',
+                                                                'devtools' => 'DevTools',
+                                                                default => $log['type'],
+                                                            };
+                                                            $logHtml .= '<div>• ' . $typeLabel . ' (' . \Carbon\Carbon::parse($log['time'])->format('H:i:s') . ')</div>';
+                                                        }
+                                                    @endphp
+                                                    @if ($attempt->is_flagged)
+                                                        <span class="badge bg-danger" 
+                                                            data-bs-toggle="popover" 
+                                                            data-bs-title="Detail Pelanggaran" 
+                                                            data-bs-html="true"
+                                                            data-bs-content="{{ $logHtml }}">
+                                                            Terflag ({{ $attempt->violations_count }}x)
+                                                        </span>
+                                                    @else
+                                                        <span class="badge bg-warning text-dark" 
+                                                            data-bs-toggle="popover" 
+                                                            data-bs-title="Detail Pelanggaran" 
+                                                            data-bs-html="true"
+                                                            data-bs-content="{{ $logHtml }}">
+                                                            {{ $attempt->violations_count }}x
+                                                        </span>
+                                                    @endif
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ route('guru.results.student', $attempt->student) }}"
+                                                        class="btn btn-info">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    @if ($attempt->is_flagged)
+                                                        @if ($attempt->reset_token)
+                                                            <button type="button" class="btn btn-secondary" 
+                                                                data-bs-toggle="popover" 
+                                                                data-bs-title="Token Reset" 
+                                                                data-bs-content="{{ $attempt->reset_token }} (exp: {{ $attempt->reset_token_expires_at?->format('d/m H:i') }})">
+                                                                <i class="bi bi-key"></i>
+                                                            </button>
+                                                            <form action="{{ route('guru.results.clear-reset-token', $attempt) }}" 
+                                                                  method="POST" class="d-inline">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="btn btn-danger" 
+                                                                    onclick="return confirm('Hapus token?')">
+                                                                    <i class="bi bi-x-lg"></i>
+                                                                </button>
+                                                            </form>
+                                                        @else
+                                                            <form action="{{ route('guru.results.reset-token', $attempt) }}" 
+                                                                  method="POST" class="d-inline">
+                                                                @csrf
+                                                                <button type="submit" class="btn btn-warning">
+                                                                    <i class="bi bi-key"></i> Generate Token
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    @endif
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -190,7 +260,7 @@
                                     <span>{{ $range }}</span>
                                     <span><strong>{{ $count }}</strong> siswa</span>
                                 </div>
-                                <div class="progress" style="height: 20px;">
+                                <div class="progress progress-sm">
                                     <div class="progress-bar bg-{{ $color }}" style="width: {{ $percentage }}%">
                                         {{ $percentage }}%
                                     </div>

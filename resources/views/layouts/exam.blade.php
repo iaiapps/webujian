@@ -38,6 +38,11 @@
                 <span>@yield('timer', '--:--')</span>
             </div>
             
+            <div class="exam-violations" title="Pelanggaran">
+                <i class="bi bi-exclamation-triangle text-warning"></i>
+                <span class="badge bg-warning" id="violation-badge">@yield('violation-count', '0/3')</span>
+            </div>
+            
             <div class="exam-actions">
                 @yield('header-actions')
             </div>

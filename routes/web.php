@@ -119,6 +119,8 @@ Route::prefix('guru')->name('guru.')->middleware(['auth', 'role:guru', 'check.ap
     Route::get('/results/package/{package}', [App\Http\Controllers\Guru\ResultController::class, 'package'])->name('results.package');
     Route::get('/results/student/{student}', [App\Http\Controllers\Guru\ResultController::class, 'student'])->name('results.student');
     Route::get('/results/export/{package}', [App\Http\Controllers\Guru\ResultController::class, 'export'])->name('results.export');
+    Route::post('/results/attempt/{attempt}/reset-token', [App\Http\Controllers\Guru\ResultController::class, 'generateResetToken'])->name('results.reset-token');
+    Route::delete('/results/attempt/{attempt}/reset-token', [App\Http\Controllers\Guru\ResultController::class, 'clearResetToken'])->name('results.clear-reset-token');
 
     // ============================================================
     // SISTEM KREDIT - Ganti Subscription menjadi Credits
@@ -161,6 +163,12 @@ Route::prefix('student')->name('student.')->middleware('auth:student')->group(fu
 
     // Leaderboard API (for polling)
     Route::get('/leaderboard/{package}', [App\Http\Controllers\Student\ResultController::class, 'leaderboard'])->name('test.leaderboard');
+
+    // Violation API (for anti-cheating)
+    Route::post('/result/{attempt}/violation', [App\Http\Controllers\Student\ResultController::class, 'recordViolation'])->name('test.violation');
+
+    // Reset token
+    Route::post('/result/{attempt}/reset', [App\Http\Controllers\Student\ResultController::class, 'resetWithToken'])->name('test.reset');
 
     // Profile
     Route::get('/profile', [App\Http\Controllers\Student\ProfileController::class, 'edit'])->name('profile.edit');

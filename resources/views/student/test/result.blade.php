@@ -72,7 +72,7 @@
         <div class="row justify-content-center">
             <div class="col-lg-10">
                 <div class="text-center mb-4">
-                    <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
+                    <i class="bi bi-check-circle text-success icon-success"></i>
                     <h2 class="mt-3">Tes Selesai!</h2>
                     <p class="text-muted">{{ $package->title }}</p>
                 </div>
@@ -104,7 +104,7 @@
                                 <table class="table table-hover mb-0">
                                     <thead class="table-light">
                                         <tr>
-                                            <th class="text-center" style="width: 60px;">Peringkat</th>
+                                            <th class="text-center leaderboard-th-rank">Peringkat</th>
                                             <th>Nama</th>
                                             <th class="text-center">Skor</th>
                                             <th class="text-center">Durasi</th>
@@ -189,6 +189,45 @@
                     </div>
                 </div>
 
+                {{-- Flagged / Reset Token --}}
+                @if ($attempt->is_flagged)
+                    <div class="card border-0 shadow-sm mb-4 border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-exclamation-triangle"></i> Anda Dikeluarkan dari Ujian
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-3">
+                                Anda telah dikeluarikan dari ujian karena terlalu banyak pelanggaran 
+                                ({{ $attempt->violations_count }} pelanggaran).
+                            </p>
+                            
+                            @if ($attempt->reset_token && $attempt->reset_token_expires_at && now()->lessThan($attempt->reset_token_expires_at))
+                                <div class="alert alert-success">
+                                    <h6 class="alert-heading">Token Reset Tersedia!</h6>
+                                    <p class="mb-2">Hubungi guru untuk mendapatkan token reset. Token akan expired pada 
+                                        {{ $attempt->reset_token_expires_at->format('d M Y H:i') }}</p>
+                                    
+                                    <form action="{{ route('student.test.reset', $attempt) }}" method="POST" class="d-flex gap-2">
+                                        @csrf
+                                        <input type="text" name="reset_token" class="form-control" 
+                                            placeholder="Masukkan token reset" required>
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="bi bi-arrow-repeat"></i> Gunakan Token
+                                        </button>
+                                    </form>
+                                </div>
+                            @else
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-info-circle"></i>
+                                    Silakan hubungi guru untuk meminta token reset agar dapat mengikuti ujian ulang.
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
                 {{-- Per Category --}}
                 @php
                     $categories = $attempt->answers->groupBy('question.category.name');
@@ -211,7 +250,7 @@
                                         <span class="text-muted">{{ $correct }}/{{ $total }}
                                             ({{ $percentage }}%)</span>
                                     </div>
-                                    <div class="progress" style="height: 20px;">
+                                    <div class="progress progress-sm">
                                         <div class="progress-bar bg-{{ $percentage >= 70 ? 'success' : ($percentage >= 50 ? 'warning' : 'danger') }}"
                                             style="width: {{ $percentage }}%">
                                             {{ $percentage }}%

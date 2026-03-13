@@ -1,18 +1,19 @@
 <?php
 
 // app/Http/Controllers/Guru/ResultController.php
+
 namespace App\Http\Controllers\Guru;
 
+use App\Exports\TestResultsExport;
 use App\Http\Controllers\Controller;
-use App\Models\TestPackage;
-use App\Models\TestAttempt;
-use App\Models\Student;
 use App\Models\Question;
-use Illuminate\Http\Request;
+use App\Models\Student;
+use App\Models\TestAttempt;
+use App\Models\TestPackage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\TestResultsExport;
 
 class ResultController extends Controller
 {
@@ -62,10 +63,19 @@ class ResultController extends Controller
         // Score distribution
         $scoreDistribution = $attempts->groupBy(function ($attempt) {
             $score = $attempt->total_score;
-            if ($score >= 80) return '80-100';
-            if ($score >= 60) return '60-79';
-            if ($score >= 40) return '40-59';
-            if ($score >= 20) return '20-39';
+            if ($score >= 80) {
+                return '80-100';
+            }
+            if ($score >= 60) {
+                return '60-79';
+            }
+            if ($score >= 40) {
+                return '40-59';
+            }
+            if ($score >= 20) {
+                return '20-39';
+            }
+
             return '0-19';
         })->map->count();
 
@@ -132,9 +142,43 @@ class ResultController extends Controller
             abort(403);
         }
 
-        $fileName = 'hasil_' . str_replace(' ', '_', $package->title) . '_' . now()->format('Y-m-d') . '.xlsx';
+        $fileName = 'hasil_'.str_replace(' ', '_', $package->title).'_'.now()->format('Y-m-d').'.xlsx';
 
         return Excel::download(new TestResultsExport($package), $fileName);
+    }
+
+    public function generateResetToken(TestAttempt $attempt)
+    {
+        // Check ownership
+        if ($attempt->package->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        // Generate unique token
+        $token = Str::random(32);
+
+        // Save token with 24 hours expiry
+        $attempt->update([
+            'reset_token' => $token,
+            'reset_token_expires_at' => now()->addHours(24),
+        ]);
+
+        return back()->with('success', 'Token reset berhasil dibuat. Token: '.$token);
+    }
+
+    public function clearResetToken(TestAttempt $attempt)
+    {
+        // Check ownership
+        if ($attempt->package->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $attempt->update([
+            'reset_token' => null,
+            'reset_token_expires_at' => null,
+        ]);
+
+        return back()->with('success', 'Token reset berhasil dihapus.');
     }
 
     private function analyzeQuestions(TestPackage $package)
@@ -188,7 +232,7 @@ class ResultController extends Controller
             foreach ($attempt->answers as $answer) {
                 $categoryName = $answer->question->category->name;
 
-                if (!isset($categoryData[$categoryName])) {
+                if (! isset($categoryData[$categoryName])) {
                     $categoryData[$categoryName] = [
                         'total' => 0,
                         'correct' => 0,

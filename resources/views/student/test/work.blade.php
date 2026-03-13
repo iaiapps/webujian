@@ -3,130 +3,8 @@
 
 @section('title', 'Mengerjakan - ' . $package->title)
 
-@push('styles')
-<style>
-    .exam-header {
-        background: var(--primary);
-        color: white;
-        padding: 12px 0;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-    }
-
-    .exam-timer {
-        font-size: 2rem;
-        font-weight: 800;
-        font-family: var(--font-heading);
-    }
-
-    .exam-timer.warning {
-        color: var(--accent);
-    }
-
-    .exam-timer.danger {
-        color: var(--danger);
-        animation: pulse 1s infinite;
-    }
-
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.6; }
-    }
-
-    .question-card {
-        background: white;
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow);
-    }
-
-    .question-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        padding-bottom: 16px;
-        border-bottom: 1px solid var(--border-light);
-    }
-
-    .question-number {
-        font-family: var(--font-heading);
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: var(--primary);
-    }
-
-    .question-text {
-        font-size: 1.1rem;
-        line-height: 1.7;
-        margin-bottom: 24px;
-    }
-
-    .option-item {
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border: 2px solid var(--border) !important;
-    }
-
-    .option-item:hover {
-        border-color: var(--primary) !important;
-        background: var(--primary-subtle);
-    }
-
-    .option-item.selected {
-        border-color: var(--primary) !important;
-        background: var(--primary-subtle);
-    }
-
-    .option-item input:checked + label {
-        font-weight: 600;
-    }
-
-    .nav-sidebar {
-        background: white;
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow);
-        position: sticky;
-        top: 80px;
-    }
-
-    .nav-btn {
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        transition: all 0.2s ease;
-    }
-
-    .nav-btn.answered {
-        background: var(--primary);
-        border-color: var(--primary);
-        color: white;
-    }
-
-    .nav-btn.doubt {
-        border-color: var(--accent);
-        background: var(--accent-light);
-        color: var(--accent);
-    }
-
-    .nav-btn.current {
-        box-shadow: 0 0 0 3px var(--primary-subtle);
-    }
-
-    .btn-selesai {
-        background: var(--success);
-        border-color: var(--success);
-        color: white;
-    }
-
-    .btn-selesai:hover {
-        background: #059669;
-        color: white;
-    }
-</style>
-@endpush
-
 @section('header-actions')
-    <button type="button" class="btn btn-warning" onclick="confirmSubmit()" style="color: white;">
+    <button type="button" class="btn btn-warning text-white" onclick="confirmSubmit()">
         <i class="bi bi-send"></i> Akhiri Tes
     </button>
 @endsection
@@ -153,7 +31,7 @@
 
                                     @if ($question->question_image)
                                         <img src="{{ Storage::url($question->question_image) }}" alt="Question Image"
-                                            class="img-fluid rounded mb-3" style="max-width: 100%;">
+                                            class="img-fluid rounded mb-3">
                                     @endif
                                 </div>
 
@@ -240,12 +118,12 @@
 
             {{-- Navigation Sidebar --}}
             <div class="col-lg-3">
-                <div class="card border-0 shadow-sm sticky-top" style="top: 100px;">
+                <div class="card border-0 shadow-sm sticky-top-100">
                     <div class="card-header bg-white">
                         <h6 class="mb-0">Navigasi Nomor</h6>
                     </div>
                     <div class="card-body">
-                        <div class="d-grid gap-2" style="grid-template-columns: repeat(5, 1fr); display: grid;">
+                        <div class="nav-numbers">
                             @foreach ($questions as $index => $question)
                                 <button type="button" class="btn btn-sm btn-outline-primary nav-btn"
                                     data-index="{{ $index }}" data-question-id="{{ $question->id }}"
@@ -259,15 +137,15 @@
 
                         <div class="small">
                             <div class="d-flex align-items-center mb-2">
-                                <div class="btn btn-sm btn-primary me-2" style="width: 30px;"></div>
+                                <div class="legend-box legend-box-answered me-2"></div>
                                 <span>Sudah dijawab</span>
                             </div>
                             <div class="d-flex align-items-center mb-2">
-                                <div class="btn btn-sm btn-outline-primary me-2" style="width: 30px;"></div>
+                                <div class="legend-box legend-box-unanswered me-2"></div>
                                 <span>Belum dijawab</span>
                             </div>
                             <div class="d-flex align-items-center">
-                                <div class="btn btn-sm btn-warning me-2" style="width: 30px;"></div>
+                                <div class="legend-box legend-box-doubt me-2"></div>
                                 <span>Ragu-ragu</span>
                             </div>
                         </div>
@@ -284,6 +162,103 @@
             let currentIndex = 0;
             const totalQuestions = {{ $questions->count() }};
             let timerInterval;
+            let violationCount = {{ $violationCount ?? 0 }};
+            const maxViolations = {{ $package->max_violations ?? 3 }};
+            let isFlagged = {{ $attempt->is_flagged ? 'true' : 'false' }};
+            
+            // Initialize badge on page load
+            if (violationCount > 0) {
+                updateViolationDisplay();
+            }
+
+            // Report violation to server
+            async function reportViolation(type) {
+                if (isFlagged) return;
+                
+                try {
+                    const response = await fetch(`/student/result/${attemptId}/violation`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ type: type })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.flagged) {
+                        isFlagged = true;
+                        alert('⚠️ ' + data.message);
+                        setTimeout(() => {
+                            window.location.href = '/student/result/' + attemptId;
+                        }, 2000);
+                    } else {
+                        violationCount = data.violations_count;
+                        alert('⚠️ Pelanggaran! ' + data.message);
+                        updateViolationDisplay();
+                    }
+                } catch (error) {
+                    console.error('Error reporting violation:', error);
+                }
+            }
+            
+            function updateViolationDisplay() {
+                const badge = document.getElementById('violation-badge');
+                if (badge) {
+                    badge.textContent = violationCount + '/' + maxViolations;
+                    if (violationCount >= maxViolations - 1) {
+                        badge.classList.remove('bg-warning');
+                        badge.classList.add('bg-danger');
+                    }
+                }
+            }
+
+            // Anti-cheating: Tab switch / visibility change
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    reportViolation('tab_switch');
+                }
+            });
+
+            // Anti-cheating: Window blur (click outside)
+            window.addEventListener('blur', () => {
+                reportViolation('window_blur');
+            });
+
+            // Anti-cheating: Disable right-click
+            document.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                reportViolation('right_click');
+            });
+
+            // Anti-cheating: Disable copy
+            document.addEventListener('copy', (e) => {
+                e.preventDefault();
+                reportViolation('copy');
+            });
+
+            // Anti-cheating: Disable cut
+            document.addEventListener('cut', (e) => {
+                e.preventDefault();
+                reportViolation('cut');
+            });
+
+            // Anti-cheating: Disable paste
+            document.addEventListener('paste', (e) => {
+                e.preventDefault();
+                reportViolation('paste');
+            });
+
+            // Anti-cheating: Detect DevTools (F12)
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'F12' || 
+                    (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                    (e.ctrlKey && e.shiftKey && e.key === 'J') ||
+                    (e.ctrlKey && e.key === 'u')) {
+                    reportViolation('devtools');
+                }
+            });
 
             // Timer
             function startTimer() {

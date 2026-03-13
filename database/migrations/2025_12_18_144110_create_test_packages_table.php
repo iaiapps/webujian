@@ -29,6 +29,10 @@ return new class extends Migration
             $table->decimal('score_correct', 5, 2)->default(4);
             $table->decimal('score_wrong', 5, 2)->default(-1);
             $table->decimal('score_empty', 5, 2)->default(0);
+
+            // ANTI PELANGGARAN
+            $table->integer('max_violations')->default(3);
+
             $table->timestamps();
             $table->softDeletes();
 
