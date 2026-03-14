@@ -86,7 +86,7 @@ class CreditController extends Controller
             'expiredAt' => now()->addHours(24)->toIso8601String(),
             'items' => [[
                 'quantity' => 1,
-                'rate' => $package->price,
+                'rate' => (int) $package->price,
                 'description' => $package->name,
             ]],
             'extraData' => [
