@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Preview</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+        }
+
+        .dashboard-preview {
+            max-width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            background: #fff;
+        }
+
+        .preview-header {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .preview-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-red {
+            background: #EF4444;
+        }
+
+        .dot-yellow {
+            background: #F59E0B;
+        }
+
+        .dot-green {
+            background: #10B981;
+        }
+
+        .preview-nav {
+            background: #1E1B4B;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .preview-logo {
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .preview-menu {
+            display: flex;
+            gap: 20px;
+        }
+
+        .preview-menu span {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .preview-menu span.active {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .preview-content {
+            padding: 24px;
+            background: #F1F5F9;
+            min-height: 320px;
+        }
+
+        .preview-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        .credit-banner {
+            background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+            border-radius: 10px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .credit-badge {
+            background: #F59E0B;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .credit-info h6 {
+            margin: 0;
+            font-weight: 600;
+            color: #92400E;
+        }
+
+        .credit-info small {
+            color: #B45309;
+        }
+
+        .btn-topup {
+            background: #4F46E5;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: #fff;
+            border-radius: 8px;
+            padding: 14px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+
+        .stat-box i {
+            font-size: 1.3rem;
+            margin-bottom: 6px;
+        }
+
+        .stat-box .value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1E1B4B;
+        }
+
+        .stat-box .label {
+            font-size: 0.7rem;
+            color: #6B7280;
+            text-transform: uppercase;
+        }
+
+        .stat-blue i {
+            color: #3B82F6;
+        }
+
+        .stat-green i {
+            color: #10B981;
+        }
+
+        .stat-orange i {
+            color: #F59E0B;
+        }
+
+        .stat-purple i {
+            color: #8B5CF6;
+        }
+
+        .actions-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .action-btn {
+            background: #fff;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 16px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            border-color: #4F46E5;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+        }
+
+        .action-btn i {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .action-btn span {
+            font-size: 0.8rem;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .btn-student i {
+            color: #3B82F6;
+        }
+
+        .btn-question i {
+            color: #10B981;
+        }
+
+        .btn-package i {
+            color: #F59E0B;
+        }
+
+        .btn-results i {
+            color: #8B5CF6;
+        }
+
+        @media (max-width: 600px) {
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .actions-row {
+                grid-template-columns: repeat(2, 1px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-preview">
+        <!-- Mac-style header -->
+        <div class="preview-header">
+            <span class="preview-dot dot-red"></span>
+            <span class="preview-dot dot-yellow"></span>
+            <span class="preview-dot dot-green"></span>
+        </div>
+
+        <!-- Navbar -->
+        <div class="preview-nav">
+            <div class="preview-logo">
+                <i class="bi bi-mortarboard-fill"></i>
+                Exam Web
+            </div>
+            <div class="preview-menu">
+                <span class="active">Dashboard</span>
+                <span>Siswa</span>
+                <span>Soal</span>
+                <span>Paket Tes</span>
+                <span>Hasil</span>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="preview-content">
+            <!-- Credit Banner -->
+            <div class="credit-banner">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="credit-badge"><i class="bi bi-coin me-1"></i>10</span>
+                    <div class="credit-info">
+                        <h6>Kredit Tersedia</h6>
+                        <small><i class="bi bi-check-circle"></i> Dapat membuat paket tes</small>
+                    </div>
+                </div>
+                <button class="btn-topup"><i class="bi bi-plus-circle me-1"></i> Beli Kredit</button>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-row">
+                <div class="stat-box stat-blue">
+                    <i class="bi bi-people-fill"></i>
+                    <div class="value">15/100</div>
+                    <div class="label">Siswa</div>
+                </div>
+                <div class="stat-box stat-green">
+                    <i class="bi bi-question-circle-fill"></i>
+                    <div class="value">48/500</div>
+                    <div class="label">Soal</div>
+                </div>
+                <div class="stat-box stat-orange">
+                    <i class="bi bi-box-fill"></i>
+                    <div class="value">3</div>
+                    <div class="label">Paket Tes</div>
+                </div>
+                <div class="stat-box stat-purple">
+                    <i class="bi bi-bar-chart-fill"></i>
+                    <div class="value">127</div>
+                    <div class="label">Hasil</div>
+                </div>
+                <div class="stat-box stat-green">
+                    <i class="bi bi-coin"></i>
+                    <div class="value">10</div>
+                    <div class="label">Kredit</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="actions-row">
+                <div class="action-btn btn-student">
+                    <i class="bi bi-person-plus-fill"></i>
+                    <span>Tambah Siswa</span>
+                </div>
+                <div class="action-btn btn-question">
+                    <i class="bi bi-file-earmark-plus-fill"></i>
+                    <span>Buat Soal</span>
+                </div>
+                <div class="action-btn btn-package">
+                    <i class="bi bi-folder-plus"></i>
+                    <span>Buat Paket</span>
+                </div>
+                <div class="action-btn btn-results">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <span>Lihat Hasil</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

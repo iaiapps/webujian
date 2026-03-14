@@ -331,6 +331,7 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 1.1rem;
     max-width: 600px;
     margin: 0 auto;
+    text-align: center;
 }
 
 .feature-card {
@@ -404,9 +405,39 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--text-primary);
 }
 
-.steps-section p {
+.steps-section .col-md-4 p {
     color: var(--text-secondary);
     margin: 0;
+}
+
+/* Why Choose Us Section */
+.why-choose-section {
+    padding: var(--section-padding);
+    background-color: var(--bg-main);
+}
+
+.why-choose-section .col-md-6.col-lg-3 {
+    transition: transform 0.3s ease;
+}
+
+.why-choose-section .col-md-6.col-lg-3:hover {
+    transform: translateY(-5px);
+}
+
+.why-choose-section i {
+    width: 70px;
+    height: 70px;
+    background: var(--primary-subtle);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.why-choose-section h5 {
+    color: var(--text-primary);
+    font-weight: 600;
 }
 
 /* Pricing Section */

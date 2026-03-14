@@ -14,7 +14,7 @@ class SettingSeeder extends Seeder
     {
         $settings = [
             // General Settings
-            ['key' => 'app_name', 'value' => 'TKA Web App', 'type' => 'string', 'group' => 'general'],
+            ['key' => 'app_name', 'value' => 'EXAM WEB', 'type' => 'string', 'group' => 'general'],
             ['key' => 'app_logo', 'value' => null, 'type' => 'string', 'group' => 'general'],
             ['key' => 'app_timezone', 'value' => 'Asia/Jakarta', 'type' => 'string', 'group' => 'general'],
 
