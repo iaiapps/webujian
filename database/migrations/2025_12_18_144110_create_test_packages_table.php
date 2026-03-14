@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->integer('duration'); // dalam menit
-            $table->timestamp('start_date');
-            $table->timestamp('end_date');
+            $table->timestamp('start_date')->nullable();
+            $table->timestamp('end_date')->nullable();
             $table->boolean('show_result')->default(true);
             $table->boolean('show_explanation')->default(true);
             $table->boolean('show_ranking')->default(true);
