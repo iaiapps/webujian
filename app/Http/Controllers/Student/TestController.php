@@ -146,7 +146,7 @@ class TestController extends Controller
         }
 
         $package = $attempt->package;
-        $package->load('questions.category');
+        $package->load(['questions.category', 'questions.options']);
 
         // Get questions (shuffle if needed)
         $questions = $package->questions;

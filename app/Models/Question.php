@@ -16,11 +16,6 @@ class Question extends Model
         'question_type',
         'question_text',
         'question_image',
-        'option_a',
-        'option_b',
-        'option_c',
-        'option_d',
-        'option_e',
         'correct_answer',
         'explanation',
         'difficulty',
@@ -49,12 +44,22 @@ class Question extends Model
             ->withTimestamps();
     }
 
+    public function options()
+    {
+        return $this->hasMany(QuestionOption::class)->orderBy('order');
+    }
+
+    public function getOptionByLabel($label)
+    {
+        return $this->options()->where('label', $label)->first();
+    }
+
     // Helper Methods
     public function checkAnswer($studentAnswer)
     {
         if ($this->question_type === 'single') {
             return strtoupper(trim($this->correct_answer)) === strtoupper(trim($studentAnswer));
-        } else {
+        } elseif ($this->question_type === 'complex') {
             // Complex: A,C,E
             $correctAnswers = array_map('trim', array_map('strtoupper', explode(',', $this->correct_answer)));
             $studentAnswers = array_map('trim', array_map('strtoupper', explode(',', $studentAnswer)));
@@ -63,7 +68,35 @@ class Question extends Model
             sort($studentAnswers);
 
             return $correctAnswers === $studentAnswers;
+        } elseif ($this->question_type === 'category') {
+            // Category: A:B,B:S,C:B,D:B,E:S
+            $correctMap = $this->parseCategoryAnswer($this->correct_answer);
+            $studentMap = $this->parseCategoryAnswer($studentAnswer);
+
+            return $correctMap === $studentMap;
         }
+
+        return false;
+    }
+
+    private function parseCategoryAnswer($answerString)
+    {
+        $result = [];
+        $pairs = explode(',', $answerString);
+
+        foreach ($pairs as $pair) {
+            $parts = explode(':', $pair);
+            if (count($parts) === 2) {
+                $statement = strtoupper(trim($parts[0]));
+                $value = strtoupper(trim($parts[1]));
+                $result[$statement] = $value;
+            }
+        }
+
+        // Sort by key to ensure consistent comparison
+        ksort($result);
+
+        return $result;
     }
 
     public function getCorrectAnswersArray()

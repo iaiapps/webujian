@@ -73,16 +73,22 @@ class QuestionController extends Controller
 
     public function store(Request $request)
     {
+        // Filter out empty options (D & E can be empty)
+        $filteredOptions = array_filter($request->options ?? [], function ($option) {
+            return ! empty(trim($option['content'] ?? ''));
+        });
+
+        // Replace request options with filtered
+        $request->merge(['options' => $filteredOptions]);
+
         $request->validate([
             'category_id' => ['required', 'exists:question_categories,id'],
-            'question_type' => ['required', 'in:single,complex'],
+            'question_type' => ['required', 'in:single,complex,category'],
             'question_text' => ['required', 'string'],
             'question_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
-            'option_a' => ['required', 'string'],
-            'option_b' => ['required', 'string'],
-            'option_c' => ['required', 'string'],
-            'option_d' => ['required', 'string'],
-            'option_e' => ['required', 'string'],
+            'options' => ['required', 'array', 'min:3', 'max:5'], // Min 3 (A, B, C), max 5
+            'options.*.label' => ['required', 'string', 'size:1'],
+            'options.*.content' => ['required', 'string'],
             'correct_answer' => ['required', 'string'],
             'explanation' => ['nullable', 'string'],
             'difficulty' => ['required', 'in:easy,medium,hard'],
@@ -94,11 +100,6 @@ class QuestionController extends Controller
             'category_id',
             'question_type',
             'question_text',
-            'option_a',
-            'option_b',
-            'option_c',
-            'option_d',
-            'option_e',
             'correct_answer',
             'explanation',
             'difficulty',
@@ -117,7 +118,29 @@ class QuestionController extends Controller
             }
         }
 
+        // Format correct answer untuk category type
+        if ($request->question_type === 'category') {
+            // Dari form: ['A' => 'B', 'B' => 'S', ...]
+            if (is_array($request->correct_answer)) {
+                $pairs = [];
+                foreach ($request->correct_answer as $statement => $value) {
+                    $pairs[] = strtoupper($statement).':'.strtoupper($value);
+                }
+                $data['correct_answer'] = implode(',', $pairs);
+            }
+        }
+
+        // Create question
         $question = $user->questions()->create($data);
+
+        // Create options
+        foreach ($request->options as $index => $option) {
+            $question->options()->create([
+                'label' => strtoupper($option['label']),
+                'content' => $option['content'],
+                'order' => $index,
+            ]);
+        }
 
         return redirect()->route('guru.questions.index')->with('success', 'Soal berhasil ditambahkan!');
     }
@@ -129,7 +152,7 @@ class QuestionController extends Controller
             abort(403);
         }
 
-        $question->load('category');
+        $question->load(['category', 'options']);
 
         return view('guru.questions.show', compact('question'));
     }
@@ -141,6 +164,7 @@ class QuestionController extends Controller
             abort(403);
         }
 
+        $question->load('options');
         $categories = QuestionCategory::where('is_active', true)->get();
 
         return view('guru.questions.edit', compact('question', 'categories'));
@@ -153,16 +177,22 @@ class QuestionController extends Controller
             abort(403);
         }
 
+        // Filter out empty options (D & E can be empty)
+        $filteredOptions = array_filter($request->options ?? [], function ($option) {
+            return ! empty(trim($option['content'] ?? ''));
+        });
+
+        // Replace request options with filtered
+        $request->merge(['options' => $filteredOptions]);
+
         $request->validate([
             'category_id' => ['required', 'exists:question_categories,id'],
-            'question_type' => ['required', 'in:single,complex'],
+            'question_type' => ['required', 'in:single,complex,category'],
             'question_text' => ['required', 'string'],
             'question_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
-            'option_a' => ['required', 'string'],
-            'option_b' => ['required', 'string'],
-            'option_c' => ['required', 'string'],
-            'option_d' => ['required', 'string'],
-            'option_e' => ['required', 'string'],
+            'options' => ['required', 'array', 'min:3', 'max:5'], // Min 3 (A, B, C), max 5
+            'options.*.label' => ['required', 'string', 'size:1'],
+            'options.*.content' => ['required', 'string'],
             'correct_answer' => ['required', 'string'],
             'explanation' => ['nullable', 'string'],
             'difficulty' => ['required', 'in:easy,medium,hard'],
@@ -172,11 +202,6 @@ class QuestionController extends Controller
             'category_id',
             'question_type',
             'question_text',
-            'option_a',
-            'option_b',
-            'option_c',
-            'option_d',
-            'option_e',
             'correct_answer',
             'explanation',
             'difficulty',
@@ -198,7 +223,29 @@ class QuestionController extends Controller
             }
         }
 
+        // Format correct answer untuk category type
+        if ($request->question_type === 'category') {
+            if (is_array($request->correct_answer)) {
+                $pairs = [];
+                foreach ($request->correct_answer as $statement => $value) {
+                    $pairs[] = strtoupper($statement).':'.strtoupper($value);
+                }
+                $data['correct_answer'] = implode(',', $pairs);
+            }
+        }
+
+        // Update question
         $question->update($data);
+
+        // Delete old options and create new ones
+        $question->options()->delete();
+        foreach ($request->options as $index => $option) {
+            $question->options()->create([
+                'label' => strtoupper($option['label']),
+                'content' => $option['content'],
+                'order' => $index,
+            ]);
+        }
 
         return redirect()->route('guru.questions.index')->with('success', 'Soal berhasil diupdate!');
     }
@@ -215,6 +262,7 @@ class QuestionController extends Controller
             Storage::disk('public')->delete($question->question_image);
         }
 
+        // Options will be deleted automatically via cascade
         $question->delete();
 
         return redirect()->route('guru.questions.index')->with('success', 'Soal berhasil dihapus!');

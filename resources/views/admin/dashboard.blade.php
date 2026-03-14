@@ -13,41 +13,23 @@
     {{-- Statistics Cards --}}
     <div class="row g-4 mb-4">
         <div class="col-md-6 col-xl-3">
-            <x-ui.stat-card
-                icon="people-fill"
-                icon-variant="primary"
-                value="{{ $stats['total_users'] }}"
-                label="Total Guru"
-                change="{{ $stats['active_users'] }} aktif"
-                change-type="positive"
-            />
+            <x-ui.stat-card icon="people-fill" icon-variant="primary" value="{{ $stats['total_users'] }}" label="Total Guru"
+                change="{{ $stats['active_users'] }} aktif" change-type="positive" />
         </div>
 
         <div class="col-md-6 col-xl-3">
-            <x-ui.stat-card
-                icon="person-badge-fill"
-                icon-variant="success"
-                value="{{ number_format($stats['total_students']) }}"
-                label="Total Siswa"
-            />
+            <x-ui.stat-card icon="person-badge-fill" icon-variant="success"
+                value="{{ number_format($stats['total_students']) }}" label="Total Siswa" />
         </div>
 
         <div class="col-md-6 col-xl-3">
-            <x-ui.stat-card
-                icon="question-circle-fill"
-                icon-variant="info"
-                value="{{ number_format($stats['total_questions']) }}"
-                label="Total Soal"
-            />
+            <x-ui.stat-card icon="question-circle-fill" icon-variant="info"
+                value="{{ number_format($stats['total_questions']) }}" label="Total Soal" />
         </div>
 
         <div class="col-md-6 col-xl-3">
-            <x-ui.stat-card
-                icon="currency-dollar"
-                icon-variant="orange"
-                value="Rp {{ number_format($revenue['this_month']) }}"
-                label="Revenue Bulan Ini"
-            />
+            <x-ui.stat-card icon="currency-dollar" icon-variant="orange"
+                value="Rp {{ number_format($revenue['this_month']) }}" label="Revenue Bulan Ini" />
         </div>
     </div>
 
@@ -67,7 +49,7 @@
                         </a>
                     </div>
                 @empty
-                    <p class="text-muted text-center py-3">Tidak ada guru yang menunggu persetujuan</p>
+                    <p class="text-muted text-center py-3 mb-0">Tidak ada guru yang menunggu persetujuan</p>
                 @endforelse
 
                 @if ($pendingUsers->count() > 0)

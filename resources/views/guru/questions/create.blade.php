@@ -48,6 +48,8 @@
                                             Pilihan Ganda</option>
                                         <option value="complex" {{ old('question_type') === 'complex' ? 'selected' : '' }}>
                                             PG Kompleks</option>
+                                        <option value="category" {{ old('question_type') === 'category' ? 'selected' : '' }}>
+                                            PG Kompleks (Kategori)</option>
                                     </select>
                                     @error('question_type')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -96,136 +98,139 @@
                             <hr class="my-4">
 
                             <h5 class="mb-3">Pilihan Jawaban</h5>
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> Minimal 3 pilihan (A, B, C) wajib diisi. Pilihan D dan E opsional.
+                            </div>
 
+                            {{-- Option A (Required) --}}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">A. <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control @error('options.0.content') is-invalid @enderror" 
+                                    name="options[0][content]" placeholder="Pilihan A" value="{{ old('options.0.content') }}" required>
+                                <input type="hidden" name="options[0][label]" value="A">
+                                @error('options.0.content')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            {{-- Option B (Required) --}}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">B. <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control @error('options.1.content') is-invalid @enderror" 
+                                    name="options[1][content]" placeholder="Pilihan B" value="{{ old('options.1.content') }}" required>
+                                <input type="hidden" name="options[1][label]" value="B">
+                                @error('options.1.content')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            {{-- Option C (Required) --}}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">C. <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control @error('options.2.content') is-invalid @enderror" 
+                                    name="options[2][content]" placeholder="Pilihan C" value="{{ old('options.2.content') }}" required>
+                                <input type="hidden" name="options[2][label]" value="C">
+                                @error('options.2.content')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            {{-- Option D (Optional) --}}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">D. <span class="text-muted">(opsional)</span></label>
+                                <input type="text" class="form-control @error('options.3.content') is-invalid @enderror" 
+                                    name="options[3][content]" placeholder="Pilihan D (opsional)" value="{{ old('options.3.content') }}">
+                                <input type="hidden" name="options[3][label]" value="D">
+                                @error('options.3.content')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            {{-- Option E (Optional) --}}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">E. <span class="text-muted">(opsional)</span></label>
+                                <input type="text" class="form-control @error('options.4.content') is-invalid @enderror" 
+                                    name="options[4][content]" placeholder="Pilihan E (opsional)" value="{{ old('options.4.content') }}">
+                                <input type="hidden" name="options[4][label]" value="E">
+                                @error('options.4.content')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <hr class="my-4">
+
+                            <h5 class="mb-3">Jawaban Benar</h5>
+
+                            {{-- Single Choice --}}
                             <div id="single-choice" style="display: none;">
-                                <div class="mb-3">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="correct_answer" value="A"
-                                            id="answer_a" {{ old('correct_answer') === 'A' ? 'checked' : '' }}>
-                                        <label class="form-check-label fw-bold" for="answer_a">A.</label>
-                                    </div>
-                                    <input type="text" class="form-control @error('option_a') is-invalid @enderror mt-2"
-                                        name="option_a" placeholder="Pilihan A" value="{{ old('option_a') }}" required>
-                                    @error('option_a')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i> Pilih <strong>satu</strong> jawaban yang benar.
                                 </div>
-
-                                <div class="mb-3">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="correct_answer" value="B"
-                                            id="answer_b" {{ old('correct_answer') === 'B' ? 'checked' : '' }}>
-                                        <label class="form-check-label fw-bold" for="answer_b">B.</label>
-                                    </div>
-                                    <input type="text" class="form-control @error('option_b') is-invalid @enderror mt-2"
-                                        name="option_b" placeholder="Pilihan B" value="{{ old('option_b') }}" required>
-                                    @error('option_b')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <div class="mb-3">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="correct_answer"
-                                            value="C" id="answer_c"
-                                            {{ old('correct_answer') === 'C' ? 'checked' : '' }}>
-                                        <label class="form-check-label fw-bold" for="answer_c">C.</label>
-                                    </div>
-                                    <input type="text"
-                                        class="form-control @error('option_c') is-invalid @enderror mt-2" name="option_c"
-                                        placeholder="Pilihan C" value="{{ old('option_c') }}" required>
-                                    @error('option_c')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <div class="mb-3">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="correct_answer"
-                                            value="D" id="answer_d"
-                                            {{ old('correct_answer') === 'D' ? 'checked' : '' }}>
-                                        <label class="form-check-label fw-bold" for="answer_d">D.</label>
-                                    </div>
-                                    <input type="text"
-                                        class="form-control @error('option_d') is-invalid @enderror mt-2" name="option_d"
-                                        placeholder="Pilihan D" value="{{ old('option_d') }}" required>
-                                    @error('option_d')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <div class="mb-3">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="correct_answer"
-                                            value="E" id="answer_e"
-                                            {{ old('correct_answer') === 'E' ? 'checked' : '' }}>
-                                        <label class="form-check-label fw-bold" for="answer_e">E.</label>
-                                    </div>
-                                    <input type="text"
-                                        class="form-control @error('option_e') is-invalid @enderror mt-2" name="option_e"
-                                        placeholder="Pilihan E" value="{{ old('option_e') }}" required>
-                                    @error('option_e')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                <div class="d-flex gap-4">
+                                    @foreach(['A', 'B', 'C', 'D', 'E'] as $opt)
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="correct_answer" 
+                                                value="{{ $opt }}" id="single_{{ $opt }}" {{ old('correct_answer') === $opt ? 'checked' : '' }}>
+                                            <label class="form-check-label fw-bold" for="single_{{ $opt }}">{{ $opt }}</label>
+                                        </div>
+                                    @endforeach
                                 </div>
                             </div>
 
+                            {{-- Complex Choice (Multiple) --}}
                             <div id="complex-choice" style="display: none;">
                                 <div class="alert alert-info">
-                                    <i class="bi bi-info-circle"></i> Untuk PG Kompleks, centang <strong>semua</strong>
-                                    jawaban yang benar.
+                                    <i class="bi bi-info-circle"></i> Centang <strong>semua</strong> jawaban yang benar (bisa lebih dari satu).
                                 </div>
-
-                                <div class="mb-3">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="correct_answer[]"
-                                            value="A" id="complex_a">
-                                        <label class="form-check-label fw-bold" for="complex_a">A.</label>
-                                    </div>
-                                    <input type="text" class="form-control mt-2" name="option_a_complex"
-                                        placeholder="Pilihan A">
-                                </div>
-
-                                <div class="mb-3">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="correct_answer[]"
-                                            value="B" id="complex_b">
-                                        <label class="form-check-label fw-bold" for="complex_b">B.</label>
-                                    </div>
-                                    <input type="text" class="form-control mt-2" name="option_b_complex"
-                                        placeholder="Pilihan B">
-                                </div>
-
-                                <div class="mb-3">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="correct_answer[]"
-                                            value="C" id="complex_c">
-                                        <label class="form-check-label fw-bold" for="complex_c">C.</label>
-                                    </div>
-                                    <input type="text" class="form-control mt-2" name="option_c_complex"
-                                        placeholder="Pilihan C">
-                                </div>
-
-                                <div class="mb-3">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="correct_answer[]"
-                                            value="D" id="complex_d">
-                                        <label class="form-check-label fw-bold" for="complex_d">D.</label>
-                                    </div>
-                                    <input type="text" class="form-control mt-2" name="option_d_complex"
-                                        placeholder="Pilihan D">
-                                </div>
-
-                                <div class="mb-3">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="correct_answer[]"
-                                            value="E" id="complex_e">
-                                        <label class="form-check-label fw-bold" for="complex_e">E.</label>
-                                    </div>
-                                    <input type="text" class="form-control mt-2" name="option_e_complex"
-                                        placeholder="Pilihan E">
+                                <div class="d-flex gap-4">
+                                    @foreach(['A', 'B', 'C', 'D', 'E'] as $opt)
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="correct_answer[]" 
+                                                value="{{ $opt }}" id="complex_{{ $opt }}" 
+                                                {{ is_array(old('correct_answer')) && in_array($opt, old('correct_answer')) ? 'checked' : '' }}>
+                                            <label class="form-check-label fw-bold" for="complex_{{ $opt }}">{{ $opt }}</label>
+                                        </div>
+                                    @endforeach
                                 </div>
                             </div>
+
+                            {{-- Category Choice (True/False per option) --}}
+                            <div id="category-choice" style="display: none;">
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i> Tentukan apakah setiap pilihan <strong>BENAR</strong> atau <strong>SALAH</strong>.
+                                </div>
+                                <div class="row">
+                                    @foreach(['A', 'B', 'C', 'D', 'E'] as $opt)
+                                        <div class="col-md-6 mb-3">
+                                            <div class="border p-3 rounded">
+                                                <label class="fw-bold mb-2">Pilihan {{ $opt }}:</label>
+                                                <div class="d-flex gap-3">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" 
+                                                            name="correct_answer[{{ $opt }}]" value="B" id="category_{{ $opt }}_true"
+                                                            {{ old('correct_answer.' . $opt) === 'B' ? 'checked' : '' }}>
+                                                        <label class="form-check-label text-success fw-bold" for="category_{{ $opt }}_true">
+                                                            <i class="bi bi-check-circle"></i> Benar
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" 
+                                                            name="correct_answer[{{ $opt }}]" value="S" id="category_{{ $opt }}_false"
+                                                            {{ old('correct_answer.' . $opt) === 'S' ? 'checked' : '' }}>
+                                                        <label class="form-check-label text-danger fw-bold" for="category_{{ $opt }}_false">
+                                                            <i class="bi bi-x-circle"></i> Salah
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            @error('correct_answer')
+                                <div class="text-danger mt-2">{{ $message }}</div>
+                            @enderror
 
                             <hr class="my-4">
 
@@ -256,59 +261,28 @@
                 const typeSelect = document.getElementById('question_type');
                 const singleChoice = document.getElementById('single-choice');
                 const complexChoice = document.getElementById('complex-choice');
+                const categoryChoice = document.getElementById('category-choice');
 
                 function toggleQuestionType() {
                     const type = typeSelect.value;
+                    
+                    // Hide all sections first
+                    singleChoice.style.display = 'none';
+                    complexChoice.style.display = 'none';
+                    categoryChoice.style.display = 'none';
+                    
+                    // Show appropriate section
                     if (type === 'single') {
                         singleChoice.style.display = 'block';
-                        complexChoice.style.display = 'none';
-                        // Copy values from complex to single
-                        document.querySelector('input[name="option_a"]').value = document.querySelector(
-                            'input[name="option_a_complex"]').value || '';
-                        document.querySelector('input[name="option_b"]').value = document.querySelector(
-                            'input[name="option_b_complex"]').value || '';
-                        document.querySelector('input[name="option_c"]').value = document.querySelector(
-                            'input[name="option_c_complex"]').value || '';
-                        document.querySelector('input[name="option_d"]').value = document.querySelector(
-                            'input[name="option_d_complex"]').value || '';
-                        document.querySelector('input[name="option_e"]').value = document.querySelector(
-                            'input[name="option_e_complex"]').value || '';
-                    } else {
-                        singleChoice.style.display = 'none';
+                    } else if (type === 'complex') {
                         complexChoice.style.display = 'block';
-                        // Copy values from single to complex
-                        document.querySelector('input[name="option_a_complex"]').value = document.querySelector(
-                            'input[name="option_a"]').value || '';
-                        document.querySelector('input[name="option_b_complex"]').value = document.querySelector(
-                            'input[name="option_b"]').value || '';
-                        document.querySelector('input[name="option_c_complex"]').value = document.querySelector(
-                            'input[name="option_c"]').value || '';
-                        document.querySelector('input[name="option_d_complex"]').value = document.querySelector(
-                            'input[name="option_d"]').value || '';
-                        document.querySelector('input[name="option_e_complex"]').value = document.querySelector(
-                            'input[name="option_e"]').value || '';
+                    } else if (type === 'category') {
+                        categoryChoice.style.display = 'block';
                     }
                 }
 
                 typeSelect.addEventListener('change', toggleQuestionType);
                 toggleQuestionType(); // Init
-
-                // Form submit handler for complex type
-                document.getElementById('questionForm').addEventListener('submit', function(e) {
-                    if (typeSelect.value === 'complex') {
-                        // Copy complex values to main option fields
-                        document.querySelector('input[name="option_a"]').value = document.querySelector(
-                            'input[name="option_a_complex"]').value;
-                        document.querySelector('input[name="option_b"]').value = document.querySelector(
-                            'input[name="option_b_complex"]').value;
-                        document.querySelector('input[name="option_c"]').value = document.querySelector(
-                            'input[name="option_c_complex"]').value;
-                        document.querySelector('input[name="option_d"]').value = document.querySelector(
-                            'input[name="option_d_complex"]').value;
-                        document.querySelector('input[name="option_e"]').value = document.querySelector(
-                            'input[name="option_e_complex"]').value;
-                    }
-                });
             });
         </script>
     @endpush

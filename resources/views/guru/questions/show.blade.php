@@ -23,8 +23,16 @@
                     <div class="card-body p-4">
                         <div class="d-flex gap-2 mb-3">
                             <span class="badge bg-info">{{ $question->category->name }}</span>
-                            <span class="badge bg-{{ $question->question_type === 'single' ? 'primary' : 'success' }}">
-                                {{ $question->question_type === 'single' ? 'Pilihan Ganda' : 'PG Kompleks' }}
+                            @php
+                                $typeLabels = [
+                                    'single' => ['label' => 'Pilihan Ganda', 'class' => 'primary'],
+                                    'complex' => ['label' => 'PG Kompleks', 'class' => 'success'],
+                                    'category' => ['label' => 'PG Kompleks (Kategori)', 'class' => 'warning']
+                                ];
+                                $typeInfo = $typeLabels[$question->question_type] ?? ['label' => $question->question_type, 'class' => 'secondary'];
+                            @endphp
+                            <span class="badge bg-{{ $typeInfo['class'] }}">
+                                {{ $typeInfo['label'] }}
                             </span>
                             <span
                                 class="badge bg-{{ $question->difficulty === 'easy' ? 'success' : ($question->difficulty === 'medium' ? 'warning' : 'danger') }}">
@@ -42,48 +50,57 @@
                             </div>
                         @endif
 
-                        <h5 class="mb-3">Pilihan Jawaban:</h5>
-                        @php
-                            $correctAnswers = explode(',', $question->correct_answer);
-                        @endphp
+                        @if ($question->question_type === 'category')
+                            {{-- Category Type --}}
+                            <h5 class="mb-3">Pernyataan:</h5>
+                            @php
+                                // Parse category answers: "A:B,B:S,C:B" → ["A" => "B", "B" => "S", ...]
+                                $categoryAnswers = [];
+                                foreach (explode(',', $question->correct_answer) as $pair) {
+                                    $parts = explode(':', $pair);
+                                    if (count($parts) === 2) {
+                                        $categoryAnswers[trim($parts[0])] = trim($parts[1]);
+                                    }
+                                }
+                            @endphp
 
-                        <div class="list-group mb-3">
-                            <div
-                                class="list-group-item {{ in_array('A', $correctAnswers) ? 'list-group-item-success' : '' }}">
-                                <strong>A.</strong> {{ $question->option_a }}
-                                @if (in_array('A', $correctAnswers))
-                                    <span class="badge bg-success float-end">Benar</span>
-                                @endif
+                            <div class="list-group mb-3">
+                                @foreach($question->options as $option)
+                                    @php
+                                        $isTrue = ($categoryAnswers[$option->label] ?? '') === 'B';
+                                    @endphp
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ $option->label }}.</strong> {{ $option->content }}
+                                        </div>
+                                        <span class="badge bg-{{ $isTrue ? 'success' : 'danger' }}">
+                                            {{ $isTrue ? 'Benar' : 'Salah' }}
+                                        </span>
+                                    </div>
+                                @endforeach
                             </div>
-                            <div
-                                class="list-group-item {{ in_array('B', $correctAnswers) ? 'list-group-item-success' : '' }}">
-                                <strong>B.</strong> {{ $question->option_b }}
-                                @if (in_array('B', $correctAnswers))
-                                    <span class="badge bg-success float-end">Benar</span>
-                                @endif
+                            
+                            <div class="alert alert-light border">
+                                <strong>Kunci Jawaban:</strong> <code>{{ $question->correct_answer }}</code>
                             </div>
-                            <div
-                                class="list-group-item {{ in_array('C', $correctAnswers) ? 'list-group-item-success' : '' }}">
-                                <strong>C.</strong> {{ $question->option_c }}
-                                @if (in_array('C', $correctAnswers))
-                                    <span class="badge bg-success float-end">Benar</span>
-                                @endif
+                        @else
+                            {{-- Single/Complex Type --}}
+                            <h5 class="mb-3">Pilihan Jawaban:</h5>
+                            @php
+                                $correctAnswers = explode(',', $question->correct_answer);
+                            @endphp
+
+                            <div class="list-group mb-3">
+                                @foreach($question->options as $option)
+                                    <div class="list-group-item {{ in_array($option->label, $correctAnswers) ? 'list-group-item-success' : '' }}">
+                                        <strong>{{ $option->label }}.</strong> {{ $option->content }}
+                                        @if (in_array($option->label, $correctAnswers))
+                                            <span class="badge bg-success float-end">Benar</span>
+                                        @endif
+                                    </div>
+                                @endforeach
                             </div>
-                            <div
-                                class="list-group-item {{ in_array('D', $correctAnswers) ? 'list-group-item-success' : '' }}">
-                                <strong>D.</strong> {{ $question->option_d }}
-                                @if (in_array('D', $correctAnswers))
-                                    <span class="badge bg-success float-end">Benar</span>
-                                @endif
-                            </div>
-                            <div
-                                class="list-group-item {{ in_array('E', $correctAnswers) ? 'list-group-item-success' : '' }}">
-                                <strong>E.</strong> {{ $question->option_e }}
-                                @if (in_array('E', $correctAnswers))
-                                    <span class="badge bg-success float-end">Benar</span>
-                                @endif
-                            </div>
-                        </div>
+                        @endif
 
                         @if ($question->explanation)
                             <h5 class="mb-3">Pembahasan:</h5>

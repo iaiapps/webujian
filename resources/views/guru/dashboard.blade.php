@@ -10,18 +10,6 @@
         <p class="page-subtitle">{{ auth()->user()->institution_name }}</p>
     </div>
 
-    {{-- Pending Payment Alert - DINONAKTIFKAN --}}
-    {{-- @if (isset($pendingSubscription) && $pendingSubscription)
-        <div class="alert alert-warning mb-4">
-            <i class="bi bi-hourglass-split me-2"></i>
-            <strong>Menunggu Verifikasi!</strong> Permintaan upgrade ke
-            <strong>{{ strtoupper($pendingSubscription->plan) }}</strong>
-            ({{ $pendingSubscription->billing_cycle == 'monthly' ? 'Bulanan' : 'Tahunan' }}) sedang diproses admin.
-            <br><small>Invoice: {{ $pendingSubscription->invoice_number }} | Diajukan:
-                {{ $pendingSubscription->created_at->format('d M Y H:i') }}</small>
-        </div>
-    @endif --}}
-
     {{-- SISTEM KREDIT - Card Info Kredit --}}
     <x-ui.card class="mb-4">
         <div class="row align-items-center">
@@ -35,7 +23,7 @@
                     <div>
                         <h6 class="mb-0" style="font-weight: 600;">Kredit Tersedia</h6>
                         <small class="text-muted">
-                            @if($creditInfo['can_create_package'])
+                            @if ($creditInfo['can_create_package'])
                                 <span class="text-success"><i class="bi bi-check-circle"></i> Dapat membuat paket tes</span>
                             @else
                                 <span class="text-danger"><i class="bi bi-x-circle"></i> Kredit tidak cukup</span>
@@ -66,14 +54,14 @@
     @endif
 
     {{-- Usage Statistics Cards --}}
-    <div class="row g-4 mb-4">
-        <div class="col-xl-4 col-md-6">
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
             <x-ui.stat-card icon="people" icon-variant="{{ $usage['students'] >= 80 ? 'danger' : 'primary' }}"
                 value="{{ $stats['total_students'] }}/{{ $stats['max_students'] }}" label="Siswa" />
         </div>
 
         {{-- KELAS DINONAKTIFKAN - Card kelas disembunyikan --}}
-        {{-- <div class="col-xl-4 col-md-6">
+        {{-- <div class="col-xl-3 col-md-6">
             <x-ui.stat-card
                 icon="door-open"
                 icon-variant="success"
@@ -82,19 +70,19 @@
             />
         </div> --}}
 
-        <div class="col-xl-4 col-md-6">
+        <div class="col-xl-3 col-md-6">
             <x-ui.stat-card icon="question-circle" icon-variant="info"
                 value="{{ $stats['total_questions'] }}/{{ $stats['max_questions'] }}" label="Soal" />
         </div>
 
-        <div class="col-xl-4 col-md-6">
-            <x-ui.stat-card icon="box" icon-variant="warning"
-                value="{{ $stats['total_packages'] }}" label="Paket Tes" />
+        <div class="col-xl-3 col-md-6">
+            <x-ui.stat-card icon="box" icon-variant="warning" value="{{ $stats['total_packages'] }}"
+                label="Paket Tes" />
         </div>
-        
-        <div class="col-xl-4 col-md-6">
-            <x-ui.stat-card icon="coin" icon-variant="success"
-                value="{{ $stats['credits'] }}" label="Kredit Tersedia" />
+
+        <div class="col-xl-3 col-md-6">
+            <x-ui.stat-card icon="coin" icon-variant="success" value="{{ $stats['credits'] }}"
+                label="Kredit Tersedia" />
         </div>
     </div>
 

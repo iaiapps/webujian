@@ -3,12 +3,12 @@
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class QuestionsTemplateExport implements FromArray, WithHeadings, WithStyles, WithColumnWidths
+class QuestionsTemplateExport implements FromArray, WithColumnWidths, WithHeadings, WithStyles
 {
     public function array(): array
     {
@@ -36,6 +36,18 @@ class QuestionsTemplateExport implements FromArray, WithHeadings, WithStyles, Wi
                 'A,C,E',
                 'numerasi-matematika',
                 'Bilangan prima adalah 2, 7, dan 11',
+            ],
+            [
+                'Perhatikan pernyataan tentang fotosintesis:',
+                'category',
+                'Fotosintesis butuh cahaya',
+                'Terjadi di mitokondria',
+                'Menghasilkan O2',
+                'Memerlukan CO2',
+                'Hanya di malam hari',
+                'A:B,B:S,C:B,D:B,E:S',
+                'biologi',
+                'Fotosintesis butuh cahaya dan hasilkan O2',
             ],
             [
                 'Sinonim dari kata "elok" adalah...',

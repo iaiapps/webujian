@@ -15,15 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // guru pemilik soal
             $table->foreignId('category_id')->constrained('question_categories')->onDelete('cascade');
-            $table->enum('question_type', ['single', 'complex'])->default('single');
+            $table->enum('question_type', ['single', 'complex', 'category'])->default('single');
             $table->text('question_text');
             $table->string('question_image')->nullable();
-            $table->text('option_a');
-            $table->text('option_b');
-            $table->text('option_c');
-            $table->text('option_d');
-            $table->text('option_e');
-            $table->string('correct_answer'); // 'A' atau 'A,C,E' untuk kompleks
+            $table->string('correct_answer'); // 'A' atau 'A,C,E' untuk kompleks, 'A:B,B:S' untuk category
             $table->text('explanation')->nullable();
             $table->enum('difficulty', ['easy', 'medium', 'hard'])->default('medium');
             $table->integer('usage_count')->default(0); // berapa kali dipakai

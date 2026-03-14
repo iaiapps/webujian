@@ -64,6 +64,8 @@
                                 Ganda</option>
                             <option value="complex" {{ request('question_type') === 'complex' ? 'selected' : '' }}>PG
                                 Kompleks</option>
+                            <option value="category" {{ request('question_type') === 'category' ? 'selected' : '' }}>PG
+                                Kompleks (Kategori)</option>
                         </select>
                     </div>
                     <div class="col-md-2">
@@ -96,9 +98,16 @@
                             <div class="col-md-9">
                                 <div class="d-flex gap-2 mb-2">
                                     <span class="badge bg-info">{{ $question->category->name }}</span>
-                                    <span
-                                        class="badge bg-{{ $question->question_type === 'single' ? 'primary' : 'success' }}">
-                                        {{ $question->question_type === 'single' ? 'Pilihan Ganda' : 'PG Kompleks' }}
+                                    @php
+                                        $typeLabels = [
+                                            'single' => ['label' => 'Pilihan Ganda', 'class' => 'primary'],
+                                            'complex' => ['label' => 'PG Kompleks', 'class' => 'success'],
+                                            'category' => ['label' => 'PG Kompleks (Kategori)', 'class' => 'warning']
+                                        ];
+                                        $typeInfo = $typeLabels[$question->question_type] ?? ['label' => $question->question_type, 'class' => 'secondary'];
+                                    @endphp
+                                    <span class="badge bg-{{ $typeInfo['class'] }}">
+                                        {{ $typeInfo['label'] }}
                                     </span>
                                     <span
                                         class="badge bg-{{ $question->difficulty === 'easy' ? 'success' : ($question->difficulty === 'medium' ? 'warning' : 'danger') }}">

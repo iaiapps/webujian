@@ -39,18 +39,67 @@
                                 @if ($question->question_type === 'single')
                                     {{-- Single Choice (Radio) --}}
                                     <div class="options-container">
-                                        @foreach (['A', 'B', 'C', 'D', 'E'] as $opt)
+                                        @foreach ($question->options as $option)
                                             <div class="form-check mb-3 p-3 border rounded option-item"
-                                                onclick="selectOption({{ $question->id }}, '{{ $opt }}', this)">
+                                                onclick="selectOption({{ $question->id }}, '{{ $option->label }}', this)">
                                                 <input class="form-check-input" type="radio"
-                                                    name="answer_{{ $question->id }}" value="{{ $opt }}"
-                                                    id="q{{ $question->id }}_{{ $opt }}"
-                                                    {{ ($existingAnswers[$question->id] ?? '') === $opt ? 'checked' : '' }}>
+                                                    name="answer_{{ $question->id }}" value="{{ $option->label }}"
+                                                    id="q{{ $question->id }}_{{ $option->label }}"
+                                                    {{ ($existingAnswers[$question->id] ?? '') === $option->label ? 'checked' : '' }}>
                                                 <label class="form-check-label w-100"
-                                                    for="q{{ $question->id }}_{{ $opt }}">
-                                                    <strong>{{ $opt }}.</strong>
-                                                    {{ $question->{'option_' . strtolower($opt)} }}
+                                                    for="q{{ $question->id }}_{{ $option->label }}">
+                                                    <strong>{{ $option->label }}.</strong>
+                                                    {{ $option->content }}
                                                 </label>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @elseif ($question->question_type === 'category')
+                                    {{-- Category Type (True/False for each statement) --}}
+                                    @php
+                                        // Parse existing category answer: "A:B,B:S,C:B" → ["A" => "B", "B" => "S", ...]
+                                        $existingCategoryAnswers = [];
+                                        $existingAnswerStr = $existingAnswers[$question->id] ?? '';
+                                        foreach (explode(',', $existingAnswerStr) as $pair) {
+                                            $parts = explode(':', $pair);
+                                            if (count($parts) === 2) {
+                                                $existingCategoryAnswers[trim($parts[0])] = trim($parts[1]);
+                                            }
+                                        }
+                                    @endphp
+                                    <div class="alert alert-info mb-3">
+                                        <i class="bi bi-info-circle"></i> Tentukan apakah setiap pernyataan di bawah ini <strong>BENAR</strong> atau <strong>SALAH</strong>.
+                                    </div>
+                                    <div class="options-container">
+                                        @foreach ($question->options as $option)
+                                            <div class="card mb-3 border">
+                                                <div class="card-body">
+                                                    <p class="mb-3"><strong>{{ $option->label }}.</strong> {{ $option->content }}</p>
+                                                    <div class="d-flex gap-4">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio"
+                                                                name="answer_{{ $question->id }}_{{ $option->label }}" value="B"
+                                                                id="q{{ $question->id }}_{{ $option->label }}_true"
+                                                                {{ ($existingCategoryAnswers[$option->label] ?? '') === 'B' ? 'checked' : '' }}
+                                                                onchange="selectCategoryOption({{ $question->id }})">
+                                                            <label class="form-check-label text-success fw-bold"
+                                                                for="q{{ $question->id }}_{{ $option->label }}_true">
+                                                                <i class="bi bi-check-circle"></i> Benar
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio"
+                                                                name="answer_{{ $question->id }}_{{ $option->label }}" value="S"
+                                                                id="q{{ $question->id }}_{{ $option->label }}_false"
+                                                                {{ ($existingCategoryAnswers[$option->label] ?? '') === 'S' ? 'checked' : '' }}
+                                                                onchange="selectCategoryOption({{ $question->id }})">
+                                                            <label class="form-check-label text-danger fw-bold"
+                                                                for="q{{ $question->id }}_{{ $option->label }}_false">
+                                                                <i class="bi bi-x-circle"></i> Salah
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         @endforeach
                                     </div>
@@ -61,23 +110,28 @@
                                         satu)
                                     </div>
                                     <div class="options-container">
-                                        @foreach (['A', 'B', 'C', 'D', 'E'] as $opt)
+                                        @foreach ($question->options as $option)
                                             @php
                                                 $existingAnswer = $existingAnswers[$question->id] ?? '';
                                                 $selectedOpts = explode(',', $existingAnswer);
-                                                $isChecked = in_array($opt, $selectedOpts);
+                                                $isChecked = in_array($option->label, $selectedOpts);
                                             @endphp
                                             <div
                                                 class="form-check mb-3 p-3 border rounded option-item {{ $isChecked ? 'border-primary' : '' }}">
                                                 <input class="form-check-input" type="checkbox"
-                                                    name="answer_{{ $question->id }}[]" value="{{ $opt }}"
-                                                    id="q{{ $question->id }}_{{ $opt }}"
+                                                    name="answer_{{ $question->id }}[]" value="{{ $option->label }}"
+                                                    id="q{{ $question->id }}_{{ $option->label }}"
                                                     {{ $isChecked ? 'checked' : '' }}
                                                     onchange="selectComplexOption({{ $question->id }})">
                                                 <label class="form-check-label w-100"
-                                                    for="q{{ $question->id }}_{{ $opt }}">
-                                                    <strong>{{ $opt }}.</strong>
-                                                    {{ $question->{'option_' . strtolower($opt)} }}
+                                                    for="q{{ $question->id }}_{{ $option->label }}">
+                                                    <strong>{{ $option->label }}.</strong>
+                                                    {{ $option->content }}
+                                                </label>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
                                                 </label>
                                             </div>
                                         @endforeach
@@ -324,6 +378,26 @@
                 updateNavButton(questionId, 'answered');
             }
 
+            function selectCategoryOption(questionId) {
+                // Collect answers for each statement (A, B, C, D, E)
+                const answers = [];
+                ['A', 'B', 'C', 'D', 'E'].forEach(opt => {
+                    const checkedRadio = document.querySelector(`input[name="answer_${questionId}_${opt}"]:checked`);
+                    if (checkedRadio) {
+                        answers.push(`${opt}:${checkedRadio.value}`);
+                    }
+                });
+
+                // Format: "A:B,B:S,C:B,D:B,E:S"
+                const answer = answers.join(',');
+                
+                // Only save if all 5 statements are answered
+                if (answers.length === 5) {
+                    saveAnswer(questionId, answer);
+                    updateNavButton(questionId, 'answered');
+                }
+            }
+
             function toggleDoubt(questionId) {
                 const isDoubt = document.getElementById(`doubt_${questionId}`).checked;
                 saveAnswer(questionId, null, isDoubt);
@@ -337,12 +411,29 @@
                 // Get current answer if not provided
                 if (answer === null) {
                     const questionEl = document.querySelector(`.question-item[data-question-id="${questionId}"]`);
-                    const type = questionEl.querySelector('input[type="radio"]') ? 'single' : 'complex';
-
-                    if (type === 'single') {
+                    
+                    // Detect question type
+                    // Category type has inputs like: answer_{questionId}_A, answer_{questionId}_B, etc.
+                    const categoryInputs = questionEl.querySelectorAll(`input[name^="answer_${questionId}_"]`);
+                    const singleInput = questionEl.querySelector(`input[name="answer_${questionId}"]`);
+                    const complexInputs = questionEl.querySelectorAll(`input[name="answer_${questionId}[]"]`);
+                    
+                    if (categoryInputs.length > 0) {
+                        // Category type: collect A:B,B:S,C:B,D:B,E:S format
+                        const answers = [];
+                        ['A', 'B', 'C', 'D', 'E'].forEach(opt => {
+                            const checkedRadio = questionEl.querySelector(`input[name="answer_${questionId}_${opt}"]:checked`);
+                            if (checkedRadio) {
+                                answers.push(`${opt}:${checkedRadio.value}`);
+                            }
+                        });
+                        answer = answers.join(',');
+                    } else if (singleInput) {
+                        // Single choice type
                         const checked = questionEl.querySelector(`input[name="answer_${questionId}"]:checked`);
                         answer = checked ? checked.value : null;
-                    } else {
+                    } else if (complexInputs.length > 0) {
+                        // Complex type (checkbox)
                         const checked = Array.from(questionEl.querySelectorAll(`input[name="answer_${questionId}[]"]:checked`))
                             .map(el => el.value);
                         answer = checked.join(',');
