@@ -10,7 +10,6 @@ namespace App\Http\Controllers\Guru;
 use App\Http\Controllers\Controller;
 use App\Models\CreditPackage;
 use App\Models\CreditPurchase;
-use App\Models\Setting;
 use App\Services\MayarService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -39,9 +38,7 @@ class CreditController extends Controller
         // Ambil 5 transaksi terakhir
         $recentTransactions = $user->creditTransactions()->take(5)->get();
 
-        $payment = Setting::getByGroup('payment');
-
-        return view('guru.credits.index', compact('creditInfo', 'recentTransactions', 'payment'));
+        return view('guru.credits.index', compact('creditInfo', 'recentTransactions'));
     }
 
     public function history()
@@ -64,9 +61,7 @@ class CreditController extends Controller
         // Ambil paket kredit aktif dari database
         $creditPackages = CreditPackage::active()->ordered()->get();
 
-        $payment = Setting::getByGroup('payment');
-
-        return view('guru.credits.topup', compact('creditPackages', 'payment'));
+        return view('guru.credits.topup', compact('creditPackages'));
     }
 
     public function purchase(Request $request)

@@ -10,7 +10,7 @@
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
-        <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.settings.update') }}" method="POST">
             @csrf
             @method('PUT')
 
@@ -43,79 +43,33 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
 
-                {{-- Payment Settings --}}
+                {{-- Credit Settings --}}
                 <div class="col-lg-6">
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-white">
-                            <h5 class="mb-0"><i class="bi bi-credit-card"></i> Pembayaran</h5>
+                            <h5 class="mb-0"><i class="bi bi-coin"></i> Kredit Default</h5>
                         </div>
                         <div class="card-body">
-                            <h6 class="text-muted mb-3">Bank Transfer</h6>
                             <div class="mb-3">
-                                <label class="form-label">Nama Bank</label>
-                                <input type="text" name="bank_name" class="form-control"
-                                    value="{{ $settings['payment']['bank_name'] ?? '' }}">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Nomor Rekening</label>
-                                <input type="text" name="bank_account_number" class="form-control"
-                                    value="{{ $settings['payment']['bank_account_number'] ?? '' }}">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Nama Pemilik Rekening</label>
-                                <input type="text" name="bank_account_name" class="form-control"
-                                    value="{{ $settings['payment']['bank_account_name'] ?? '' }}">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Cabang (opsional)</label>
-                                <input type="text" name="bank_branch" class="form-control"
-                                    value="{{ $settings['payment']['bank_branch'] ?? '' }}">
-                            </div>
-
-                            <hr>
-                            <h6 class="text-muted mb-3">QRIS</h6>
-                            <div class="mb-3">
-                                <label class="form-label">Nama Merchant</label>
-                                <input type="text" name="qris_merchant_name" class="form-control"
-                                    value="{{ $settings['payment']['qris_merchant_name'] ?? '' }}">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Gambar QRIS</label>
-                                <input type="file" name="qris_image" class="form-control" accept="image/*">
-                                @if (!empty($settings['payment']['qris_image']))
-                                    <small class="text-muted">Sudah ada gambar QRIS</small>
-                                @endif
-                            </div>
-
-                            <hr>
-                            <div class="mb-3">
-                                <label class="form-label">WhatsApp Konfirmasi</label>
-                                <input type="text" name="payment_whatsapp" class="form-control"
-                                    value="{{ $settings['payment']['payment_whatsapp'] ?? '' }}"
-                                    placeholder="6281234567890">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Instruksi Pembayaran</label>
-                                <textarea name="payment_instructions" class="form-control" rows="2">{{ $settings['payment']['payment_instructions'] ?? '' }}</textarea>
+                                <label class="form-label">Kredit Default untuk User Baru</label>
+                                <input type="number" name="credit_default" class="form-control"
+                                    value="{{ $settings['limits']['credit_default'] ?? 10 }}" min="0">
+                                <small class="text-muted">Jumlah kredit yang diberikan saat registrasi</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- ============================================================ --}}
-                {{-- SISTEM KREDIT - Global Limits (bukan per-plan) --}}
-                {{-- ============================================================ --}}
+                {{-- Global Limits --}}
                 <div class="col-12">
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-white">
                             <h5 class="mb-0"><i class="bi bi-sliders"></i> Limit Global</h5>
                         </div>
                         <div class="card-body">
-                            <p class="text-muted">Limit ini berlaku untuk semua guru, tidak terpengaruh oleh sistem kredit.
-                            </p>
+                            <p class="text-muted">Limit ini berlaku untuk semua guru.</p>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Max Siswa</label>

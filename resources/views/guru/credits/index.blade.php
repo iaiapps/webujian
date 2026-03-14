@@ -105,39 +105,5 @@
                 </div>
             </div>
         @endif
-
-        {{-- Payment Info --}}
-        {{-- <div class="row">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informasi Pembayaran</h5>
-                </div>
-                <div class="card-body">
-                    @if (!empty($payment['bank_name']))
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6>Bank Transfer</h6>
-                            <p class="mb-1"><strong>Bank:</strong> {{ $payment['bank_name'] }}</p>
-                            <p class="mb-1"><strong>Nomor Rekening:</strong> {{ $payment['bank_account_number'] }}</p>
-                            <p class="mb-0"><strong>Atas Nama:</strong> {{ $payment['bank_account_name'] }}</p>
-                        </div>
-                        @if (!empty($payment['qris_merchant_name']))
-                        <div class="col-md-6">
-                            <h6>QRIS</h6>
-                            <p class="mb-1"><strong>Merchant:</strong> {{ $payment['qris_merchant_name'] }}</p>
-                            @if (!empty($payment['qris_image']))
-                            <p class="mb-0"><small class="text-muted">Scan QRIS untuk pembayaran</small></p>
-                            @endif
-                        </div>
-                        @endif
-                    </div>
-                    @else
-                    <p class="text-muted">Belum ada informasi pembayaran. Silakan hubungi admin.</p>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div> --}}
     </div>
 @endsection
