@@ -3,113 +3,118 @@
 @section('title', 'Kredit Saya')
 
 @section('content')
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Kredit Saya</h2>
-        <div>
-            <a href="{{ route('guru.credits.history') }}" class="btn btn-outline-primary me-2">
-                <i class="bi bi-clock-history"></i> Riwayat Lengkap
-            </a>
-            <a href="{{ route('guru.credits.topup') }}" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> Beli Kredit
-            </a>
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Kredit Saya</h2>
+            <div>
+                <a href="{{ route('guru.credits.history') }}" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-clock-history"></i> Riwayat Lengkap
+                </a>
+                <a href="{{ route('guru.credits.topup') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Beli Kredit
+                </a>
+            </div>
         </div>
-    </div>
 
-    {{-- Credit Balance Card --}}
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm bg-primary text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-0 opacity-75">Kredit Tersedia</h6>
-                            <h1 class="mb-0 fw-bold">{{ $creditInfo['current_credits'] }}</h1>
-                            <small>Kredit untuk membuat paket tes</small>
-                        </div>
-                        <div class="fs-1">
-                            <i class="bi bi-coin"></i>
+        {{-- Credit Balance Card --}}
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm bg-primary text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="opacity-75 mb-2">Kredit Tersedia</h6>
+                                <h1 class="fs-1 fw-bold mb-2">{{ $creditInfo['current_credits'] }}</h1>
+                                <small>Kredit untuk membuat paket tes</small>
+                            </div>
+                            <div class="fs-1">
+                                <i class="bi bi-coin"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Cara Menggunakan Kredit</h5>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i> 1 Kredit = 1 Paket Tes</li>
-                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i> Tidak ada batasan paket tes</li>
-                        <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i> Setiap pembuatan paket mengurangi 1 kredit</li>
-                        <li class="mb-0"><i class="bi bi-info-circle text-info me-2"></i> Kredit tidak hangus jika paket dihapus</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Recent Transactions --}}
-    @if(isset($recentTransactions) && $recentTransactions->count() > 0)
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Riwayat Terakhir</h5>
-                    <a href="{{ route('guru.credits.history') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Tanggal</th>
-                                    <th>Tipe</th>
-                                    <th>Jumlah</th>
-                                    <th>Balance</th>
-                                    <th>Deskripsi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($recentTransactions as $transaction)
-                                <tr>
-                                    <td>{{ $transaction->created_at->format('d M Y H:i') }}</td>
-                                    <td>
-                                        <span class="badge bg-{{ $transaction->getTypeBadgeClass() }}">
-                                            {{ $transaction->getTypeLabel() }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        @if($transaction->amount > 0)
-                                            <span class="text-success fw-bold">+{{ $transaction->amount }}</span>
-                                        @else
-                                            <span class="text-danger fw-bold">{{ $transaction->amount }}</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <small>{{ $transaction->balance_before }} → <strong>{{ $transaction->balance_after }}</strong></small>
-                                    </td>
-                                    <td>{{ Str::limit($transaction->description, 40) }}</td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Cara Menggunakan Kredit</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i> 1 Kredit = 1 Paket Tes
+                            </li>
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i> Tidak ada batasan paket
+                                tes</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i> Setiap pembuatan paket
+                                mengurangi 1 kredit</li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    @endif
 
-    {{-- Payment Info --}}
-    <div class="row">
+        {{-- Recent Transactions --}}
+        @if (isset($recentTransactions) && $recentTransactions->count() > 0)
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="bi bi-clock-history"></i> Riwayat Terakhir</h5>
+                            <a href="{{ route('guru.credits.history') }}" class="btn btn-sm btn-outline-primary">Lihat
+                                Semua</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Tanggal</th>
+                                            <th>Tipe</th>
+                                            <th>Jumlah</th>
+                                            <th>Balance</th>
+                                            <th>Deskripsi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($recentTransactions as $transaction)
+                                            <tr>
+                                                <td>{{ $transaction->created_at->format('d M Y H:i') }}</td>
+                                                <td>
+                                                    <span class="badge bg-{{ $transaction->getTypeBadgeClass() }}">
+                                                        {{ $transaction->getTypeLabel() }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    @if ($transaction->amount > 0)
+                                                        <span
+                                                            class="text-success fw-bold">+{{ $transaction->amount }}</span>
+                                                    @else
+                                                        <span class="text-danger fw-bold">{{ $transaction->amount }}</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <small>{{ $transaction->balance_before }} →
+                                                        <strong>{{ $transaction->balance_after }}</strong></small>
+                                                </td>
+                                                <td>{{ Str::limit($transaction->description, 40) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- Payment Info --}}
+        {{-- <div class="row">
         <div class="col-12">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white">
                     <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informasi Pembayaran</h5>
                 </div>
                 <div class="card-body">
-                    @if(!empty($payment['bank_name']))
+                    @if (!empty($payment['bank_name']))
                     <div class="row">
                         <div class="col-md-6">
                             <h6>Bank Transfer</h6>
@@ -117,11 +122,11 @@
                             <p class="mb-1"><strong>Nomor Rekening:</strong> {{ $payment['bank_account_number'] }}</p>
                             <p class="mb-0"><strong>Atas Nama:</strong> {{ $payment['bank_account_name'] }}</p>
                         </div>
-                        @if(!empty($payment['qris_merchant_name']))
+                        @if (!empty($payment['qris_merchant_name']))
                         <div class="col-md-6">
                             <h6>QRIS</h6>
                             <p class="mb-1"><strong>Merchant:</strong> {{ $payment['qris_merchant_name'] }}</p>
-                            @if(!empty($payment['qris_image']))
+                            @if (!empty($payment['qris_image']))
                             <p class="mb-0"><small class="text-muted">Scan QRIS untuk pembayaran</small></p>
                             @endif
                         </div>
@@ -133,6 +138,6 @@
                 </div>
             </div>
         </div>
+    </div> --}}
     </div>
-</div>
 @endsection

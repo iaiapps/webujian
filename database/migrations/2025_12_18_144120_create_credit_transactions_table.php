@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('description');
             $table->string('reference_id')->nullable(); // ID package jika usage, invoice jika purchase
             $table->string('reference_type')->nullable(); // 'test_package', 'purchase', 'manual'
-            $table->foreignId('credit_purchase_id')->nullable()->constrained()->nullOnDelete();
+            $table->unsignedBigInteger('credit_purchase_id')->nullable();
             $table->foreignId('performed_by')->nullable()->constrained('users')->nullOnDelete(); // admin ID jika manual
             $table->text('notes')->nullable(); // alasan manual adjustment
             $table->timestamps();

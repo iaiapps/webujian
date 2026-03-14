@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             QuestionCategorySeeder::class,
             SettingSeeder::class,
+            CreditPackageSeeder::class,
         ]);
     }
 }
