@@ -91,10 +91,10 @@ class CreditController extends Controller
             ]],
             'extraData' => [
                 'internal_ref' => $internalRef,
-                'user_id' => $user->id,
-                'package_id' => $package->id,
-                'credits' => $package->credit_amount,
-                'bonus' => $package->bonus_credits,
+                'user_id' => (string) $user->id,
+                'package_id' => (string) $package->id,
+                'credits' => (string) $package->credit_amount,
+                'bonus' => (string) $package->bonus_credits,
             ],
         ];
 
