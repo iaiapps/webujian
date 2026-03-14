@@ -6,20 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'Ujian') - TKA</title>
+    <title>@yield('title', 'Ujian') - ExamWeb</title>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
+
     <!-- Exam CSS -->
     <link href="{{ asset('css/exam.css') }}" rel="stylesheet">
-    
+
     @stack('styles')
 </head>
 
@@ -30,19 +32,19 @@
                 <div class="logo-icon">
                     <i class="bi bi-mortarboard-fill"></i>
                 </div>
-                <span>TKA</span>
+                <span>ExamWeb</span>
             </div>
-            
+
             <div class="exam-timer" id="timer">
                 <i class="bi bi-clock"></i>
                 <span>@yield('timer', '--:--')</span>
             </div>
-            
+
             <div class="exam-violations" title="Pelanggaran">
                 <i class="bi bi-exclamation-triangle text-warning"></i>
                 <span class="badge bg-warning" id="violation-badge">@yield('violation-count', '0/3')</span>
             </div>
-            
+
             <div class="exam-actions">
                 @yield('header-actions')
             </div>

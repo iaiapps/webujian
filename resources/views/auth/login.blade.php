@@ -7,7 +7,7 @@
         <div class="auth-card">
             <!-- Logo/Brand -->
             <div class="text-center mb-4">
-                <h1 class="h2 fw-bold mb-2">TKA Web App</h1>
+                <h1 class="h2 fw-bold mb-2">ExamWeb</h1>
                 <p class="text-muted">Masuk ke akun Anda</p>
             </div>
 

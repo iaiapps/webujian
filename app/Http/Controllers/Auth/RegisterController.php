@@ -97,6 +97,6 @@ class RegisterController extends Controller
         $this->guard()->login($user);
 
         return redirect($this->redirectTo)
-            ->with('success', 'Registrasi berhasil! Selamat datang di TKA.');
+            ->with('success', 'Registrasi berhasil! Selamat datang di ExamWeb.');
     }
 }

@@ -1,4 +1,4 @@
-/* Exam Interface Styles - TKA Student */
+/* Exam Interface Styles - ExamWeb Student */
 
 :root {
     /* Primary - Midnight Blue */
@@ -31,8 +31,8 @@
     --border: #e5e7eb;
 
     /* Typography */
-    --font-heading: 'Plus Jakarta Sans', sans-serif;
-    --font-body: 'Inter', sans-serif;
+    --font-heading: "Plus Jakarta Sans", sans-serif;
+    --font-body: "Inter", sans-serif;
 
     /* Spacing */
     --header-height: 64px;
@@ -57,7 +57,12 @@ body {
     min-height: 100vh;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     font-family: var(--font-heading);
     font-weight: 700;
     line-height: 1.2;
@@ -87,7 +92,7 @@ h1, h2, h3, h4, h5, h6 {
     left: 0;
     right: 0;
     z-index: 1000;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .exam-logo {
@@ -132,8 +137,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
 }
 
 .exam-actions {
@@ -170,7 +180,7 @@ h1, h2, h3, h4, h5, h6 {
 .question-card {
     background: var(--bg-card);
     border-radius: var(--radius-lg);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     padding: 28px;
     max-width: 800px;
     margin: 0 auto;
@@ -506,7 +516,11 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background: linear-gradient(
+        135deg,
+        var(--primary) 0%,
+        var(--primary-dark) 100%
+    );
 }
 
 .exam-start-card {
@@ -521,7 +535,11 @@ h1, h2, h3, h4, h5, h6 {
 .exam-start-header {
     padding: 40px;
     text-align: center;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    background: linear-gradient(
+        135deg,
+        var(--primary) 0%,
+        var(--primary-light) 100%
+    );
     color: white;
 }
 
@@ -696,12 +714,12 @@ h1, h2, h3, h4, h5, h6 {
     .nav-panel {
         display: none;
     }
-    
+
     .question-area {
         max-width: 100%;
         padding: 16px;
     }
-    
+
     .question-card {
         padding: 20px;
     }
@@ -711,28 +729,28 @@ h1, h2, h3, h4, h5, h6 {
     .exam-header {
         padding: 0 16px;
     }
-    
+
     .exam-logo span {
         display: none;
     }
-    
+
     .exam-timer {
         font-size: 1.2rem;
     }
-    
+
     .exam-info-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .question-nav {
         flex-direction: column;
         gap: 12px;
     }
-    
+
     .nav-buttons {
         width: 100%;
     }
-    
+
     .nav-buttons .btn-nav {
         flex: 1;
         justify-content: center;

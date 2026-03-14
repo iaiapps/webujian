@@ -25,7 +25,7 @@
                             <div class="mb-3">
                                 <label class="form-label">Nama Aplikasi</label>
                                 <input type="text" name="app_name" class="form-control"
-                                    value="{{ $settings['general']['app_name'] ?? 'TKA SaaS' }}">
+                                    value="{{ $settings['general']['app_name'] ?? 'ExamWeb' }}">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Timezone</label>

@@ -3,7 +3,7 @@
         <div class="brand-icon">
             <i class="bi bi-{{ $role === 'student' ? 'mortarboard-fill' : 'shield-fill-check' }}"></i>
         </div>
-        <span class="brand-text">{{ $role === 'student' ? 'TKA' : 'TKA Admin' }}</span>
+        <span class="brand-text">{{ $role === 'student' ? 'ExamWeb' : 'ExamWeb Admin' }}</span>
     </div>
 
     <nav class="sidebar-nav">

@@ -7,7 +7,7 @@
     <meta name="description"
         content="Platform Tes Kompetensi Akademik Digital untuk Guru dan Siswa - Buat tryout, latihan soal, dan ujian dengan mudah">
 
-    <title>TKA - Platform Tes & Tryout Digital</title>
+    <title>ExamWeb - Platform Tes & Tryout Digital</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
