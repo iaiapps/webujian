@@ -2,23 +2,29 @@
 
 // app/Http/Controllers/Guru/CreditController.php
 // ============================================================
-// SISTEM KREDIT - Ganti dari SubscriptionController
+// SISTEM KREDIT - Integrasi dengan Mayar Payment Gateway
 // ============================================================
 
 namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
 use App\Models\CreditPackage;
+use App\Models\CreditPurchase;
 use App\Models\Setting;
+use App\Services\MayarService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class CreditController extends Controller
 {
-    public function __construct()
+    private MayarService $mayarService;
+
+    public function __construct(MayarService $mayarService)
     {
         $this->middleware(['auth', 'role:guru', 'check.approved']);
+        $this->mayarService = $mayarService;
     }
 
     public function index()
@@ -67,73 +73,167 @@ class CreditController extends Controller
     {
         $request->validate([
             'package_id' => ['required', 'exists:credit_packages,id'],
-            'payment_proof' => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
         ]);
 
         $user = Auth::user();
         $package = CreditPackage::findOrFail($request->package_id);
 
-        // Hitung total
-        $creditAmount = $package->credit_amount;
-        $bonusCredits = $package->bonus_credits;
-        $totalCredits = $package->getTotalCredits();
-        $totalPrice = $package->price;
+        // Generate internal reference
+        $internalRef = $this->mayarService->generateInternalRef($user->id, $package->id);
 
-        $proofPath = $this->uploadPaymentProof($request->file('payment_proof'));
-
-        $invoiceNumber = 'CRD-'.date('Ymd').'-'.strtoupper(uniqid());
-
-        session([
-            'credit_purchase' => [
-                'invoice_number' => $invoiceNumber,
-                'package_name' => $package->name,
-                'credit_amount' => $creditAmount,
-                'bonus_credits' => $bonusCredits,
-                'total_credits' => $totalCredits,
-                'total_price' => $totalPrice,
-                'payment_proof' => $proofPath,
+        // Create invoice data
+        $invoiceData = [
+            'name' => $user->name,
+            'email' => $user->email,
+            'mobile' => $user->phone ?? '081000000000',
+            'redirectUrl' => route('guru.credits.success'),
+            'description' => "Pembelian {$package->name}",
+            'expiredAt' => now()->addHours(24)->toIso8601String(),
+            'items' => [[
+                'quantity' => 1,
+                'rate' => $package->price,
+                'description' => $package->name,
+            ]],
+            'extraData' => [
+                'internal_ref' => $internalRef,
+                'user_id' => $user->id,
+                'package_id' => $package->id,
+                'credits' => $package->credit_amount,
+                'bonus' => $package->bonus_credits,
             ],
-        ]);
+        ];
 
-        return redirect()->route('guru.credits.success');
+        try {
+            // Create invoice di Mayar
+            $response = $this->mayarService->createInvoice($invoiceData);
+
+            // Simpan ke database
+            $purchase = CreditPurchase::create([
+                'user_id' => $user->id,
+                'credit_package_id' => $package->id,
+                'mayar_invoice_id' => $response['data']['id'],
+                'mayar_transaction_id' => $response['data']['transactionId'],
+                'payment_link' => $response['data']['link'],
+                'amount' => $package->price,
+                'credits_amount' => $package->credit_amount,
+                'bonus_credits' => $package->bonus_credits,
+                'total_credits' => $package->getTotalCredits(),
+                'expired_at' => Carbon::createFromTimestampMs($response['data']['expiredAt']),
+                'internal_ref' => $internalRef,
+                'status' => 'pending',
+            ]);
+
+            // Redirect ke halaman pembayaran Mayar
+            return redirect($response['data']['link']);
+
+        } catch (\Exception $e) {
+            Log::error('Credit Purchase Failed', [
+                'user_id' => $user->id,
+                'package_id' => $package->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', 'Gagal membuat invoice pembayaran. Silakan coba lagi.');
+        }
     }
 
     public function success()
     {
-        $purchase = session('credit_purchase');
+        $user = Auth::user();
+
+        // Ambil purchase terakhir yang pending
+        $purchase = CreditPurchase::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->latest()
+            ->first();
 
         if (! $purchase) {
             return redirect()->route('guru.credits.index');
         }
 
+        return view('guru.credits.success', compact('purchase'));
+    }
+
+    /**
+     * Check purchase status via AJAX polling
+     */
+    public function checkStatus(Request $request)
+    {
+        $request->validate([
+            'purchase_id' => ['required', 'exists:credit_purchases,id'],
+        ]);
+
         $user = Auth::user();
+        $purchase = CreditPurchase::where('id', $request->purchase_id)
+            ->where('user_id', $user->id)
+            ->first();
 
-        // Catat transaksi utama (purchase)
-        $user->addCredits(
-            $purchase['credit_amount'],
-            'purchase',
-            "Pembelian paket {$purchase['package_name']}",
-            $purchase['invoice_number'],
-            'purchase'
-        );
-
-        // Catat transaksi bonus jika ada
-        if ($purchase['bonus_credits'] > 0) {
-            $user->addCredits(
-                $purchase['bonus_credits'],
-                'bonus',
-                "Bonus {$purchase['bonus_credits']} kredit ({$purchase['package_name']})",
-                $purchase['invoice_number'],
-                'purchase'
-            );
+        if (! $purchase) {
+            return response()->json(['error' => 'Purchase not found'], 404);
         }
 
-        $result = $purchase;
-        $user->refresh();
+        // Jika masih pending, cek ke Mayar API
+        if ($purchase->isPending()) {
+            try {
+                $mayarStatus = $this->mayarService->getInvoiceStatus($purchase->mayar_invoice_id);
 
-        session()->forget('credit_purchase');
+                if (isset($mayarStatus['data']['status'])) {
+                    $mayarInvoiceStatus = $mayarStatus['data']['status'];
 
-        return view('guru.credits.success', compact('result'))->with('success', 'Pembelian kredit berhasil! Kredit telah ditambahkan ke akun Anda.');
+                    // Update status jika berbeda
+                    if ($mayarInvoiceStatus === 'paid' && $purchase->isPending()) {
+                        $purchase->markAsPaid($mayarStatus['data']['paymentMethod'] ?? null);
+
+                        // Tambah kredit
+                        $this->processPurchaseCredits($purchase);
+                    } elseif ($mayarInvoiceStatus === 'expired' && $purchase->isPending()) {
+                        $purchase->markAsExpired();
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error('Check Status Failed', [
+                    'purchase_id' => $purchase->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return response()->json([
+            'status' => $purchase->status,
+            'status_label' => $purchase->getStatusLabel(),
+            'is_paid' => $purchase->isPaid(),
+            'is_expired' => $purchase->isExpired(),
+            'total_credits' => $purchase->total_credits,
+            'current_credits' => $user->fresh()->credits,
+        ]);
+    }
+
+    /**
+     * Process credits for a paid purchase
+     */
+    private function processPurchaseCredits(CreditPurchase $purchase): void
+    {
+        $user = $purchase->user;
+
+        // Base credits
+        $user->addCredits(
+            amount: $purchase->credits_amount,
+            type: 'purchase',
+            description: "Pembelian {$purchase->creditPackage->name}",
+            referenceId: $purchase->id,
+            referenceType: 'credit_purchase'
+        );
+
+        // Bonus credits
+        if ($purchase->bonus_credits > 0) {
+            $user->addCredits(
+                amount: $purchase->bonus_credits,
+                type: 'bonus',
+                description: "Bonus dari {$purchase->creditPackage->name}",
+                referenceId: $purchase->id,
+                referenceType: 'credit_purchase'
+            );
+        }
     }
 
     public function cancel(Request $request)
@@ -141,15 +241,5 @@ class CreditController extends Controller
         session()->forget('credit_purchase');
 
         return redirect()->route('guru.credits.index');
-    }
-
-    private function uploadPaymentProof($file)
-    {
-        $filename = 'credit_payment_'.time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
-        $path = 'payment_proofs/'.$filename;
-
-        Storage::disk('public')->put($path, file_get_contents($file));
-
-        return $path;
     }
 }

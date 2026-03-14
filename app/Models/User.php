@@ -94,6 +94,12 @@ class User extends Authenticatable
         return $this->hasMany(CreditTransaction::class)->latest();
     }
 
+    // SISTEM KREDIT - History pembelian kredit
+    public function creditPurchases()
+    {
+        return $this->hasMany(CreditPurchase::class)->latest();
+    }
+
     // SISTEM KREDIT - subscriptionHistories dinonaktifkan
     // public function subscriptionHistories()
     // {

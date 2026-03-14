@@ -81,7 +81,7 @@
                     <h5 class="mb-0">Detail Pembelian</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('guru.credits.purchase') }}" enctype="multipart/form-data" id="purchase-form">
+                    <form method="POST" action="{{ route('guru.credits.purchase') }}" id="purchase-form">
                         @csrf
                         
                         <input type="hidden" name="package_id" id="package_id" value="">
@@ -116,39 +116,18 @@
 
                         <h6 class="mb-3">Metode Pembayaran</h6>
 
-                        @if(!empty($payment['bank_name']))
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="payment_method" id="bank_transfer" value="bank_transfer" checked>
-                                <label class="form-check-label" for="bank_transfer">
-                                    Bank Transfer
-                                </label>
-                            </div>
-                            <div class="ms-4 mt-2 p-2 bg-light rounded">
-                                <small class="text-muted">
-                                    <strong>{{ $payment['bank_name'] }}</strong><br>
-                                    {{ $payment['bank_account_number'] }}<br>
-                                    A/n {{ $payment['bank_account_name'] }}
-                                </small>
-                            </div>
-                        </div>
-                        @endif
-
-                        <div class="mb-3">
-                            <label class="form-label">Upload Bukti Transfer <span class="text-danger">*</span></label>
-                            <input type="file" name="payment_proof" class="form-control" accept="image/*" required>
-                            <small class="text-muted">Format: JPG, PNG (Max 2MB)</small>
-                        </div>
-
-                        @if(!empty($payment['payment_instructions']))
                         <div class="alert alert-info mb-3">
-                            <h6 class="alert-heading"><i class="bi bi-info-circle me-1"></i>Instruksi:</h6>
-                            <small>{{ $payment['payment_instructions'] }}</small>
+                            <i class="bi bi-info-circle me-2"></i>
+                            Anda akan diarahkan ke halaman pembayaran Mayar yang mendukung berbagai metode pembayaran:
+                            <ul class="mb-0 mt-2">
+                                <li>QRIS (Gopay, OVO, DANA, dll)</li>
+                                <li>Virtual Account (BCA, BNI, BRI, Mandiri)</li>
+                                <li>Credit Card</li>
+                            </ul>
                         </div>
-                        @endif
 
                         <button type="submit" class="btn btn-primary w-100" id="submit-btn" disabled>
-                            <i class="bi bi-check-circle"></i> Konfirmasi Pembelian
+                            <i class="bi bi-credit-card"></i> Lanjutkan ke Pembayaran
                         </button>
                     </form>
                 </div>

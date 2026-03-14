@@ -19,6 +19,9 @@ Route::get('/waiting-approval', function () {
     return view('auth.waiting-approval');
 })->name('auth.waiting-approval');
 
+// Mayar Webhook (no auth required)
+Route::post('/webhook/mayar', [App\Http\Controllers\WebhookController::class, 'handleMayar'])->name('webhook.mayar');
+
 // Student Auth Routes
 Route::prefix('student')->name('student.')->group(function () {
     Route::get('/login', [App\Http\Controllers\Student\Auth\LoginController::class, 'showLoginForm'])->name('login');
@@ -135,6 +138,7 @@ Route::prefix('guru')->name('guru.')->middleware(['auth', 'role:guru', 'check.ap
     Route::post('/credits/purchase', [App\Http\Controllers\Guru\CreditController::class, 'purchase'])->name('credits.purchase');
     Route::get('/credits/success', [App\Http\Controllers\Guru\CreditController::class, 'success'])->name('credits.success');
     Route::get('/credits/history', [App\Http\Controllers\Guru\CreditController::class, 'history'])->name('credits.history');
+    Route::get('/credits/check-status', [App\Http\Controllers\Guru\CreditController::class, 'checkStatus'])->name('credits.check-status');
 
     // Profile
     Route::get('/profile', [App\Http\Controllers\Guru\ProfileController::class, 'edit'])->name('profile.edit');

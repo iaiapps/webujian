@@ -18,6 +18,7 @@ class CreditTransaction extends Model
         'description',
         'reference_id',
         'reference_type',
+        'credit_purchase_id',
         'performed_by',
         'notes',
     ];
@@ -37,6 +38,11 @@ class CreditTransaction extends Model
     public function performedBy()
     {
         return $this->belongsTo(User::class, 'performed_by');
+    }
+
+    public function creditPurchase()
+    {
+        return $this->belongsTo(CreditPurchase::class);
     }
 
     // Scopes
