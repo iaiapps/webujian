@@ -10,7 +10,8 @@ use App\Models\QuestionCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Laravel\Facades\Image;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 use Maatwebsite\Excel\Facades\Excel;
 
 class QuestionController extends Controller
@@ -313,8 +314,11 @@ class QuestionController extends Controller
     // Upload image with optimization
     private function uploadImage($file)
     {
+        // Create image manager instance
+        $manager = new ImageManager(new Driver);
+
         // Read and process image
-        $image = Image::read($file);
+        $image = $manager->read($file);
 
         // Scale to max width 800px while maintaining aspect ratio
         $image->scale(width: 800);

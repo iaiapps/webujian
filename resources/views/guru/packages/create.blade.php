@@ -186,7 +186,6 @@
                                 <small class="text-muted">Nonaktifkan untuk menyembunyikan dari siswa</small>
                             </div>
 
-                            <hr>
 
                             {{-- KELAS DINONAKTIFKAN --}}
                             {{-- <div class="mb-3">
@@ -269,17 +268,17 @@
                             <div class="row">
                                 <div class="col-4 mb-3">
                                     <label for="score_correct" class="form-label">Skor Benar</label>
-                                    <input type="number" step="0.01" class="form-control" id="score_correct" 
+                                    <input type="number" step="0.01" class="form-control" id="score_correct"
                                         name="score_correct" value="{{ old('score_correct', 4) }}">
                                 </div>
                                 <div class="col-4 mb-3">
                                     <label for="score_wrong" class="form-label">Skor Salah</label>
-                                    <input type="number" step="0.01" class="form-control" id="score_wrong" 
+                                    <input type="number" step="0.01" class="form-control" id="score_wrong"
                                         name="score_wrong" value="{{ old('score_wrong', -1) }}">
                                 </div>
                                 <div class="col-4 mb-3">
                                     <label for="score_empty" class="form-label">Skor Kosong</label>
-                                    <input type="number" step="0.01" class="form-control" id="score_empty" 
+                                    <input type="number" step="0.01" class="form-control" id="score_empty"
                                         name="score_empty" value="{{ old('score_empty', 0) }}">
                                 </div>
                             </div>
@@ -353,11 +352,11 @@
                 container.innerHTML = '<div class="text-center py-3"><i class="bi bi-hourglass"></i> Memuat...</div>';
 
                 fetch(`{{ url('/guru/packages/get-questions') }}?${params}`, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
                     .then(res => {
                         if (!res.ok) throw new Error('HTTP ' + res.status);
                         return res.json();
@@ -367,7 +366,8 @@
                     })
                     .catch(err => {
                         console.error(err);
-                        container.innerHTML = '<div class="text-center text-danger py-3">Gagal memuat soal: ' + err.message + '</div>';
+                        container.innerHTML = '<div class="text-center text-danger py-3">Gagal memuat soal: ' + err
+                            .message + '</div>';
                     });
             }
 

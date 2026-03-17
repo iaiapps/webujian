@@ -40,14 +40,18 @@
                 <span>@yield('timer', '--:--')</span>
             </div>
 
+            @hasSection('violations')
             <div class="exam-violations" title="Pelanggaran">
                 <i class="bi bi-exclamation-triangle text-warning"></i>
                 <span class="badge bg-warning" id="violation-badge">@yield('violation-count', '0/3')</span>
             </div>
+            @endif
 
+            @hasSection('header-actions')
             <div class="exam-actions">
                 @yield('header-actions')
             </div>
+            @endif
         </header>
 
         <main class="exam-main">

@@ -15,36 +15,20 @@
     {{-- Statistics Cards --}}
     <div class="row g-4 mb-4">
         <div class="col-md-3">
-            <x-ui.stat-card
-                icon="check-circle"
-                icon-variant="primary"
-                value="{{ $stats['total_completed'] }}"
-                label="Total Tes Selesai"
-            />
+            <x-ui.stat-card icon="check-circle" icon-variant="primary" value="{{ $stats['total_completed'] }}"
+                label="Total Tes Selesai" />
         </div>
         <div class="col-md-3">
-            <x-ui.stat-card
-                icon="graph-up-arrow"
-                icon-variant="success"
-                value="{{ number_format($stats['avg_score'] ?? 0, 1) }}"
-                label="Rata-rata Skor"
-            />
+            <x-ui.stat-card icon="graph-up-arrow" icon-variant="success"
+                value="{{ number_format($stats['avg_score'] ?? 0, 1) }}" label="Rata-rata Skor" />
         </div>
         <div class="col-md-3">
-            <x-ui.stat-card
-                icon="trophy"
-                icon-variant="info"
-                value="{{ number_format($stats['highest_score'] ?? 0) }}"
-                label="Skor Tertinggi"
-            />
+            <x-ui.stat-card icon="trophy" icon-variant="info" value="{{ number_format($stats['highest_score'] ?? 0) }}"
+                label="Skor Tertinggi" />
         </div>
         <div class="col-md-3">
-            <x-ui.stat-card
-                icon="check2-all"
-                icon-variant="orange"
-                value="{{ number_format($stats['total_correct']) }}"
-                label="Total Jawaban Benar"
-            />
+            <x-ui.stat-card icon="check2-all" icon-variant="orange" value="{{ number_format($stats['total_correct']) }}"
+                label="Total Jawaban Benar" />
         </div>
     </div>
 
@@ -92,18 +76,18 @@
         <div class="col-lg-4">
             <x-ui.card title="Histori Tes">
                 @forelse($completedTests->take(5) as $test)
-                    @if($test->package)
-                    <div class="d-flex justify-content-between align-items-start mb-3 pb-3 border-bottom">
-                        <div>
-                            <h6 class="mb-0 small" style="font-weight: 600;">{{ $test->package->title }}</h6>
-                            <small class="text-muted">{{ $test->submitted_at?->format('d M Y') ?? '-' }}</small>
+                    @if ($test->package)
+                        <div class="d-flex justify-content-between align-items-start mb-3 pb-3 border-bottom">
+                            <div>
+                                <h6 class="mb-0 small" style="font-weight: 600;">{{ $test->package->title }}</h6>
+                                <small class="text-muted">{{ $test->submitted_at?->format('d M Y') ?? '-' }}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge badge-primary">{{ number_format($test->total_score) }}</span>
+                                <br>
+                                <a href="{{ route('student.test.result', $test->id) }}" class="small">Detail</a>
+                            </div>
                         </div>
-                        <div class="text-end">
-                            <span class="badge badge-primary">{{ number_format($test->total_score) }}</span>
-                            <br>
-                            <a href="{{ route('student.test.result', $test->id) }}" class="small">Detail</a>
-                        </div>
-                    </div>
                     @endif
                 @empty
                     <p class="text-muted text-center py-3 mb-0">Belum ada tes yang dikerjakan</p>

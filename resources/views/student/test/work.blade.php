@@ -3,6 +3,11 @@
 
 @section('title', 'Mengerjakan - ' . $package->title)
 
+@section('violations')
+    <i class="bi bi-exclamation-triangle text-warning"></i>
+    <span class="badge bg-warning" id="violation-badge">{{ $violationCount ?? 0 }}/{{ $package->max_violations ?? 3 }}</span>
+@endsection
+
 @section('header-actions')
     <button type="button" class="btn btn-warning text-white" onclick="confirmSubmit()">
         <i class="bi bi-send"></i> Akhiri Tes
@@ -10,8 +15,11 @@
 @endsection
 
 @section('content')
-    <div class="question-area">
-        <div class="question-card">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="question-area">
+                    <div class="question-card">
                         @foreach ($questions as $index => $question)
                             <div class="question-item {{ $index === 0 ? '' : 'd-none' }}"
                                 data-question-id="{{ $question->id }}" data-index="{{ $index }}">
@@ -68,17 +76,21 @@
                                         }
                                     @endphp
                                     <div class="alert alert-info mb-3">
-                                        <i class="bi bi-info-circle"></i> Tentukan apakah setiap pernyataan di bawah ini <strong>BENAR</strong> atau <strong>SALAH</strong>.
+                                        <i class="bi bi-info-circle"></i> Tentukan apakah setiap pernyataan di bawah ini
+                                        <strong>BENAR</strong> atau <strong>SALAH</strong>.
                                     </div>
                                     <div class="options-container">
                                         @foreach ($question->options as $option)
                                             <div class="card mb-3 border">
                                                 <div class="card-body">
-                                                    <p class="mb-3"><strong>{{ $option->label }}.</strong> {{ $option->content }}</p>
+                                                    <p class="mb-3"><strong>{{ $option->label }}.</strong>
+                                                        {{ $option->content }}
+                                                    </p>
                                                     <div class="d-flex gap-4">
                                                         <div class="form-check">
                                                             <input class="form-check-input" type="radio"
-                                                                name="answer_{{ $question->id }}_{{ $option->label }}" value="B"
+                                                                name="answer_{{ $question->id }}_{{ $option->label }}"
+                                                                value="B"
                                                                 id="q{{ $question->id }}_{{ $option->label }}_true"
                                                                 {{ ($existingCategoryAnswers[$option->label] ?? '') === 'B' ? 'checked' : '' }}
                                                                 onchange="selectCategoryOption({{ $question->id }})">
@@ -89,7 +101,8 @@
                                                         </div>
                                                         <div class="form-check">
                                                             <input class="form-check-input" type="radio"
-                                                                name="answer_{{ $question->id }}_{{ $option->label }}" value="S"
+                                                                name="answer_{{ $question->id }}_{{ $option->label }}"
+                                                                value="S"
                                                                 id="q{{ $question->id }}_{{ $option->label }}_false"
                                                                 {{ ($existingCategoryAnswers[$option->label] ?? '') === 'S' ? 'checked' : '' }}
                                                                 onchange="selectCategoryOption({{ $question->id }})">
@@ -132,11 +145,6 @@
                                         @endforeach
                                     </div>
                                 @endif
-                                                </label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @endif
 
                                 {{-- Ragu-ragu --}}
                                 <div class="form-check mt-4">
@@ -144,7 +152,7 @@
                                         {{ in_array($question->id, $doubtQuestions) ? 'checked' : '' }}
                                         onchange="toggleDoubt({{ $question->id }})">
                                     <label class="form-check-label" for="doubt_{{ $question->id }}">
-                                        <i class="bi bi-question-circle"></i> Ragu-ragu dengan jawaban ini
+                                        Ragu-ragu dengan jawaban ini?
                                     </label>
                                 </div>
 
@@ -171,9 +179,9 @@
             </div>
 
             {{-- Navigation Sidebar --}}
-            <div class="col-lg-3">
-                <div class="card border-0 shadow-sm sticky-top-100">
-                    <div class="card-header bg-white">
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm sticky-top-100 rounded-4">
+                    <div class="card-header bg-white py-3 rounded-top-4">
                         <h6 class="mb-0">Navigasi Nomor</h6>
                     </div>
                     <div class="card-body">
@@ -219,7 +227,7 @@
             let violationCount = {{ $violationCount ?? 0 }};
             const maxViolations = {{ $package->max_violations ?? 3 }};
             let isFlagged = {{ $attempt->is_flagged ? 'true' : 'false' }};
-            
+
             // Initialize badge on page load
             if (violationCount > 0) {
                 updateViolationDisplay();
@@ -228,7 +236,7 @@
             // Report violation to server
             async function reportViolation(type) {
                 if (isFlagged) return;
-                
+
                 try {
                     const response = await fetch(`/student/result/${attemptId}/violation`, {
                         method: 'POST',
@@ -236,11 +244,13 @@
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
                         },
-                        body: JSON.stringify({ type: type })
+                        body: JSON.stringify({
+                            type: type
+                        })
                     });
-                    
+
                     const data = await response.json();
-                    
+
                     if (data.flagged) {
                         isFlagged = true;
                         alert('⚠️ ' + data.message);
@@ -256,7 +266,7 @@
                     console.error('Error reporting violation:', error);
                 }
             }
-            
+
             function updateViolationDisplay() {
                 const badge = document.getElementById('violation-badge');
                 if (badge) {
@@ -306,7 +316,7 @@
 
             // Anti-cheating: Detect DevTools (F12)
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'F12' || 
+                if (e.key === 'F12' ||
                     (e.ctrlKey && e.shiftKey && e.key === 'I') ||
                     (e.ctrlKey && e.shiftKey && e.key === 'J') ||
                     (e.ctrlKey && e.key === 'u')) {
@@ -390,7 +400,7 @@
 
                 // Format: "A:B,B:S,C:B,D:B,E:S"
                 const answer = answers.join(',');
-                
+
                 // Only save if all 5 statements are answered
                 if (answers.length === 5) {
                     saveAnswer(questionId, answer);
@@ -411,18 +421,19 @@
                 // Get current answer if not provided
                 if (answer === null) {
                     const questionEl = document.querySelector(`.question-item[data-question-id="${questionId}"]`);
-                    
+
                     // Detect question type
                     // Category type has inputs like: answer_{questionId}_A, answer_{questionId}_B, etc.
                     const categoryInputs = questionEl.querySelectorAll(`input[name^="answer_${questionId}_"]`);
                     const singleInput = questionEl.querySelector(`input[name="answer_${questionId}"]`);
                     const complexInputs = questionEl.querySelectorAll(`input[name="answer_${questionId}[]"]`);
-                    
+
                     if (categoryInputs.length > 0) {
                         // Category type: collect A:B,B:S,C:B,D:B,E:S format
                         const answers = [];
                         ['A', 'B', 'C', 'D', 'E'].forEach(opt => {
-                            const checkedRadio = questionEl.querySelector(`input[name="answer_${questionId}_${opt}"]:checked`);
+                            const checkedRadio = questionEl.querySelector(
+                                `input[name="answer_${questionId}_${opt}"]:checked`);
                             if (checkedRadio) {
                                 answers.push(`${opt}:${checkedRadio.value}`);
                             }

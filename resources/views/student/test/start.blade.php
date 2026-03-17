@@ -13,16 +13,16 @@
                     <p class="mb-0 opacity-75">{{ $package->description }}</p>
                 @endif
             </div>
-            
+
             <div class="exam-start-body">
                 <div class="exam-info-grid">
                     <div class="exam-info-item">
-                        <i class="bi bi-question-circle"></i>
+                        {{-- <i class="bi bi-question-circle"></i> --}}
                         <h4>{{ $package->total_questions }}</h4>
                         <span>Soal</span>
                     </div>
                     <div class="exam-info-item">
-                        <i class="bi bi-clock"></i>
+                        {{-- <i class="bi bi-clock"></i> --}}
                         <h4>{{ $package->duration }}</h4>
                         <span>Menit</span>
                     </div>
@@ -50,7 +50,7 @@
                         </label>
                     </div>
 
-                    <button type="button" class="btn btn-accent btn-lg w-100 py-3" onclick="confirmStart()">
+                    <button type="button" class="btn btn-start btn-lg w-100 py-3" onclick="confirmStart()">
                         <i class="bi bi-play-circle me-2"></i>Saya Siap, Mulai Tes!
                     </button>
                 </form>
