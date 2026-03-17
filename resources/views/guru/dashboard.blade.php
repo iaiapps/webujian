@@ -115,6 +115,21 @@
         </div>
     </div>
 
+    {{-- Monitoring Alert - Show if there are active tests with violations --}}
+    @php
+        $testsWithViolations = $activeTests->filter(function ($test) {
+            return $test->testAttempts->where('status', 'ongoing')->sum('violations_count') > 0;
+        });
+    @endphp
+    
+    @if ($testsWithViolations->count() > 0)
+        <div class="alert alert-warning mb-4">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>Perhatian!</strong> Ada {{ $testsWithViolations->count() }} tes yang memiliki pelanggaran.
+            <a href="{{ route('guru.monitoring.package', $testsWithViolations->first()) }}" class="alert-link">Lihat Monitoring</a>
+        </div>
+    @endif
+
     <div class="row g-4">
         {{-- Active Tests --}}
         <div class="col-lg-8">
@@ -135,6 +150,10 @@
                         <div class="mt-2">
                             <a href="{{ route('guru.packages.show', $test->id) }}"
                                 class="btn btn-sm btn-outline-primary">Detail</a>
+                            <a href="{{ route('guru.monitoring.package', $test->id) }}"
+                                class="btn btn-sm btn-warning text-white ms-1">
+                                <i class="bi bi-broadcast"></i> Monitoring
+                            </a>
                         </div>
                     </div>
                 @empty

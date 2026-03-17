@@ -65,7 +65,7 @@ class ResultController extends Controller
                         'score' => $attempt->total_score,
                         'submitted_at' => $attempt->submitted_at,
                         'duration' => $attempt->start_time && $attempt->submitted_at
-                            ? $attempt->submitted_at->diffInMinutes($attempt->start_time)
+                            ? $attempt->start_time->diffInMinutes($attempt->submitted_at)
                             : null,
                     ];
                 });
@@ -78,7 +78,7 @@ class ResultController extends Controller
         // Get answers with questions
         $attempt->load(['answers.question.category']);
 
-        return view('student.test.result', compact('attempt', 'package', 'ranking', 'totalAttempts', 'leaderboard'));
+        return view('student.exam.result.index', compact('attempt', 'package', 'ranking', 'totalAttempts', 'leaderboard'));
     }
 
     public function history()
@@ -125,7 +125,7 @@ class ResultController extends Controller
         // Map answers to questions
         $answersMap = $attempt->answers->keyBy('question_id');
 
-        return view('student.test.review', compact('attempt', 'package', 'questions', 'answersMap'));
+        return view('student.exam.result.review', compact('attempt', 'package', 'questions', 'answersMap'));
     }
 
     public function leaderboard(TestPackage $package)
@@ -145,7 +145,7 @@ class ResultController extends Controller
                     'name' => $attempt->student->name,
                     'score' => number_format($attempt->total_score, 1),
                     'duration' => $attempt->start_time && $attempt->submitted_at
-                        ? $attempt->submitted_at->diffInMinutes($attempt->start_time)
+                        ? $attempt->start_time->diffInMinutes($attempt->submitted_at)
                         : null,
                 ];
             });

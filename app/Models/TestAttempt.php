@@ -22,6 +22,12 @@ class TestAttempt extends Model
         'status',
         'ip_address',
         'user_agent',
+        'violations_count',
+        'violations_log',
+        'is_flagged',
+        'flagged_at',
+        'reset_token',
+        'reset_token_expires_at',
     ];
 
     protected $casts = [
@@ -32,6 +38,11 @@ class TestAttempt extends Model
         'correct_answers' => 'integer',
         'wrong_answers' => 'integer',
         'unanswered' => 'integer',
+        'violations_count' => 'integer',
+        'violations_log' => 'array',
+        'is_flagged' => 'boolean',
+        'flagged_at' => 'datetime',
+        'reset_token_expires_at' => 'datetime',
     ];
 
     public function student()
@@ -80,14 +91,14 @@ class TestAttempt extends Model
     public function calculateScore()
     {
         $package = $this->package;
-        
+
         $correct = $this->correct_answers;
         $wrong = $this->wrong_answers;
         $empty = $this->unanswered;
 
         // Scoring dari setting paket tes
-        $score = ($correct * $package->score_correct) 
-               + ($wrong * $package->score_wrong) 
+        $score = ($correct * $package->score_correct)
+               + ($wrong * $package->score_wrong)
                + ($empty * $package->score_empty);
 
         return max(0, $score);

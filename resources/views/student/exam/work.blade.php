@@ -1,5 +1,5 @@
-{{-- resources/views/student/test/work.blade.php --}}
-@extends('layouts.exam')
+{{-- resources/views/student/exam/work.blade.php --}}
+@extends('student.exam.layouts.exam')
 
 @section('title', 'Mengerjakan - ' . $package->title)
 
@@ -220,22 +220,32 @@
     @push('scripts')
         <script>
             const attemptId = {{ $attempt->id }};
-            const endTime = new Date("{{ $attempt->end_time->toIso8601String() }}");
+            const endTime = new Date("{{ $attempt->end_time ? $attempt->end_time->toIso8601String() : now()->addHours(2)->toIso8601String() }}");
             let currentIndex = 0;
             const totalQuestions = {{ $questions->count() }};
             let timerInterval;
             let violationCount = {{ $violationCount ?? 0 }};
             const maxViolations = {{ $package->max_violations ?? 3 }};
             let isFlagged = {{ $attempt->is_flagged ? 'true' : 'false' }};
+            let lastViolationTime = 0;
+            const violationCooldown = 3000; // 3 seconds cooldown
 
             // Initialize badge on page load
             if (violationCount > 0) {
                 updateViolationDisplay();
             }
 
-            // Report violation to server
+            // Report violation to server with rate limiting
             async function reportViolation(type) {
                 if (isFlagged) return;
+                
+                // Rate limiting: check cooldown
+                const now = Date.now();
+                if (now - lastViolationTime < violationCooldown) {
+                    console.log('Violation cooldown active, skipping:', type);
+                    return;
+                }
+                lastViolationTime = now;
 
                 try {
                     const response = await fetch(`/student/result/${attemptId}/violation`, {
@@ -253,17 +263,73 @@
 
                     if (data.flagged) {
                         isFlagged = true;
-                        alert('⚠️ ' + data.message);
-                        setTimeout(() => {
-                            window.location.href = '/student/result/' + attemptId;
-                        }, 2000);
+                        showViolationModal(data.message, true);
                     } else {
                         violationCount = data.violations_count;
-                        alert('⚠️ Pelanggaran! ' + data.message);
+                        showViolationModal(data.message, false);
                         updateViolationDisplay();
                     }
                 } catch (error) {
                     console.error('Error reporting violation:', error);
+                }
+            }
+
+            // Custom modal for violations (cannot be blocked like alert)
+            function showViolationModal(message, isFlagged) {
+                // Remove any existing modal
+                const existingModal = document.getElementById('violation-modal');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+                
+                // Create modal HTML
+                const modal = document.createElement('div');
+                modal.id = 'violation-modal';
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.7);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 9999;
+                `;
+                
+                const content = document.createElement('div');
+                content.style.cssText = `
+                    background: white;
+                    padding: 30px;
+                    border-radius: 10px;
+                    max-width: 400px;
+                    text-align: center;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                `;
+                
+                content.innerHTML = `
+                    <div style="font-size: 48px; margin-bottom: 15px;">${isFlagged ? '⛔' : '⚠️'}</div>
+                    <h4 style="color: ${isFlagged ? '#dc3545' : '#ffc107'}; margin-bottom: 15px;">
+                        ${isFlagged ? 'Ujian Dihentikan' : 'Pelanggaran Terdeteksi'}
+                    </h4>
+                    <p style="margin-bottom: 20px; color: #333;">${message}</p>
+                    ${isFlagged ? '<p style="color: #666; font-size: 14px;">Anda akan diarahkan ke halaman hasil...</p>' : ''}
+                `;
+                
+                modal.appendChild(content);
+                document.body.appendChild(modal);
+                
+                // Auto redirect if flagged
+                if (isFlagged) {
+                    setTimeout(() => {
+                        window.location.href = '/student/result/' + attemptId;
+                    }, 3000);
+                } else {
+                    // Auto close after 5 seconds for non-flagged violations
+                    setTimeout(() => {
+                        modal.remove();
+                    }, 5000);
                 }
             }
 
@@ -275,6 +341,26 @@
                         badge.classList.remove('bg-warning');
                         badge.classList.add('bg-danger');
                     }
+                    
+                    // Add animation effect
+                    badge.style.animation = 'none';
+                    badge.offsetHeight; // Trigger reflow
+                    badge.style.animation = 'pulse 0.5s ease-in-out';
+                    
+                    // Play warning sound
+                    playWarningSound();
+                }
+            }
+            
+            // Play warning sound for violations
+            function playWarningSound() {
+                try {
+                    const audio = new Audio();
+                    audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE'; // Short beep sound
+                    audio.volume = 0.5;
+                    audio.play().catch(e => console.log('Sound play failed:', e));
+                } catch (e) {
+                    console.log('Audio not supported');
                 }
             }
 
@@ -324,6 +410,56 @@
                 }
             });
 
+            // Anti-cheating: Fullscreen mode enforcement
+            let fullscreenWarningShown = false;
+            
+            function enterFullscreen() {
+                const elem = document.documentElement;
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                }
+            }
+            
+            function checkFullscreen() {
+                const isFullscreen = document.fullscreenElement || 
+                                     document.webkitFullscreenElement || 
+                                     document.mozFullScreenElement ||
+                                     document.msFullscreenElement;
+                
+                if (!isFullscreen && !fullscreenWarningShown) {
+                    fullscreenWarningShown = true;
+                    showViolationModal('Anda keluar dari mode fullscreen. Masuk kembali ke fullscreen atau akan dicatat sebagai pelanggaran.', false);
+                    
+                    // Auto re-enter fullscreen after 3 seconds
+                    setTimeout(() => {
+                        enterFullscreen();
+                        fullscreenWarningShown = false;
+                    }, 3000);
+                    
+                    // Report as violation after warning
+                    setTimeout(() => {
+                        reportViolation('exit_fullscreen');
+                    }, 5000);
+                }
+            }
+            
+            // Enter fullscreen on page load
+            window.addEventListener('load', () => {
+                setTimeout(() => {
+                    enterFullscreen();
+                }, 1000);
+            });
+            
+            // Monitor fullscreen changes
+            document.addEventListener('fullscreenchange', checkFullscreen);
+            document.addEventListener('webkitfullscreenchange', checkFullscreen);
+            document.addEventListener('mozfullscreenchange', checkFullscreen);
+            document.addEventListener('MSFullscreenChange', checkFullscreen);
+
             // Timer
             function startTimer() {
                 timerInterval = setInterval(() => {
@@ -345,7 +481,7 @@
 
                     // Warning 10 minutes
                     if (diff <= 600000 && diff > 599000) {
-                        alert('⚠️ Waktu tersisa 10 menit!');
+                        showViolationModal('⚠️ Waktu tersisa 10 menit!', false);
                     }
                 }, 1000);
             }

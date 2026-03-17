@@ -161,10 +161,14 @@
                         </div>
 
                         @if ($statistics['completed'] > 0)
-                            <a href="{{ route('guru.results.package', $package) }}" class="btn btn-primary w-100">
+                            <a href="{{ route('guru.results.package', $package) }}" class="btn btn-primary w-100 mb-2">
                                 <i class="bi bi-bar-chart"></i> Lihat Hasil Lengkap
                             </a>
                         @endif
+                        
+                        <a href="{{ route('guru.monitoring.package', $package) }}" class="btn btn-warning w-100 text-white">
+                            <i class="bi bi-broadcast"></i> Monitoring Live ({{ $statistics['ongoing'] }} siswa)
+                        </a>
                     </div>
                 </div>
 

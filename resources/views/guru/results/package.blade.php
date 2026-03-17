@@ -11,6 +11,9 @@
                 <p class="text-muted mb-0">Hasil & Analisis</p>
             </div>
             <div>
+                <a href="{{ route('guru.monitoring.package', $package) }}" class="btn btn-warning text-white">
+                    <i class="bi bi-broadcast"></i> Monitoring Live
+                </a>
                 <a href="{{ route('guru.results.export', $package) }}" class="btn btn-success">
                     <i class="bi bi-download"></i> Export Excel
                 </a>

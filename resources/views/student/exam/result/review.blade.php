@@ -1,5 +1,5 @@
-{{-- resources/views/student/test/review.blade.php --}}
-@extends('layouts.dashboard')
+{{-- resources/views/student/exam/result/review.blade.php --}}
+@extends('student.exam.layouts.exam')
 
 @section('title', 'Review Pembahasan - ' . $package->title)
 

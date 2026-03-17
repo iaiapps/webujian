@@ -1,5 +1,5 @@
-{{-- resources/views/student/test/start.blade.php --}}
-@extends('layouts.exam')
+{{-- resources/views/student/exam/start.blade.php --}}
+@extends('student.exam.layouts.exam')
 
 @section('title', 'Mulai Tes - ' . $package->title)
 

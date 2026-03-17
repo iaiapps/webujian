@@ -154,8 +154,8 @@ class ResultController extends Controller
             abort(403);
         }
 
-        // Generate unique token
-        $token = Str::random(32);
+        // Generate unique 6-character alphanumeric token (uppercase letters + numbers)
+        $token = strtoupper(Str::random(6));
 
         // Save token with 24 hours expiry
         $attempt->update([

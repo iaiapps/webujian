@@ -132,6 +132,12 @@ Route::prefix('guru')->name('guru.')->middleware(['auth', 'role:guru', 'check.ap
     Route::post('/results/attempt/{attempt}/reset-token', [App\Http\Controllers\Guru\ResultController::class, 'generateResetToken'])->name('results.reset-token');
     Route::delete('/results/attempt/{attempt}/reset-token', [App\Http\Controllers\Guru\ResultController::class, 'clearResetToken'])->name('results.clear-reset-token');
 
+    // Monitoring (Real-time)
+    Route::get('/monitoring', [App\Http\Controllers\Guru\MonitoringController::class, 'index'])->name('monitoring.index');
+    Route::get('/monitoring/{package}', [App\Http\Controllers\Guru\MonitoringController::class, 'index'])->name('monitoring.package');
+    Route::get('/monitoring/{package}/data', [App\Http\Controllers\Guru\MonitoringController::class, 'getData'])->name('monitoring.data');
+    Route::get('/monitoring/attempt/{attempt}/violations', [App\Http\Controllers\Guru\MonitoringController::class, 'getViolationsDetail'])->name('monitoring.violations');
+
     // Credits (Top-up)
     Route::get('/credits', [App\Http\Controllers\Guru\CreditController::class, 'index'])->name('credits.index');
     Route::get('/credits/topup', [App\Http\Controllers\Guru\CreditController::class, 'topup'])->name('credits.topup');

@@ -70,6 +70,10 @@
                     href="{{ route('guru.results.index') }}">
                     <i class="bi bi-bar-chart"></i> Hasil
                 </a>
+                <a class="sidebar-link {{ request()->routeIs('guru.monitoring.*') ? 'active' : '' }}"
+                    href="{{ route('guru.monitoring.index') }}">
+                    <i class="bi bi-broadcast"></i> Monitoring
+                </a>
                 {{-- SISTEM KREDIT - Ganti dari Subscription --}}
                 <a class="sidebar-link {{ request()->routeIs('guru.credits.*') ? 'active' : '' }}"
                     href="{{ route('guru.credits.index') }}">

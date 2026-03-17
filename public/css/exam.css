@@ -333,7 +333,6 @@ h6 {
 }
 
 .btn-start {
-    width: 100%;
     padding: 14px 28px;
     font-size: 1rem;
     font-weight: 700;
@@ -343,7 +342,6 @@ h6 {
     border-radius: var(--radius-md);
     cursor: pointer;
     transition: all 0.2s ease;
-    display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
@@ -351,6 +349,7 @@ h6 {
 
 .btn-start:hover {
     background: var(--accent-hover);
+    color: white;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
 }
@@ -421,4 +420,98 @@ h6 {
     .exam-info-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* ==================== Exam Result Styles ==================== */
+
+.exam-result-wrapper {
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.result-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.result-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.result-icon.success {
+    color: var(--success);
+}
+
+.result-icon.flagged {
+    color: var(--danger);
+}
+
+.score-card {
+    background: linear-gradient(
+        135deg,
+        var(--primary) 0%,
+        var(--primary-light) 100%
+    );
+    color: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.score-display {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* Violation Styles */
+.violation-card {
+    border: 2px solid var(--danger);
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.violation-header {
+    background: var(--danger);
+    color: white;
+    padding: 1rem;
+}
+
+.violation-list {
+    padding: 1.5rem;
+}
+
+.violation-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.violation-item:last-child {
+    border-bottom: none;
+}
+
+/* Token Styles */
+.token-box {
+    background: var(--warning-subtle);
+    border: 2px solid var(--warning);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.token-code {
+    font-family: monospace;
+    font-size: 1.5rem;
+    font-weight: bold;
+    letter-spacing: 0.2rem;
+    text-align: center;
+    background: var(--text-primary);
+    color: var(--warning);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
 }

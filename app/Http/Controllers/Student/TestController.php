@@ -59,7 +59,7 @@ class TestController extends Controller
         // Show confirmation page
         $package->load('questions.category');
 
-        return view('student.test.start', compact('package'));
+        return view('student.exam.start', compact('package'));
     }
 
     public function createAttempt(Request $request)
@@ -167,7 +167,7 @@ class TestController extends Controller
         // Get current violation count for JS initialization
         $violationCount = $attempt->violations_count;
 
-        return view('student.test.work', compact('attempt', 'package', 'questions', 'existingAnswers', 'doubtQuestions', 'violationCount'));
+        return view('student.exam.work', compact('attempt', 'package', 'questions', 'existingAnswers', 'doubtQuestions', 'violationCount'));
     }
 
     public function continueAttempt(TestAttempt $attempt)
