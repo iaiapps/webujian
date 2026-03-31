@@ -161,6 +161,7 @@ Route::prefix('student')->name('student.')->middleware('auth:student')->group(fu
     Route::get('/test/{package}/start', [App\Http\Controllers\Student\TestController::class, 'start'])->name('test.start');
     Route::post('/test/create-attempt', [App\Http\Controllers\Student\TestController::class, 'createAttempt'])->name('test.create-attempt');
     Route::get('/test/{attempt}/work', [App\Http\Controllers\Student\TestController::class, 'work'])->name('test.work');
+    Route::get('/test/{attempt}/question/{number}', [App\Http\Controllers\Student\TestController::class, 'getQuestion'])->name('test.get-question');
     Route::post('/test/{attempt}/save-answer', [App\Http\Controllers\Student\TestController::class, 'saveAnswer'])->name('test.save-answer');
     Route::post('/test/{attempt}/submit', [App\Http\Controllers\Student\TestController::class, 'submit'])->name('test.submit');
     Route::get('/test/{attempt}/continue', [App\Http\Controllers\Student\TestController::class, 'continue'])->name('test.continue');
@@ -176,6 +177,9 @@ Route::prefix('student')->name('student.')->middleware('auth:student')->group(fu
     // Violation API (for anti-cheating)
     Route::post('/result/{attempt}/violation', [App\Http\Controllers\Student\ResultController::class, 'recordViolation'])->name('test.violation');
 
+    // Bulk sync API (for LocalStorage sync)
+    Route::post('/test/{attempt}/bulk-sync', [App\Http\Controllers\Student\TestController::class, 'bulkSync'])->name('test.bulk-sync');
+
     // Reset token
     Route::post('/result/{attempt}/reset', [App\Http\Controllers\Student\ResultController::class, 'resetWithToken'])->name('test.reset');
 
@@ -184,3 +188,11 @@ Route::prefix('student')->name('student.')->middleware('auth:student')->group(fu
     Route::put('/profile', [App\Http\Controllers\Student\ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [App\Http\Controllers\Student\ProfileController::class, 'updatePassword'])->name('profile.password');
 });
+
+// Keep-alive API untuk session management
+Route::post('/api/keep-alive', function () {
+    // Refresh session
+    session()->regenerate();
+
+    return response()->json(['status' => 'ok', 'timestamp' => now()->toIso8601String()]);
+})->middleware('auth');

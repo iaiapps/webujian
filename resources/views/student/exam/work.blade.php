@@ -9,7 +9,7 @@
 @endsection
 
 @section('header-actions')
-    <button type="button" class="btn btn-warning text-white" onclick="confirmSubmit()">
+    <button type="button" id="btnFinishHeader" class="btn btn-warning text-white" onclick="confirmSubmit()">
         <i class="bi bi-send"></i> Akhiri Tes
     </button>
 @endsection
@@ -20,160 +20,75 @@
             <div class="col-lg-8">
                 <div class="question-area">
                     <div class="question-card">
-                        @foreach ($questions as $index => $question)
-                            <div class="question-item {{ $index === 0 ? '' : 'd-none' }}"
-                                data-question-id="{{ $question->id }}" data-index="{{ $index }}">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5>Soal {{ $index + 1 }} dari {{ $questions->count() }}</h5>
-                                    <div class="d-flex gap-2">
-                                        <span class="badge bg-info">{{ $question->category->name }}</span>
-                                        <span
-                                            class="badge bg-{{ $question->question_type === 'single' ? 'primary' : 'success' }}">
-                                            {{ $question->question_type === 'single' ? 'Pilihan Ganda' : 'PG Kompleks' }}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div class="mb-4">
-                                    <p class="fs-5">{{ $question->question_text }}</p>
-
-                                    @if ($question->question_image)
-                                        <img src="{{ Storage::url($question->question_image) }}" alt="Question Image"
-                                            class="img-fluid rounded mb-3">
-                                    @endif
-                                </div>
-
-                                {{-- Options --}}
-                                @if ($question->question_type === 'single')
-                                    {{-- Single Choice (Radio) --}}
-                                    <div class="options-container">
-                                        @foreach ($question->options as $option)
-                                            <div class="form-check mb-3 p-3 border rounded option-item"
-                                                onclick="selectOption({{ $question->id }}, '{{ $option->label }}', this)">
-                                                <input class="form-check-input" type="radio"
-                                                    name="answer_{{ $question->id }}" value="{{ $option->label }}"
-                                                    id="q{{ $question->id }}_{{ $option->label }}"
-                                                    {{ ($existingAnswers[$question->id] ?? '') === $option->label ? 'checked' : '' }}>
-                                                <label class="form-check-label w-100"
-                                                    for="q{{ $question->id }}_{{ $option->label }}">
-                                                    <strong>{{ $option->label }}.</strong>
-                                                    {{ $option->content }}
-                                                </label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @elseif ($question->question_type === 'category')
-                                    {{-- Category Type (True/False for each statement) --}}
-                                    @php
-                                        // Parse existing category answer: "A:B,B:S,C:B" → ["A" => "B", "B" => "S", ...]
-                                        $existingCategoryAnswers = [];
-                                        $existingAnswerStr = $existingAnswers[$question->id] ?? '';
-                                        foreach (explode(',', $existingAnswerStr) as $pair) {
-                                            $parts = explode(':', $pair);
-                                            if (count($parts) === 2) {
-                                                $existingCategoryAnswers[trim($parts[0])] = trim($parts[1]);
-                                            }
-                                        }
-                                    @endphp
-                                    <div class="alert alert-info mb-3">
-                                        <i class="bi bi-info-circle"></i> Tentukan apakah setiap pernyataan di bawah ini
-                                        <strong>BENAR</strong> atau <strong>SALAH</strong>.
-                                    </div>
-                                    <div class="options-container">
-                                        @foreach ($question->options as $option)
-                                            <div class="card mb-3 border">
-                                                <div class="card-body">
-                                                    <p class="mb-3"><strong>{{ $option->label }}.</strong>
-                                                        {{ $option->content }}
-                                                    </p>
-                                                    <div class="d-flex gap-4">
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="radio"
-                                                                name="answer_{{ $question->id }}_{{ $option->label }}"
-                                                                value="B"
-                                                                id="q{{ $question->id }}_{{ $option->label }}_true"
-                                                                {{ ($existingCategoryAnswers[$option->label] ?? '') === 'B' ? 'checked' : '' }}
-                                                                onchange="selectCategoryOption({{ $question->id }})">
-                                                            <label class="form-check-label text-success fw-bold"
-                                                                for="q{{ $question->id }}_{{ $option->label }}_true">
-                                                                <i class="bi bi-check-circle"></i> Benar
-                                                            </label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="radio"
-                                                                name="answer_{{ $question->id }}_{{ $option->label }}"
-                                                                value="S"
-                                                                id="q{{ $question->id }}_{{ $option->label }}_false"
-                                                                {{ ($existingCategoryAnswers[$option->label] ?? '') === 'S' ? 'checked' : '' }}
-                                                                onchange="selectCategoryOption({{ $question->id }})">
-                                                            <label class="form-check-label text-danger fw-bold"
-                                                                for="q{{ $question->id }}_{{ $option->label }}_false">
-                                                                <i class="bi bi-x-circle"></i> Salah
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @else
-                                    {{-- Complex Choice (Checkbox) --}}
-                                    <div class="alert alert-info mb-3">
-                                        <i class="bi bi-info-circle"></i> Pilih semua jawaban yang benar (bisa lebih dari
-                                        satu)
-                                    </div>
-                                    <div class="options-container">
-                                        @foreach ($question->options as $option)
-                                            @php
-                                                $existingAnswer = $existingAnswers[$question->id] ?? '';
-                                                $selectedOpts = explode(',', $existingAnswer);
-                                                $isChecked = in_array($option->label, $selectedOpts);
-                                            @endphp
-                                            <div
-                                                class="form-check mb-3 p-3 border rounded option-item {{ $isChecked ? 'border-primary' : '' }}">
-                                                <input class="form-check-input" type="checkbox"
-                                                    name="answer_{{ $question->id }}[]" value="{{ $option->label }}"
-                                                    id="q{{ $question->id }}_{{ $option->label }}"
-                                                    {{ $isChecked ? 'checked' : '' }}
-                                                    onchange="selectComplexOption({{ $question->id }})">
-                                                <label class="form-check-label w-100"
-                                                    for="q{{ $question->id }}_{{ $option->label }}">
-                                                    <strong>{{ $option->label }}.</strong>
-                                                    {{ $option->content }}
-                                                </label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @endif
-
-                                {{-- Ragu-ragu --}}
-                                <div class="form-check mt-4">
-                                    <input class="form-check-input" type="checkbox" id="doubt_{{ $question->id }}"
-                                        {{ in_array($question->id, $doubtQuestions) ? 'checked' : '' }}
-                                        onchange="toggleDoubt({{ $question->id }})">
-                                    <label class="form-check-label" for="doubt_{{ $question->id }}">
-                                        Ragu-ragu dengan jawaban ini?
-                                    </label>
-                                </div>
-
-                                {{-- Navigation --}}
-                                <div class="d-flex justify-content-between mt-4">
-                                    <button type="button" class="btn btn-secondary" onclick="prevQuestion()"
-                                        {{ $index === 0 ? 'disabled' : '' }}>
-                                        <i class="bi bi-chevron-left"></i> Sebelumnya
-                                    </button>
-                                    @if ($index < $questions->count() - 1)
-                                        <button type="button" class="btn btn-primary" onclick="nextQuestion()">
-                                            Selanjutnya <i class="bi bi-chevron-right"></i>
-                                        </button>
-                                    @else
-                                        <button type="button" class="btn btn-success" onclick="confirmSubmit()">
-                                            <i class="bi bi-send"></i> Selesai & Submit
-                                        </button>
-                                    @endif
+                        <!-- Question Loading State -->
+                        <div id="questionSkeleton" class="question-skeleton">
+                            <div class="skeleton-header mb-4">
+                                <div class="skeleton-text" style="width: 40%; height: 24px;"></div>
+                                <div class="d-flex gap-2 mt-2">
+                                    <div class="skeleton-badge"></div>
+                                    <div class="skeleton-badge"></div>
                                 </div>
                             </div>
-                        @endforeach
+                            <div class="skeleton-body mb-4">
+                                <div class="skeleton-text mb-2" style="width: 100%;"></div>
+                                <div class="skeleton-text mb-2" style="width: 90%;"></div>
+                                <div class="skeleton-text mb-2" style="width: 95%;"></div>
+                                <div class="skeleton-text" style="width: 60%;"></div>
+                            </div>
+                            <div class="skeleton-options">
+                                <div class="skeleton-option mb-3"></div>
+                                <div class="skeleton-option mb-3"></div>
+                                <div class="skeleton-option mb-3"></div>
+                                <div class="skeleton-option mb-3"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Question Container -->
+                        <div id="questionContainer" class="question-container" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 id="questionNumber">Soal <span id="currentQNum">1</span> dari <span id="totalQNum">{{ $package->total_questions }}</span></h5>
+                                <div class="d-flex gap-2">
+                                    <span id="questionCategory" class="badge bg-info"></span>
+                                    <span id="questionType" class="badge"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <p id="questionText" class="fs-5"></p>
+                                <div id="questionImageContainer"></div>
+                            </div>
+
+                            <!-- Options Container -->
+                            <div id="optionsContainer" class="options-container"></div>
+
+                            <!-- Ragu-ragu -->
+                            <div class="form-check mt-4">
+                                <input class="form-check-input" type="checkbox" id="doubtCheckbox" onchange="toggleCurrentDoubt()">
+                                <label class="form-check-label" for="doubtCheckbox">
+                                    <i class="bi bi-question-circle me-2"></i>Tandai soal ini (ragu-ragu)
+                                </label>
+                            </div>
+
+                            <!-- Navigation -->
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" id="btnPrev" class="btn btn-outline-primary" onclick="goToPrevQuestion()">
+                                    <i class="bi bi-arrow-left me-2"></i>Sebelumnya
+                                </button>
+                                <button type="button" id="btnNext" class="btn btn-primary" onclick="goToNextQuestion()">
+                                    Selanjutnya<i class="bi bi-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Error State -->
+                        <div id="questionError" class="question-error text-center py-5" style="display: none;">
+                            <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                            <h5 class="mt-3">Gagal memuat soal</h5>
+                            <p class="text-muted">Silakan coba lagi</p>
+                            <button type="button" class="btn btn-primary" onclick="retryLoadQuestion()">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Coba Lagi
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -217,6 +132,32 @@
         </div>
     </div>
 
+    <!-- Submit Loading Modal -->
+    <div id="submitLoadingModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center py-5">
+                    <div class="loading-animation mb-4">
+                        <div class="spinner-border text-success" style="width: 3.5rem; height: 3.5rem;" role="status"></div>
+                    </div>
+                    <h4 class="mb-3">Mengirim Jawaban...</h4>
+                    <p class="text-muted mb-4">Mohon tunggu, sistem sedang memproses hasil ujian Anda.</p>
+                    
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div id="submitProgress" class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                             style="width: 0%"></div>
+                    </div>
+                    
+                    <p id="submitLoadingText" class="text-success fw-bold">Estimasi: 7 detik</p>
+                    <p class="text-muted small mt-3">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Mohon tidak menutup atau me-refresh halaman ini
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
         <script>
             const attemptId = {{ $attempt->id }};
@@ -229,10 +170,79 @@
             let isFlagged = {{ $attempt->is_flagged ? 'true' : 'false' }};
             let lastViolationTime = 0;
             const violationCooldown = 3000; // 3 seconds cooldown
+            
+            // Audio initialization variables
+            let hasUserInteracted = false;
+            let audioContext = null;
 
             // Initialize badge on page load
             if (violationCount > 0) {
                 updateViolationDisplay();
+            }
+            
+            // Initialize audio on user interaction
+            function initAudio() {
+                if (!hasUserInteracted) {
+                    hasUserInteracted = true;
+                    try {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) {
+                        console.log('AudioContext not supported');
+                    }
+                }
+            }
+            
+            document.addEventListener('click', initAudio, { once: true });
+            document.addEventListener('keydown', initAudio, { once: true });
+            document.addEventListener('touchstart', initAudio, { once: true });
+            
+            // Play warning sound for violations
+            function playWarningSound() {
+                if (!hasUserInteracted) return;
+                
+                try {
+                    if (audioContext && audioContext.state === 'running') {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+                        
+                        oscillator.frequency.value = 800;
+                        oscillator.type = 'sine';
+                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                        
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.5);
+                    } else {
+                        const audio = new Audio();
+                        audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE';
+                        audio.volume = 0.5;
+                        audio.play().catch(e => console.log('Sound play failed:', e));
+                    }
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+            
+            // Update violation badge display
+            function updateViolationDisplay() {
+                const badge = document.getElementById('violation-badge');
+                if (badge) {
+                    badge.textContent = `${violationCount}/${maxViolations}`;
+                    
+                    if (violationCount >= maxViolations) {
+                        badge.classList.remove('bg-warning');
+                        badge.classList.add('bg-danger');
+                    }
+                    
+                    badge.style.animation = 'none';
+                    badge.offsetHeight;
+                    badge.style.animation = 'pulse 0.5s ease-in-out';
+                    
+                    playWarningSound();
+                }
             }
 
             // Report violation to server with rate limiting
@@ -330,78 +340,6 @@
                     setTimeout(() => {
                         modal.remove();
                     }, 5000);
-                }
-            }
-
-            function updateViolationDisplay() {
-                const badge = document.getElementById('violation-badge');
-                if (badge) {
-                    badge.textContent = violationCount + '/' + maxViolations;
-                    if (violationCount >= maxViolations - 1) {
-                        badge.classList.remove('bg-warning');
-                        badge.classList.add('bg-danger');
-                    }
-                    
-                    // Add animation effect
-                    badge.style.animation = 'none';
-                    badge.offsetHeight; // Trigger reflow
-                    badge.style.animation = 'pulse 0.5s ease-in-out';
-                    
-                    // Play warning sound
-                    playWarningSound();
-                }
-            }
-            
-            // Track user interaction for audio initialization
-            let hasUserInteracted = false;
-            let audioContext = null;
-            
-            function initAudio() {
-                if (!hasUserInteracted) {
-                    hasUserInteracted = true;
-                    // Initialize audio context after user interaction
-                    try {
-                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    } catch (e) {
-                        console.log('AudioContext not supported');
-                    }
-                }
-            }
-            
-            // Listen for user interactions
-            document.addEventListener('click', initAudio, { once: true });
-            document.addEventListener('keydown', initAudio, { once: true });
-            document.addEventListener('touchstart', initAudio, { once: true });
-            
-            // Play warning sound for violations
-            function playWarningSound() {
-                if (!hasUserInteracted) return;
-                
-                try {
-                    // Use AudioContext for better browser support
-                    if (audioContext && audioContext.state === 'running') {
-                        const oscillator = audioContext.createOscillator();
-                        const gainNode = audioContext.createGain();
-                        
-                        oscillator.connect(gainNode);
-                        gainNode.connect(audioContext.destination);
-                        
-                        oscillator.frequency.value = 800;
-                        oscillator.type = 'sine';
-                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-                        
-                        oscillator.start(audioContext.currentTime);
-                        oscillator.stop(audioContext.currentTime + 0.5);
-                    } else {
-                        // Fallback to Audio element
-                        const audio = new Audio();
-                        audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE';
-                        audio.volume = 0.5;
-                        audio.play().catch(e => console.log('Sound play failed:', e));
-                    }
-                } catch (e) {
-                    console.log('Audio not supported');
                 }
             }
 
@@ -579,7 +517,9 @@
             }
 
             function goToQuestion(index) {
-                showQuestion(index);
+                if (questionLoader) {
+                    navigateToQuestion(index + 1);
+                }
             }
 
             // Save Answer
@@ -699,6 +639,8 @@
             }
 
             function confirmSubmit() {
+                console.log('confirmSubmit called');
+                
                 const answered = document.querySelectorAll('.nav-btn.btn-primary').length;
                 const unanswered = totalQuestions - answered;
 
@@ -708,8 +650,58 @@
                 msg += `Yakin ingin submit?`;
 
                 if (confirm(msg)) {
-                    submitTest();
+                    // Disable all submit buttons to prevent double click
+                    const submitBtnHeader = document.getElementById('btnFinishHeader');
+                    const submitBtnNav = document.getElementById('btnNext');
+                    
+                    if (submitBtnHeader) {
+                        submitBtnHeader.disabled = true;
+                        submitBtnHeader.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Menyimpan...';
+                    }
+                    
+                    if (submitBtnNav) {
+                        submitBtnNav.disabled = true;
+                        submitBtnNav.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Menyimpan...';
+                    }
+                    
+                    // Show loading modal with random delay 5-15 seconds (maksimal 15 detik)
+                    const delay = 5000 + Math.random() * 10000; // 5-15 detik
+                    const estimatedSeconds = Math.ceil(delay / 1000);
+                    
+                    console.log('Submit delay:', delay, 'ms, estimated:', estimatedSeconds, 'seconds');
+                    
+                    showSubmitLoading(estimatedSeconds);
+                    
+                    // Delay kemudian submit
+                    setTimeout(() => {
+                        console.log('Executing submitTest after delay');
+                        submitTest();
+                    }, delay);
                 }
+            }
+
+            function showSubmitLoading(estimatedSeconds) {
+                const modal = new bootstrap.Modal(document.getElementById('submitLoadingModal'));
+                const progressBar = document.getElementById('submitProgress');
+                const loadingText = document.getElementById('submitLoadingText');
+                
+                progressBar.style.width = '0%';
+                loadingText.textContent = `Estimasi: ${estimatedSeconds} detik`;
+                
+                modal.show();
+
+                // Animate progress bar
+                let progress = 0;
+                const increment = 100 / (estimatedSeconds * 10); // Update tiap 100ms
+                
+                const progressInterval = setInterval(() => {
+                    progress += increment;
+                    if (progress >= 100) {
+                        progress = 100;
+                        clearInterval(progressInterval);
+                    }
+                    progressBar.style.width = `${progress}%`;
+                }, 100);
             }
 
             function submitTest() {
@@ -727,12 +719,41 @@
                             window.location.href = data.redirect || `/student/result/${attemptId}`;
                         } else {
                             alert(data.error || 'Gagal submit');
+                            hideSubmitLoading();
                         }
                     })
                     .catch(err => {
                         console.error('Submit error:', err);
                         alert('Gagal submit. Silakan coba lagi.');
+                        hideSubmitLoading();
                     });
+            }
+
+            function hideSubmitLoading() {
+                console.log('hideSubmitLoading called');
+                
+                const modalEl = document.getElementById('submitLoadingModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) {
+                    modal.hide();
+                }
+                
+                // Re-enable submit buttons
+                const submitBtnHeader = document.getElementById('btnFinishHeader');
+                const submitBtnNav = document.getElementById('btnNext');
+                
+                if (submitBtnHeader) {
+                    submitBtnHeader.disabled = false;
+                    submitBtnHeader.innerHTML = '<i class="bi bi-send"></i> Akhiri Tes';
+                }
+                
+                if (submitBtnNav) {
+                    submitBtnNav.disabled = false;
+                    const currentQ = questionLoader ? questionLoader.getCurrentNumber() : 1;
+                    btnNext.innerHTML = currentQ >= totalQuestions ? 
+                        'Selesai<i class="bi bi-check-lg ms-2"></i>' : 
+                        'Selanjutnya<i class="bi bi-arrow-right ms-2"></i>';
+                }
             }
 
             function autoSubmit() {
@@ -746,8 +767,385 @@
                 history.go(1);
             };
 
+            // ==================== LAZY LOADING FUNCTIONS ====================
+            
+            // Initialize QuestionLoader
+            let questionLoader = null;
+            let currentQuestionData = null;
+            
+            document.addEventListener('DOMContentLoaded', () => {
+                // Initialize QuestionLoader
+                if (typeof QuestionLoader !== 'undefined') {
+                    QuestionLoader.init({
+                        attemptId: attemptId,
+                        totalQuestions: totalQuestions,
+                        currentQuestion: 1
+                    });
+                    
+                    questionLoader = QuestionLoader;
+                    
+                    // Load first question
+                    loadQuestion(1);
+                }
+            });
+            
+            // Load question by number
+            async function loadQuestion(questionNumber) {
+                if (!questionLoader) return;
+                
+                // Show skeleton
+                showQuestionSkeleton();
+                
+                try {
+                    const question = await questionLoader.loadQuestion(questionNumber);
+                    renderQuestion(question);
+                    currentQuestionData = question;
+                    
+                    // Update navigation buttons
+                    updateNavButtons(questionNumber);
+                    
+                    // Update ExamState
+                    if (typeof ExamState !== 'undefined') {
+                        ExamState.setCurrentQuestion(questionNumber);
+                    }
+                    
+                } catch (error) {
+                    console.error('Failed to load question:', error);
+                    showQuestionError();
+                }
+            }
+            
+            // Render question data to UI
+            function renderQuestion(question) {
+                // Hide skeleton, show container
+                document.getElementById('questionSkeleton').style.display = 'none';
+                document.getElementById('questionError').style.display = 'none';
+                document.getElementById('questionContainer').style.display = 'block';
+                
+                // Update question info
+                document.getElementById('currentQNum').textContent = question.number;
+                document.getElementById('totalQNum').textContent = question.total_questions;
+                document.getElementById('questionCategory').textContent = question.category || 'Umum';
+                document.getElementById('questionText').textContent = question.text;
+                
+                // Update question type badge
+                const typeBadge = document.getElementById('questionType');
+                if (question.type === 'single') {
+                    typeBadge.className = 'badge bg-primary';
+                    typeBadge.textContent = 'Pilihan Ganda';
+                } else if (question.type === 'category') {
+                    typeBadge.className = 'badge bg-success';
+                    typeBadge.textContent = 'Kategori';
+                } else {
+                    typeBadge.className = 'badge bg-success';
+                    typeBadge.textContent = 'PG Kompleks';
+                }
+                
+                // Render image if exists
+                const imageContainer = document.getElementById('questionImageContainer');
+                if (question.image) {
+                    imageContainer.innerHTML = `
+                        <img data-src="${question.image}" alt="Question Image" 
+                             class="img-fluid rounded mb-3 lazy-image" 
+                             style="background-color: #f0f0f0; min-height: 100px;">
+                    `;
+                    
+                    // Initialize lazy loading for this image
+                    if (typeof LazyImage !== 'undefined') {
+                        setTimeout(() => LazyImage.refresh(), 100);
+                    }
+                } else {
+                    imageContainer.innerHTML = '';
+                }
+                
+                // Render options
+                renderOptions(question);
+                
+                // Restore doubt status
+                const doubtCheckbox = document.getElementById('doubtCheckbox');
+                if (doubtCheckbox) {
+                    doubtCheckbox.checked = question.is_doubt || false;
+                }
+            }
+            
+            // Render options based on question type
+            function renderOptions(question) {
+                const container = document.getElementById('optionsContainer');
+                container.innerHTML = '';
+                
+                if (question.type === 'single') {
+                    // Single choice
+                    question.options.forEach(option => {
+                        const isChecked = question.existing_answer === option.label;
+                        const optionEl = document.createElement('div');
+                        optionEl.className = 'form-check mb-3 p-3 border rounded option-item';
+                        optionEl.onclick = () => selectOption(question.id, option.label);
+                        optionEl.innerHTML = `
+                            <input class="form-check-input" type="radio" 
+                                   name="answer_${question.id}" value="${option.label}" 
+                                   id="q${question.id}_${option.label}" ${isChecked ? 'checked' : ''}
+                                   onchange="saveCurrentAnswer()">
+                            <label class="form-check-label w-100" for="q${question.id}_${option.label}">
+                                <strong>${option.label}.</strong> ${option.content}
+                            </label>
+                        `;
+                        container.appendChild(optionEl);
+                    });
+                } else if (question.type === 'category') {
+                    // Category type
+                    const info = document.createElement('div');
+                    info.className = 'alert alert-info mb-3';
+                    info.innerHTML = '<i class="bi bi-info-circle"></i> Tentukan apakah setiap pernyataan di bawah ini <strong>BENAR</strong> atau <strong>SALAH</strong>.';
+                    container.appendChild(info);
+                    
+                    // Parse existing answers
+                    const existingPairs = {};
+                    if (question.existing_answer) {
+                        question.existing_answer.split(',').forEach(pair => {
+                            const [opt, val] = pair.split(':');
+                            if (opt && val) existingPairs[opt.trim()] = val.trim();
+                        });
+                    }
+                    
+                    question.options.forEach(option => {
+                        const isTrue = existingPairs[option.label] === 'B';
+                        const isFalse = existingPairs[option.label] === 'S';
+                        
+                        const optionEl = document.createElement('div');
+                        optionEl.className = 'card mb-3 border';
+                        optionEl.innerHTML = `
+                            <div class="card-body">
+                                <p class="mb-3"><strong>${option.label}.</strong> ${option.content}</p>
+                                <div class="d-flex gap-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" 
+                                               name="answer_${question.id}_${option.label}" value="B"
+                                               id="q${question.id}_${option.label}_true" ${isTrue ? 'checked' : ''}
+                                               onchange="saveCurrentAnswer()">
+                                        <label class="form-check-label text-success fw-bold" for="q${question.id}_${option.label}_true">
+                                            <i class="bi bi-check-circle"></i> Benar
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" 
+                                               name="answer_${question.id}_${option.label}" value="S"
+                                               id="q${question.id}_${option.label}_false" ${isFalse ? 'checked' : ''}
+                                               onchange="saveCurrentAnswer()">
+                                        <label class="form-check-label text-danger fw-bold" for="q${question.id}_${option.label}_false">
+                                            <i class="bi bi-x-circle"></i> Salah
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(optionEl);
+                    });
+                } else {
+                    // Complex type
+                    const info = document.createElement('div');
+                    info.className = 'alert alert-info mb-3';
+                    info.innerHTML = '<i class="bi bi-info-circle"></i> Pilih semua jawaban yang benar (bisa lebih dari satu)';
+                    container.appendChild(info);
+                    
+                    const existingAnswers = question.existing_answer ? question.existing_answer.split(',') : [];
+                    
+                    question.options.forEach(option => {
+                        const isChecked = existingAnswers.includes(option.label);
+                        const optionEl = document.createElement('div');
+                        optionEl.className = 'form-check mb-3 p-3 border rounded option-item';
+                        optionEl.innerHTML = `
+                            <input class="form-check-input" type="checkbox" 
+                                   name="answer_${question.id}" value="${option.label}" 
+                                   id="q${question.id}_${option.label}" ${isChecked ? 'checked' : ''}
+                                   onchange="saveCurrentAnswer()">
+                            <label class="form-check-label w-100" for="q${question.id}_${option.label}">
+                                <strong>${option.label}.</strong> ${option.content}
+                            </label>
+                        `;
+                        container.appendChild(optionEl);
+                    });
+                }
+            }
+            
+            // Show skeleton loading
+            function showQuestionSkeleton() {
+                document.getElementById('questionSkeleton').style.display = 'block';
+                document.getElementById('questionContainer').style.display = 'none';
+                document.getElementById('questionError').style.display = 'none';
+            }
+            
+            // Show error state
+            function showQuestionError() {
+                document.getElementById('questionSkeleton').style.display = 'none';
+                document.getElementById('questionContainer').style.display = 'none';
+                document.getElementById('questionError').style.display = 'block';
+            }
+            
+            // Retry loading
+            function retryLoadQuestion() {
+                if (questionLoader) {
+                    loadQuestion(questionLoader.getCurrentNumber());
+                }
+            }
+            
+            // Update navigation buttons state
+            function updateNavButtons(questionNumber) {
+                console.log('updateNavButtons called:', questionNumber, 'of', totalQuestions);
+                
+                const btnPrev = document.getElementById('btnPrev');
+                const btnNext = document.getElementById('btnNext');
+                
+                if (btnPrev) {
+                    btnPrev.disabled = questionNumber <= 1;
+                    console.log('btnPrev disabled:', btnPrev.disabled);
+                }
+                if (btnNext) {
+                    // Enable button, hanya ubah text
+                    btnNext.disabled = false;
+                    if (questionNumber >= totalQuestions) {
+                        btnNext.innerHTML = 'Selesai<i class="bi bi-check-lg ms-2"></i>';
+                        btnNext.classList.remove('btn-primary');
+                        btnNext.classList.add('btn-success');
+                    } else {
+                        btnNext.innerHTML = 'Selanjutnya<i class="bi bi-arrow-right ms-2"></i>';
+                        btnNext.classList.remove('btn-success');
+                        btnNext.classList.add('btn-primary');
+                    }
+                    console.log('btnNext text:', btnNext.innerHTML, 'disabled:', btnNext.disabled);
+                }
+            }
+            
+            // Go to next question
+            function goToNextQuestion() {
+                console.log('goToNextQuestion clicked, questionLoader:', questionLoader);
+                
+                if (!questionLoader) {
+                    console.error('QuestionLoader not initialized');
+                    alert('Sistem belum siap. Mohon tunggu sebentar.');
+                    return;
+                }
+                
+                const currentNum = questionLoader.getCurrentNumber();
+                const nextNum = currentNum + 1;
+                
+                console.log('Current:', currentNum, 'Next:', nextNum, 'Total:', totalQuestions);
+                
+                if (nextNum <= totalQuestions) {
+                    saveCurrentAnswer();
+                    loadQuestion(nextNum);
+                } else {
+                    // Last question, show submit
+                    console.log('Last question, calling confirmSubmit');
+                    const nextBtn = document.getElementById('btnNext');
+                    if (nextBtn) {
+                        nextBtn.disabled = true;
+                        nextBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Menyimpan...';
+                    }
+                    confirmSubmit();
+                }
+            }
+            
+            // Go to previous question
+            function goToPrevQuestion() {
+                if (questionLoader) {
+                    const prevNum = questionLoader.getCurrentNumber() - 1;
+                    if (prevNum >= 1) {
+                        saveCurrentAnswer();
+                        loadQuestion(prevNum);
+                    }
+                }
+            }
+            
+            // Save current answer
+            function saveCurrentAnswer() {
+                if (!currentQuestionData) return;
+                
+                const questionId = currentQuestionData.id;
+                const questionType = currentQuestionData.type;
+                let answer = null;
+                
+                if (questionType === 'single') {
+                    const checked = document.querySelector(`input[name="answer_${questionId}"]:checked`);
+                    answer = checked ? checked.value : null;
+                } else if (questionType === 'category') {
+                    const answers = [];
+                    ['A', 'B', 'C', 'D', 'E'].forEach(opt => {
+                        const checked = document.querySelector(`input[name="answer_${questionId}_${opt}"]:checked`);
+                        if (checked) {
+                            answers.push(`${opt}:${checked.value}`);
+                        }
+                    });
+                    answer = answers.join(',');
+                } else {
+                    // Complex
+                    const checked = document.querySelectorAll(`input[name="answer_${questionId}"]:checked`);
+                    answer = Array.from(checked).map(el => el.value).join(',');
+                }
+                
+                // Save to ExamState and SyncManager
+                if (typeof ExamState !== 'undefined') {
+                    const isDoubt = document.getElementById('doubtCheckbox')?.checked || false;
+                    ExamState.saveAnswer(questionId, answer, isDoubt);
+                }
+                
+                // Update nav button
+                if (answer) {
+                    updateNavButton(questionId, 'answered');
+                }
+            }
+            
+            // Toggle doubt for current question
+            function toggleCurrentDoubt() {
+                if (!currentQuestionData) return;
+                
+                const questionId = currentQuestionData.id;
+                const isDoubt = document.getElementById('doubtCheckbox').checked;
+                
+                if (typeof ExamState !== 'undefined') {
+                    ExamState.markDoubt(questionId, isDoubt);
+                }
+                
+                updateNavButton(questionId, isDoubt ? 'doubt' : (getCurrentAnswer() ? 'answered' : ''));
+            }
+            
+            // Get current answer
+            function getCurrentAnswer() {
+                if (!currentQuestionData) return null;
+                
+                const questionId = currentQuestionData.id;
+                const questionType = currentQuestionData.type;
+                
+                if (questionType === 'single') {
+                    const checked = document.querySelector(`input[name="answer_${questionId}"]:checked`);
+                    return checked ? checked.value : null;
+                } else if (questionType === 'category') {
+                    const answers = [];
+                    ['A', 'B', 'C', 'D', 'E'].forEach(opt => {
+                        const checked = document.querySelector(`input[name="answer_${questionId}_${opt}"]:checked`);
+                        if (checked) answers.push(`${opt}:${checked.value}`);
+                    });
+                    return answers.join(',');
+                } else {
+                    const checked = document.querySelectorAll(`input[name="answer_${questionId}"]:checked`);
+                    return Array.from(checked).map(el => el.value).join(',');
+                }
+            }
+            
+            // Navigate to question number
+            function navigateToQuestion(number) {
+                if (number >= 1 && number <= totalQuestions) {
+                    saveCurrentAnswer();
+                    loadQuestion(number);
+                }
+            }
+
             // Initialize
             document.addEventListener('DOMContentLoaded', () => {
+                // Initialize LazyImage
+                if (typeof LazyImage !== 'undefined') {
+                    LazyImage.init();
+                }
+                
                 startTimer();
 
                 // Mark answered questions

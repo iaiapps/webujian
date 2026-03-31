@@ -296,6 +296,90 @@ class TestController extends Controller
         }
     }
 
+    /**
+     * Bulk sync answers from LocalStorage
+     */
+    public function bulkSync(Request $request, TestAttempt $attempt)
+    {
+        $student = Auth::guard('student')->user();
+
+        // Check ownership
+        if ($attempt->student_id !== $student->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Check if still ongoing
+        if (! $attempt->isOngoing()) {
+            return response()->json(['error' => 'Test already completed'], 400);
+        }
+
+        // Validate request
+        $request->validate([
+            'answers' => ['required', 'array'],
+            'answers.*.question_id' => ['required', 'integer'],
+            'answers.*.answer' => ['nullable', 'string'],
+            'answers.*.is_doubt' => ['boolean'],
+        ]);
+
+        $syncedIds = [];
+        $errors = [];
+
+        DB::beginTransaction();
+        try {
+            foreach ($request->answers as $answerData) {
+                $questionId = $answerData['question_id'];
+                $answer = $answerData['answer'];
+                $isDoubt = $answerData['is_doubt'] ?? false;
+
+                $question = $attempt->package->questions()->find($questionId);
+
+                if (! $question) {
+                    $errors[] = "Question {$questionId} not found";
+
+                    continue;
+                }
+
+                // Check answer correctness
+                $isCorrect = false;
+                if ($answer !== null && $answer !== '') {
+                    $isCorrect = $question->checkAnswer($answer);
+                }
+
+                // Save or update answer
+                TestAnswer::updateOrCreate(
+                    [
+                        'attempt_id' => $attempt->id,
+                        'question_id' => $questionId,
+                    ],
+                    [
+                        'answer' => $answer,
+                        'is_correct' => $isCorrect,
+                        'is_doubt' => $isDoubt,
+                    ]
+                );
+
+                $syncedIds[] = $questionId;
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'synced' => count($syncedIds),
+                'synced_ids' => $syncedIds,
+                'errors' => $errors,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     private function autoSubmit(TestAttempt $attempt)
     {
         if ($attempt->isCompleted()) {
@@ -320,5 +404,66 @@ class TestController extends Controller
             DB::rollBack();
             Log::error('Auto submit failed: '.$e->getMessage());
         }
+    }
+    
+    /**
+     * Get single question for lazy loading
+     */
+    public function getQuestion(Request $request, TestAttempt $attempt, int $questionNumber)
+    {
+        $student = Auth::guard('student')->user();
+        
+        // Check ownership
+        if ($attempt->student_id !== $student->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+        
+        // Check if still ongoing
+        if (! $attempt->isOngoing()) {
+            return response()->json(['error' => 'Test already completed'], 400);
+        }
+        
+        // Load package with questions
+        $package = $attempt->package;
+        $package->load(['questions' => function ($query) {
+            $query->with('category', 'options')->orderBy('test_package_questions.order');
+        }]);
+        
+        // Get question by number (index + 1)
+        $questions = $package->questions;
+        if ($questionNumber < 1 || $questionNumber > $questions->count()) {
+            return response()->json(['error' => 'Question not found'], 404);
+        }
+        
+        $question = $questions[$questionNumber - 1];
+        
+        // Get existing answer if any
+        $existingAnswer = TestAnswer::where('attempt_id', $attempt->id)
+            ->where('question_id', $question->id)
+            ->first();
+        
+        // Format question data
+        $questionData = [
+            'id' => $question->id,
+            'number' => $questionNumber,
+            'text' => $question->question_text,
+            'image' => $question->question_image ? Storage::url($question->question_image) : null,
+            'type' => $question->question_type,
+            'category' => $question->category ? $question->category->name : null,
+            'options' => $question->options->map(function ($option) {
+                return [
+                    'label' => $option->label,
+                    'content' => $option->content,
+                ];
+            }),
+            'existing_answer' => $existingAnswer ? $existingAnswer->answer : null,
+            'is_doubt' => $existingAnswer ? $existingAnswer->is_doubt : false,
+        ];
+        
+        return response()->json([
+            'success' => true,
+            'question' => $questionData,
+            'total_questions' => $questions->count(),
+        ]);
     }
 }

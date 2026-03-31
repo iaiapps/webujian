@@ -82,7 +82,6 @@
                 </div>
             @else
                 <div class="alert alert-warning">
-                    <i class="bi bi-info-circle"></i>
                     <strong>Token Belum Tersedia</strong><br>
                     Silakan hubungi guru Anda untuk meminta token reset agar dapat mengikuti ujian ulang.
                 </div>
@@ -93,6 +92,10 @@
                 <a href="{{ route('student.dashboard') }}" class="btn btn-outline-secondary">
                     <i class="bi bi-house"></i> Kembali ke Dashboard
                 </a>
+                {{-- refresh halaman --}}
+                <button class="btn btn-outline-primary" onclick="location.reload()">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh Halaman
+                </button>
             </div>
 
             {{-- Minimal Stats --}}

@@ -422,7 +422,179 @@ h6 {
     }
 }
 
-/* ==================== Exam Result Styles ==================== */
+/* ==================== Loading Modal Styles ==================== */
+
+/* Loading Modal Animation */
+#loadingModal .modal-content,
+#submitLoadingModal .modal-content,
+#globalLoadingModal .modal-content {
+    border: none;
+    border-radius: var(--radius-xl);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+#loadingModal .spinner-border,
+#submitLoadingModal .spinner-border,
+#globalLoadingModal .spinner-border {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-width: 0.3em;
+}
+
+/* Loading Animation Pulse */
+@keyframes loadingPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+}
+
+.loading-animation {
+    animation: loadingPulse 2s ease-in-out infinite;
+}
+
+/* Progress Bar Styles */
+.progress {
+    background-color: var(--bg-exam);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.progress-bar {
+    border-radius: var(--radius-sm);
+    transition: width 0.1s linear;
+}
+
+/* Loading Text Styles */
+.loading-title {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.loading-message {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.loading-text {
+    font-size: 1.1rem;
+}
+
+/* Modal Body Padding */
+#loadingModal .modal-body,
+#submitLoadingModal .modal-body,
+#globalLoadingModal .modal-body {
+    padding: 3rem 2rem;
+}
+
+/* Prevent Background Scrolling */
+.modal-open {
+    overflow: hidden;
+}
+
+/* Loading Spinner Colors */
+.spinner-border.text-primary {
+    color: var(--primary) !important;
+}
+
+.spinner-border.text-success {
+    color: var(--success) !important;
+}
+
+.spinner-border.text-warning {
+    color: var(--accent) !important;
+}
+
+.spinner-border.text-danger {
+    color: var(--danger) !important;
+}
+
+/* Progress Bar Colors */
+.bg-primary {
+    background-color: var(--primary) !important;
+}
+
+.bg-success {
+    background-color: var(--success) !important;
+}
+
+.bg-warning {
+    background-color: var(--accent) !important;
+}
+
+.bg-danger {
+    background-color: var(--danger) !important;
+}
+
+/* Text Colors */
+.text-primary {
+    color: var(--primary) !important;
+}
+
+.text-success {
+    color: var(--success) !important;
+}
+
+.text-warning {
+    color: var(--accent) !important;
+}
+
+.text-danger {
+    color: var(--danger) !important;
+}
+
+/* Responsive Loading Modal */
+@media (max-width: 576px) {
+    #loadingModal .modal-body,
+    #submitLoadingModal .modal-body,
+    #globalLoadingModal .modal-body {
+        padding: 2rem 1.5rem;
+    }
+    
+    #loadingModal .spinner-border,
+    #submitLoadingModal .spinner-border,
+    #globalLoadingModal .spinner-border {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+    
+    .loading-title {
+        font-size: 1.2rem;
+    }
+    
+    .loading-text {
+        font-size: 1rem;
+    }
+}
+
+/* Disabled Button State */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Keep Alive Indicator (optional) */
+.keep-alive-indicator {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    background: var(--success);
+    color: white;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.keep-alive-indicator.show {
+    opacity: 1;
+}
 
 .exam-result-wrapper {
     min-height: 100vh;
@@ -514,4 +686,103 @@ h6 {
     padding: 1rem;
     border-radius: 0.5rem;
     margin: 1rem 0;
+}
+
+/* ==================== Lazy Loading Styles ==================== */
+
+/* Question Skeleton Loading */
+.question-skeleton {
+    padding: 20px;
+}
+
+.skeleton-text {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    height: 20px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+}
+
+.skeleton-badge {
+    width: 80px;
+    height: 24px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 12px;
+}
+
+.skeleton-option {
+    height: 60px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 8px;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Question Error State */
+.question-error {
+    text-align: center;
+    padding: 40px;
+}
+
+/* Lazy Image Loading */
+.lazy-image {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.lazy-image.loaded {
+    opacity: 1;
+}
+
+/* Navigation Buttons */
+#btnPrev:disabled,
+#btnNext:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Loading State */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+/* Submit Button Styles */
+#btnFinishHeader {
+    pointer-events: auto !important;
+    z-index: 100;
+}
+
+#btnFinishHeader:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#btnNext {
+    pointer-events: auto !important;
+}
+
+#btnNext:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
