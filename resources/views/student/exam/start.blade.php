@@ -28,7 +28,7 @@
                     </div>
                 </div>
 
-                <div class="alert alert-warning mb-4">
+                <div class="alert alert-warning mb-3">
                     <h6 class="alert-heading mb-2"><i class="bi bi-exclamation-triangle me-2"></i>Perhatian!</h6>
                     <ul class="mb-0 ps-3" style="font-size: 0.9rem;">
                         <li>Pastikan koneksi internet Anda stabil</li>
@@ -60,32 +60,69 @@
 
     @push('scripts')
         <script>
+            function enterFullscreen() {
+                const elem = document.documentElement;
+                if (elem.requestFullscreen) {
+                    return elem.requestFullscreen();
+                } else if (elem.webkitRequestFullscreen) {
+                    return elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) {
+                    return elem.msRequestFullscreen();
+                }
+                return Promise.resolve();
+            }
+
             function confirmStart() {
                 if (!document.getElementById('agree').checked) {
                     alert('Anda harus menyetujui pernyataan terlebih dahulu');
                     return;
                 }
 
-                if (confirm('Yakin ingin memulai tes? Timer akan langsung berjalan setelah Anda mengklik OK.')) {
-                    fetch('{{ route('student.test.create-attempt') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            },
-                            body: JSON.stringify({
-                                package_id: {{ $package->id }}
+                if (confirm('Yakin ingin memulai tes? Timer akan langsung berjalan setelah Anda mengklik OK.\n\nBrowser akan masuk ke mode fullscreen untuk mencegah kecurangan.')) {
+                    // Request fullscreen first (requires user gesture)
+                    enterFullscreen().then(() => {
+                        fetch('{{ route('student.test.create-attempt') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                },
+                                body: JSON.stringify({
+                                    package_id: {{ $package->id }}
+                                })
                             })
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.attempt_id) {
-                                window.location.href = '/student/test/' + data.attempt_id + '/work';
-                            }
-                        })
-                        .catch(err => {
-                            alert('Gagal memulai tes. Silakan coba lagi.');
-                        });
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.attempt_id) {
+                                    window.location.href = '/student/test/' + data.attempt_id + '/work';
+                                }
+                            })
+                            .catch(err => {
+                                alert('Gagal memulai tes. Silakan coba lagi.');
+                            });
+                    }).catch(err => {
+                        // If fullscreen fails, still proceed but warn user
+                        console.log('Fullscreen request failed:', err);
+                        fetch('{{ route('student.test.create-attempt') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                },
+                                body: JSON.stringify({
+                                    package_id: {{ $package->id }}
+                                })
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.attempt_id) {
+                                    window.location.href = '/student/test/' + data.attempt_id + '/work';
+                                }
+                            })
+                            .catch(fetchErr => {
+                                alert('Gagal memulai tes. Silakan coba lagi.');
+                            });
+                    });
                 }
             }
         </script>

@@ -269,7 +269,7 @@ h6 {
 }
 
 .exam-start-header {
-    padding: 40px;
+    padding: 36px;
     text-align: center;
     background: linear-gradient(
         135deg,
@@ -280,8 +280,8 @@ h6 {
 }
 
 .exam-start-header i {
-    font-size: 3.5rem;
-    margin-bottom: 16px;
+    font-size: 3rem;
+    /* margin-bottom: 16px; */
     display: block;
 }
 

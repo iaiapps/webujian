@@ -17,6 +17,7 @@ class QuestionOption extends Model
     ];
 
     protected $casts = [
+        'question_id' => 'integer',
         'order' => 'integer',
     ];
 

@@ -53,11 +53,16 @@
                         <h6 class="mb-1" style="font-weight: 600;">{{ $test->title }}</h6>
                         <p class="text-muted small mb-2">{{ $test->description }}</p>
                         <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted">
-                                <i class="bi bi-clock"></i> {{ $test->duration }} menit
-                                | <i class="bi bi-question-circle"></i> {{ $test->total_questions }} soal
-                                | <i class="bi bi-calendar"></i> Sampai {{ $test->end_date->format('d M Y H:i') }}
-                            </small>
+                            <div>
+                                <small class="text-muted d-block">
+                                    <i class="bi bi-clock"></i> {{ $test->duration }} menit
+                                    | <i class="bi bi-question-circle"></i> {{ $test->total_questions }} soal
+                                </small>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar"></i> Mulai {{ $test->start_date->format('d M Y H:i') }}
+                                    - Sampai {{ $test->end_date->format('d M Y H:i') }}
+                                </small>
+                            </div>
                             <a href="{{ route('student.test.start', $test->id) }}" class="btn btn-primary btn-sm">
                                 Mulai Tes
                             </a>

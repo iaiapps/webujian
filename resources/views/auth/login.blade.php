@@ -13,7 +13,7 @@
 
             <!-- Card -->
             <div class="card">
-                <div class="card-body p-4 p-md-5">
+                <div class="card-body p-4">
                     @if (session('error'))
                         <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
                             <i class="bi bi-exclamation-circle-fill me-2"></i>

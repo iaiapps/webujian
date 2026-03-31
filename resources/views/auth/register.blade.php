@@ -13,7 +13,7 @@
 
             <!-- Card -->
             <div class="card">
-                <div class="card-body p-4 p-md-5">
+                <div class="card-body p-4">
                     <form method="POST" action="{{ route('register') }}">
                         @csrf
                         <div class="row g-3">

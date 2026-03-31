@@ -220,7 +220,7 @@
     @push('scripts')
         <script>
             const attemptId = {{ $attempt->id }};
-            const endTime = new Date("{{ $attempt->end_time ? $attempt->end_time->toIso8601String() : now()->addHours(2)->toIso8601String() }}");
+            const endTime = new Date("{{ $attempt->end_time ? $attempt->end_time->toIso8601String() : now()->addMinutes($package->duration)->toIso8601String() }}");
             let currentIndex = 0;
             const totalQuestions = {{ $questions->count() }};
             let timerInterval;
@@ -352,13 +352,54 @@
                 }
             }
             
+            // Track user interaction for audio initialization
+            let hasUserInteracted = false;
+            let audioContext = null;
+            
+            function initAudio() {
+                if (!hasUserInteracted) {
+                    hasUserInteracted = true;
+                    // Initialize audio context after user interaction
+                    try {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) {
+                        console.log('AudioContext not supported');
+                    }
+                }
+            }
+            
+            // Listen for user interactions
+            document.addEventListener('click', initAudio, { once: true });
+            document.addEventListener('keydown', initAudio, { once: true });
+            document.addEventListener('touchstart', initAudio, { once: true });
+            
             // Play warning sound for violations
             function playWarningSound() {
+                if (!hasUserInteracted) return;
+                
                 try {
-                    const audio = new Audio();
-                    audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE'; // Short beep sound
-                    audio.volume = 0.5;
-                    audio.play().catch(e => console.log('Sound play failed:', e));
+                    // Use AudioContext for better browser support
+                    if (audioContext && audioContext.state === 'running') {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+                        
+                        oscillator.frequency.value = 800;
+                        oscillator.type = 'sine';
+                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                        
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.5);
+                    } else {
+                        // Fallback to Audio element
+                        const audio = new Audio();
+                        audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE';
+                        audio.volume = 0.5;
+                        audio.play().catch(e => console.log('Sound play failed:', e));
+                    }
                 } catch (e) {
                     console.log('Audio not supported');
                 }
@@ -371,9 +412,22 @@
                 }
             });
 
-            // Anti-cheating: Window blur (click outside)
+            // Anti-cheating: Window blur (click outside) with delay
+            let blurStartTime = null;
+            const blurDelay = 500; // 500ms delay to filter out accidental blurs
+            
             window.addEventListener('blur', () => {
-                reportViolation('window_blur');
+                blurStartTime = Date.now();
+            });
+            
+            window.addEventListener('focus', () => {
+                if (blurStartTime) {
+                    const blurDuration = Date.now() - blurStartTime;
+                    if (blurDuration > blurDelay) {
+                        reportViolation('window_blur');
+                    }
+                    blurStartTime = null;
+                }
             });
 
             // Anti-cheating: Disable right-click
@@ -400,14 +454,40 @@
                 reportViolation('paste');
             });
 
-            // Anti-cheating: Detect DevTools (F12)
+            // Anti-cheating: Detect DevTools (F12 and resize)
+            let lastWindowWidth = window.innerWidth;
+            let lastWindowHeight = window.innerHeight;
+            
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'F12' ||
-                    (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-                    (e.ctrlKey && e.shiftKey && e.key === 'J') ||
-                    (e.ctrlKey && e.key === 'u')) {
+                    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) ||
+                    (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j')) ||
+                    (e.ctrlKey && (e.key === 'U' || e.key === 'u'))) {
+                    e.preventDefault();
                     reportViolation('devtools');
                 }
+            });
+            
+            // Detect DevTools via window resize
+            window.addEventListener('resize', () => {
+                const widthDiff = Math.abs(window.innerWidth - lastWindowWidth);
+                const heightDiff = Math.abs(window.innerHeight - lastWindowHeight);
+                
+                // If window size changed significantly (likely due to DevTools opening)
+                if (widthDiff > 100 || heightDiff > 100) {
+                    // Check if user is still in fullscreen
+                    const isFullscreen = document.fullscreenElement || 
+                                        document.webkitFullscreenElement || 
+                                        document.mozFullScreenElement ||
+                                        document.msFullscreenElement;
+                    
+                    if (!isFullscreen) {
+                        reportViolation('devtools_resize');
+                    }
+                }
+                
+                lastWindowWidth = window.innerWidth;
+                lastWindowHeight = window.innerHeight;
             });
 
             // Anti-cheating: Fullscreen mode enforcement
@@ -446,13 +526,6 @@
                     }, 5000);
                 }
             }
-            
-            // Enter fullscreen on page load
-            window.addEventListener('load', () => {
-                setTimeout(() => {
-                    enterFullscreen();
-                }, 1000);
-            });
             
             // Monitor fullscreen changes
             document.addEventListener('fullscreenchange', checkFullscreen);

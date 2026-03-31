@@ -31,6 +31,8 @@ class TestAttempt extends Model
     ];
 
     protected $casts = [
+        'student_id' => 'integer',
+        'package_id' => 'integer',
         'start_time' => 'datetime',
         'end_time' => 'datetime',
         'submitted_at' => 'datetime',

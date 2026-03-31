@@ -91,10 +91,74 @@
                     </div> --}}
                 </div>
                 <div class="col-lg-6 mt-5 mt-lg-0">
-                    <div class="text-center fade-up">
-                        <iframe src="{{ asset('dashboard-preview.html') }}" class="hero-iframe img-fluid"
-                            style="width: 100%; max-width: 600px; height: 380px; border: none; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);"
-                            title="Dashboard Preview"></iframe>
+                    <div class="fade-up">
+                        <div class="dashboard-preview">
+                            <!-- Header -->
+                            <div class="db-header">
+                                <div class="db-logo">
+                                    <i class="bi bi-mortarboard-fill"></i>
+                                    <span>ExamWeb</span>
+                                </div>
+                                <div class="db-nav">
+                                    <span class="db-nav-item active">Dashboard</span>
+                                    <span class="db-nav-item">Paket Tes</span>
+                                    <span class="db-nav-item">Siswa</span>
+                                </div>
+                            </div>
+
+                            <!-- Stats Cards -->
+                            <div class="db-stats">
+                                <div class="db-stat-card">
+                                    <div class="db-stat-icon blue">
+                                        <i class="bi bi-folder-fill"></i>
+                                    </div>
+                                    <div class="db-stat-info">
+                                        <div class="db-stat-value">10</div>
+                                        <div class="db-stat-label">Paket Aktif</div>
+                                    </div>
+                                </div>
+                                <div class="db-stat-card">
+                                    <div class="db-stat-icon green">
+                                        <i class="bi bi-people-fill"></i>
+                                    </div>
+                                    <div class="db-stat-info">
+                                        <div class="db-stat-value">150</div>
+                                        <div class="db-stat-label">Total Siswa</div>
+                                    </div>
+                                </div>
+                                <div class="db-stat-card">
+                                    <div class="db-stat-icon purple">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                    </div>
+                                    <div class="db-stat-info">
+                                        <div class="db-stat-value">100</div>
+                                        <div class="db-stat-label">Tes Selesai</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Table -->
+                            <div class="db-table-section">
+                                <div class="db-table-header">
+                                    <span class="db-table-title">Paket Tes Terbaru</span>
+                                    <span class="db-badge">2 Aktif</span>
+                                </div>
+                                <div class="db-table-row">
+                                    <div class="db-table-cell">
+                                        <div class="db-table-title-sm">Tryout UTBK 2026</div>
+                                        <div class="db-table-meta">120 Soal - 120 Menit</div>
+                                    </div>
+                                    <div class="db-table-status active">Aktif</div>
+                                </div>
+                                <div class="db-table-row">
+                                    <div class="db-table-cell">
+                                        <div class="db-table-title-sm">Simulasi TKA</div>
+                                        <div class="db-table-meta">80 Soal - 90 Menit</div>
+                                    </div>
+                                    <div class="db-table-status pending">Selesai</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

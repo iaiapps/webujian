@@ -28,6 +28,8 @@ class CreditPurchase extends Model
     ];
 
     protected $casts = [
+        'user_id' => 'integer',
+        'credit_package_id' => 'integer',
         'amount' => 'decimal:2',
         'credits_amount' => 'integer',
         'bonus_credits' => 'integer',

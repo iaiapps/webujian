@@ -23,6 +23,7 @@ class ClassRoom extends Model
     protected function casts(): array
     {
         return [
+            'user_id' => 'integer',
             'student_count' => 'integer',
         ];
     }
@@ -51,7 +52,7 @@ class ClassRoom extends Model
     public function updateStudentCount(): void
     {
         $this->update([
-            'student_count' => $this->activeStudents()->count()
+            'student_count' => $this->activeStudents()->count(),
         ]);
     }
 }

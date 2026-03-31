@@ -34,6 +34,7 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'id' => 'integer',
             'email_verified_at' => 'datetime',
             'approved_at' => 'datetime',
             // SISTEM KREDIT - plan_expired_at dihapus

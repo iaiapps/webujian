@@ -18,6 +18,8 @@ class TestAnswer extends Model
     ];
 
     protected $casts = [
+        'attempt_id' => 'integer',
+        'question_id' => 'integer',
         'is_correct' => 'boolean',
         'is_doubt' => 'boolean',
     ];

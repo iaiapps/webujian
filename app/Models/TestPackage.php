@@ -30,6 +30,7 @@ class TestPackage extends Model
     ];
 
     protected $casts = [
+        'user_id' => 'integer',
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'show_result' => 'boolean',
@@ -77,6 +78,7 @@ class TestPackage extends Model
     public function isAvailable()
     {
         $now = now();
+
         return $this->is_active
             && $this->start_date <= $now
             && $this->end_date >= $now;

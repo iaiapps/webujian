@@ -21,6 +21,9 @@ class Activity extends Model
     ];
 
     protected $casts = [
+        'user_id' => 'integer',
+        'subject_id' => 'integer',
+        'causer_id' => 'integer',
         'properties' => 'array',
     ];
 

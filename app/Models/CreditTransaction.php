@@ -24,6 +24,9 @@ class CreditTransaction extends Model
     ];
 
     protected $casts = [
+        'user_id' => 'integer',
+        'credit_purchase_id' => 'integer',
+        'performed_by' => 'integer',
         'amount' => 'integer',
         'balance_before' => 'integer',
         'balance_after' => 'integer',

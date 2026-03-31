@@ -18,6 +18,7 @@ class UsageLog extends Model
     ];
 
     protected $casts = [
+        'user_id' => 'integer',
         'current_count' => 'integer',
         'max_count' => 'integer',
         'is_limit_reached' => 'boolean',

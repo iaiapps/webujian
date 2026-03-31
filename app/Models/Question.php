@@ -23,6 +23,8 @@ class Question extends Model
     ];
 
     protected $casts = [
+        'user_id' => 'integer',
+        'category_id' => 'integer',
         'usage_count' => 'integer',
     ];
 
