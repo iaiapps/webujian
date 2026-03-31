@@ -29,13 +29,14 @@
                 </div>
 
                 <div class="alert alert-warning mb-3">
-                    <h6 class="alert-heading mb-2"><i class="bi bi-exclamation-triangle me-2"></i>Perhatian!</h6>
+                    <h6 class="alert-heading mb-2"><i class="bi bi-exclamation-triangle me-2"></i>Perhatian Penting!</h6>
                     <ul class="mb-0 ps-3" style="font-size: 0.9rem;">
-                        <li>Pastikan koneksi internet Anda stabil</li>
-                        <li>Tes akan dimulai setelah Anda klik tombol "Mulai Tes"</li>
-                        <li>Timer akan berjalan otomatis dan tidak bisa di-pause</li>
-                        <li>Jawaban Anda akan tersimpan otomatis</li>
-                        <li>Tes akan ter-submit otomatis jika waktu habis</li>
+                        <li><strong style="color: #dc3545;">📱 Mode Fullscreen WAJIB:</strong> Browser akan masuk fullscreen dan harus tetap aktif selama ujian. Keluar fullscreen akan dicatat sebagai pelanggaran.</li>
+                        <li><strong>⏱️ Timer Otomatis:</strong> Timer berjalan otomatis dan tidak bisa di-pause setelah dimulai</li>
+                        <li><strong>💾 Penyimpanan:</strong> Jawaban tersimpan otomatis setiap 30 detik dan saat Anda pindah soal</li>
+                        <li><strong>🔄 Refresh:</strong> Jika browser refresh, data tersimpan dan bisa dilanjutkan</li>
+                        <li><strong>⏰ Auto Submit:</strong> Tes akan ter-submit otomatis jika waktu habis</li>
+                        <li><strong>📶 Koneksi:</strong> Pastikan koneksi internet stabil</li>
                     </ul>
                 </div>
 
@@ -216,64 +217,33 @@
             function createAttempt() {
                 hideLoadingModal();
                 
-                // Request fullscreen first (requires user gesture)
-                enterFullscreen().then(() => {
-                    fetch('{{ route('student.test.create-attempt') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            },
-                            body: JSON.stringify({
-                                package_id: {{ $package->id }}
-                            })
+                // Fullscreen sudah dipanggil di confirmStart(), langsung create attempt
+                fetch('{{ route('student.test.create-attempt') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            package_id: {{ $package->id }}
                         })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.attempt_id) {
-                                window.location.href = '/student/test/' + data.attempt_id + '/work';
-                            } else {
-                                alert('Gagal memulai tes. Silakan coba lagi.');
-                                document.getElementById('btn-start').disabled = false;
-                                isStarting = false;
-                            }
-                        })
-                        .catch(err => {
-                            console.error('Error:', err);
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.attempt_id) {
+                            window.location.href = '/student/test/' + data.attempt_id + '/work';
+                        } else {
                             alert('Gagal memulai tes. Silakan coba lagi.');
                             document.getElementById('btn-start').disabled = false;
                             isStarting = false;
-                        });
-                }).catch(err => {
-                    // If fullscreen fails, still proceed
-                    console.log('Fullscreen request failed:', err);
-                    fetch('{{ route('student.test.create-attempt') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            },
-                            body: JSON.stringify({
-                                package_id: {{ $package->id }}
-                            })
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.attempt_id) {
-                                window.location.href = '/student/test/' + data.attempt_id + '/work';
-                            } else {
-                                alert('Gagal memulai tes. Silakan coba lagi.');
-                                document.getElementById('btn-start').disabled = false;
-                                isStarting = false;
-                            }
-                        })
-                        .catch(fetchErr => {
-                            console.error('Error:', fetchErr);
-                            alert('Gagal memulai tes. Silakan coba lagi.');
-                            document.getElementById('btn-start').disabled = false;
-                            isStarting = false;
-                        });
-                });
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                        alert('Gagal memulai tes. Silakan coba lagi.');
+                        document.getElementById('btn-start').disabled = false;
+                        isStarting = false;
+                    });
             }
 
             function confirmStart() {
@@ -295,9 +265,17 @@
 
                 if (isStarting) return; // Prevent double click
                 
-                if (confirm('Yakin ingin memulai tes? Timer akan langsung berjalan setelah loading selesai.\n\nBrowser akan masuk ke mode fullscreen untuk mencegah kecurangan.')) {
+                if (confirm('Yakin ingin memulai tes?\n\n⚠️ PERHATIAN PENTING:\n━━━━━━━━━━━━━━━━━━━━━\n📱 Mode Fullscreen WAJIB aktif\n⏱️  Timer berjalan setelah loading\n🚫 Keluar fullscreen = pelanggaran\n\nPastikan Anda siap dan fokus!\n\nKlik OK untuk mulai...')) {
                     isStarting = true;
                     document.getElementById('btn-start').disabled = true;
+                    
+                    // LANGSUNG fullscreen setelah klik (harus dalam user gesture context)
+                    enterFullscreen().then(() => {
+                        console.log('Fullscreen activated');
+                    }).catch(err => {
+                        console.log('Fullscreen ditolak atau tidak didukung:', err);
+                        // Tetap lanjut meski fullscreen gagal
+                    });
                     
                     // Generate random delay 10-15 detik
                     const delay = generateRandomDelay();

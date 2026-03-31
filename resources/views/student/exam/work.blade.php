@@ -284,6 +284,98 @@
                 }
             }
 
+            // Fullscreen warning modal with OK button
+            function showFullscreenWarningModal() {
+                // Remove any existing fullscreen modal
+                const existingModal = document.getElementById('fullscreen-warning-modal');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+                
+                // Create modal HTML
+                const modal = document.createElement('div');
+                modal.id = 'fullscreen-warning-modal';
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.8);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 10000;
+                `;
+                
+                const content = document.createElement('div');
+                content.style.cssText = `
+                    background: white;
+                    padding: 40px;
+                    border-radius: 15px;
+                    max-width: 450px;
+                    text-align: center;
+                    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+                `;
+                
+                content.innerHTML = `
+                    <div style="font-size: 56px; margin-bottom: 20px;">⚠️</div>
+                    <h4 style="color: #f59e0b; margin-bottom: 15px; font-size: 1.3rem;">
+                        Keluar dari Mode Fullscreen
+                    </h4>
+                    <p style="margin-bottom: 25px; color: #333; line-height: 1.5;">
+                        Anda telah keluar dari mode fullscreen. <br>
+                        <strong style="color: #dc3545;">Anda harus kembali ke fullscreen</strong> untuk melanjutkan ujian.
+                    </p>
+                    <p style="margin-bottom: 20px; color: #666; font-size: 14px;">
+                        Jika tidak masuk fullscreen dalam 5 detik, ini akan dicatat sebagai pelanggaran.
+                    </p>
+                    <button id="fullscreenOkBtn" style="
+                        background: #1e3a5f;
+                        color: white;
+                        border: none;
+                        padding: 12px 40px;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        transition: all 0.3s;
+                    " onmouseover="this.style.background='#2d5a8a'" onmouseout="this.style.background='#1e3a5f'">
+                        <i class="bi bi-fullscreen" style="margin-right: 8px;"></i>OK, Masuk Fullscreen
+                    </button>
+                `;
+                
+                modal.appendChild(content);
+                document.body.appendChild(modal);
+                
+                // Add click handler for OK button
+                const okBtn = document.getElementById('fullscreenOkBtn');
+                okBtn.addEventListener('click', () => {
+                    enterFullscreen();
+                    modal.remove();
+                    fullscreenWarningShown = false;
+                });
+                
+                // Auto report violation after 5 seconds if still not in fullscreen
+                const violationTimeout = setTimeout(() => {
+                    const isFullscreen = document.fullscreenElement || 
+                                        document.webkitFullscreenElement || 
+                                        document.mozFullScreenElement ||
+                                        document.msFullscreenElement;
+                    
+                    if (!isFullscreen) {
+                        reportViolation('exit_fullscreen');
+                        modal.remove();
+                        fullscreenWarningShown = false;
+                    }
+                }, 5000);
+                
+                // Clear timeout if modal is removed manually
+                modal.addEventListener('remove', () => {
+                    clearTimeout(violationTimeout);
+                });
+            }
+
             // Custom modal for violations (cannot be blocked like alert)
             function showViolationModal(message, isFlagged) {
                 // Remove any existing modal
@@ -450,18 +542,15 @@
                 
                 if (!isFullscreen && !fullscreenWarningShown) {
                     fullscreenWarningShown = true;
-                    showViolationModal('Anda keluar dari mode fullscreen. Masuk kembali ke fullscreen atau akan dicatat sebagai pelanggaran.', false);
-                    
-                    // Auto re-enter fullscreen after 3 seconds
-                    setTimeout(() => {
-                        enterFullscreen();
-                        fullscreenWarningShown = false;
-                    }, 3000);
-                    
-                    // Report as violation after warning
-                    setTimeout(() => {
-                        reportViolation('exit_fullscreen');
-                    }, 5000);
+                    // Show custom fullscreen warning modal with OK button
+                    showFullscreenWarningModal();
+                } else if (isFullscreen && fullscreenWarningShown) {
+                    // User kembali ke fullscreen, remove warning modal if exists
+                    const warningModal = document.getElementById('fullscreen-warning-modal');
+                    if (warningModal) {
+                        warningModal.remove();
+                    }
+                    fullscreenWarningShown = false;
                 }
             }
             
@@ -1145,6 +1234,25 @@
                 if (typeof LazyImage !== 'undefined') {
                     LazyImage.init();
                 }
+                
+                // Check fullscreen status and show banner
+                setTimeout(() => {
+                    checkFullscreen();
+                }, 100);
+                
+                // Try to enter fullscreen (may not work without user gesture, but worth trying)
+                // Fullscreen should persist from start.blade.php redirect
+                setTimeout(() => {
+                    const isFullscreen = document.fullscreenElement || 
+                                        document.webkitFullscreenElement || 
+                                        document.mozFullScreenElement ||
+                                        document.msFullscreenElement;
+                    
+                    if (!isFullscreen) {
+                        console.log('Attempting to enter fullscreen...');
+                        enterFullscreen();
+                    }
+                }, 1000);
                 
                 startTimer();
 
